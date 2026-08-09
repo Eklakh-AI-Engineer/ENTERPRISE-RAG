@@ -45,6 +45,22 @@ def main():
     print("Retrieved documents :", result["retrieved_count"])
     print("Reranked documents  :", result["reranked_count"])
 
+    print("\n")
+    print("=" * 80)
+    print("ANSWER EVALUATION")
+    print("=" * 80)
+
+    evaluation = result["evaluation"]
+
+    print("Citation score      :", evaluation["citation_score"])
+    print("Relevance score     :", evaluation["relevance_score"])
+    print("Support score       :", evaluation["support_score"])
+    print("Overall score       :", evaluation["overall_score"])
+    print("Total citations     :", evaluation["total_citations"])
+    print("Valid citations     :", evaluation["valid_citations"])
+    print("Invalid citations   :", evaluation["invalid_citations"])
+    print("Evaluation passed   :", evaluation["passed"])
+
 
 if __name__ == "__main__":
     main()
