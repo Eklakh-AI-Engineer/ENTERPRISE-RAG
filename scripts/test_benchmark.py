@@ -22,6 +22,7 @@ def main():
 
     cases = [
 
+        # Case 1 — broad problem identification
         BenchmarkCase(
             query="What problems exist in the current job application process?",
             expected_chunks=[
@@ -31,14 +32,17 @@ def main():
             ],
         ),
 
+        # Case 2 — efficiency / workflow reasoning
         BenchmarkCase(
-    query="What problems exist in the current job application process?",
-    expected_chunks=[
-        "sample-p001-c002",
-        "sample-p001-c003",
-    ],
-),
+            query="Why is the current job application process inefficient?",
+            expected_chunks=[
+                "sample-p001-c001",
+                "sample-p001-c002",
+                "sample-p001-c003",
+            ],
+        ),
 
+        # Case 3 — specific evidence retrieval
         BenchmarkCase(
             query="What causes candidates to miss job opportunities?",
             expected_chunks=[
