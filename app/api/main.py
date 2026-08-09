@@ -1,0 +1,70 @@
+from fastapi import FastAPI
+from pydantic import BaseModel
+
+from app.query.pipeline import QueryPipeline
+
+
+app = FastAPI(
+    title="Enterprise RAG API",
+    description="Enterprise Retrieval-Augmented Generation API",
+    version="1.0.0",
+)
+
+
+class QueryRequest(BaseModel):
+    query: str
+
+
+class Citation(BaseModel):
+    source: int
+    document: str
+    page: int | None
+    chunk_id: str
+
+
+class QueryResponse(BaseModel):
+    query: str
+    answer: str
+    citations: list[Citation]
+    retrieved_count: int
+    reranked_count: int
+
+
+pipeline = QueryPipeline(
+    retrieval_top_k=10,
+    rerank_top_k=5,
+    candidate_k=10,
+)
+
+
+@app.get("/")
+def root():
+    return {
+        "service": "Enterprise RAG API",
+        "status": "running",
+        "version": "1.0.0",
+    }
+
+
+@app.get("/health")
+def health():
+    return {
+        "status": "healthy"
+    }
+
+
+@app.post(
+    "/query",
+    response_model=QueryResponse,
+)
+def query(request: QueryRequest):
+
+    result = pipeline.run(request.query)
+
+    return {
+        "query": request.query,
+        "answer": result["answer"],
+        "citations": result["citations"],
+        "retrieved_count": result["retrieved_count"],
+        "reranked_count": result["reranked_count"],
+    }
