@@ -4,7 +4,7 @@ from dataclasses import dataclass
 @dataclass
 class BenchmarkCase:
     query: str
-    expected_sources: list[int]
+    expected_chunks: list[str]
 
 
 class RAGBenchmark:
@@ -12,43 +12,122 @@ class RAGBenchmark:
     def __init__(self, pipeline):
         self.pipeline = pipeline
 
-    def run_case(self, case: BenchmarkCase) -> dict:
-
-        result = self.pipeline.run(case.query)
-
-        actual_sources = {
-            citation["source"]
-            for citation in result["citations"]
+    def _extract_chunks(self, documents: list[dict]) -> set[str]:
+        return {
+            document["chunk_id"]
+            for document in documents
+            if document.get("chunk_id")
         }
 
-        expected_sources = set(case.expected_sources)
+    def run_case(self, case: BenchmarkCase) -> dict:
 
-        matched_sources = actual_sources.intersection(
-            expected_sources
+        # Run complete RAG pipeline
+        result = self.pipeline.run(case.query)
+
+        expected_chunks = set(case.expected_chunks)
+
+        # ---------------------------------------------------------
+        # Retrieval evaluation
+        # ---------------------------------------------------------
+
+        retrieved_documents = result.get("retrieved", [])
+
+        retrieved_chunks = self._extract_chunks(
+            retrieved_documents
         )
 
-        source_recall = (
-            len(matched_sources) / len(expected_sources)
-            if expected_sources
+        matched_chunks = (
+            retrieved_chunks.intersection(expected_chunks)
+        )
+
+        retrieval_recall = (
+            len(matched_chunks) / len(expected_chunks)
+            if expected_chunks
             else 0.0
         )
 
-        overall_score = result["evaluation"]["overall_score"]
+        # ---------------------------------------------------------
+        # Citation evaluation
+        # ---------------------------------------------------------
+
+        citation_chunks = {
+            citation.get("chunk_id")
+            for citation in result.get("citations", [])
+            if citation.get("chunk_id")
+        }
+
+        citation_matched = (
+            citation_chunks.intersection(expected_chunks)
+        )
+
+        citation_recall = (
+            len(citation_matched) / len(expected_chunks)
+            if expected_chunks
+            else 0.0
+        )
+
+        # ---------------------------------------------------------
+        # Answer evaluation
+        # ---------------------------------------------------------
+
+        evaluation = result["evaluation"]
+
+        overall_score = evaluation["overall_score"]
+
+        # ---------------------------------------------------------
+        # Final pass condition
+        # ---------------------------------------------------------
+
+        passed = (
+            retrieval_recall >= 0.8
+            and citation_recall >= 0.8
+            and evaluation["passed"]
+        )
 
         return {
             "query": case.query,
-            "expected_sources": sorted(expected_sources),
-            "actual_sources": sorted(actual_sources),
-            "matched_sources": sorted(matched_sources),
-            "source_recall": round(source_recall, 4),
-            "overall_score": overall_score,
-            "passed": (
-                source_recall >= 0.8
-                and result["evaluation"]["passed"]
+
+            "expected_chunks": sorted(
+                expected_chunks
             ),
+
+            "retrieved_chunks": sorted(
+                retrieved_chunks
+            ),
+
+            "matched_chunks": sorted(
+                matched_chunks
+            ),
+
+            "retrieval_recall": round(
+                retrieval_recall,
+                4,
+            ),
+
+            "citation_chunks": sorted(
+                citation_chunks
+            ),
+
+            "citation_matched_chunks": sorted(
+                citation_matched
+            ),
+
+            "citation_recall": round(
+                citation_recall,
+                4,
+            ),
+
+            "overall_score": overall_score,
+
+            "evaluation_passed": evaluation["passed"],
+
+            "passed": passed,
         }
 
-    def run(self, cases: list[BenchmarkCase]) -> dict:
+    def run(
+        self,
+        cases: list[BenchmarkCase],
+    ) -> dict:
 
         case_results = []
 
@@ -58,8 +137,13 @@ class RAGBenchmark:
 
         if case_results:
 
-            average_source_recall = sum(
-                result["source_recall"]
+            average_retrieval_recall = sum(
+                result["retrieval_recall"]
+                for result in case_results
+            ) / len(case_results)
+
+            average_citation_recall = sum(
+                result["citation_recall"]
                 for result in case_results
             ) / len(case_results)
 
@@ -73,27 +157,43 @@ class RAGBenchmark:
                 for result in case_results
             )
 
-            pass_rate = passed_cases / len(case_results)
+            pass_rate = (
+                passed_cases /
+                len(case_results)
+            )
 
         else:
-            average_source_recall = 0.0
+
+            average_retrieval_recall = 0.0
+            average_citation_recall = 0.0
             average_overall_score = 0.0
+            passed_cases = 0
             pass_rate = 0.0
 
         return {
             "cases": case_results,
-            "average_source_recall": round(
-                average_source_recall,
+
+            "average_retrieval_recall": round(
+                average_retrieval_recall,
                 4,
             ),
+
+            "average_citation_recall": round(
+                average_citation_recall,
+                4,
+            ),
+
             "average_overall_score": round(
                 average_overall_score,
                 4,
             ),
+
             "pass_rate": round(
                 pass_rate,
                 4,
             ),
+
             "total_cases": len(case_results),
-            "passed_cases": passed_cases if case_results else 0,
+
+            "passed_cases": passed_cases,
         }
