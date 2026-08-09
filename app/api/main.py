@@ -1,103 +1,142 @@
-from fastapi import FastAPI
-from pydantic import BaseModel
+from contextlib import asynccontextmanager
+
+from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel, Field
 
 from app.query.pipeline import QueryPipeline
 
 
-app = FastAPI(
-    title="Enterprise RAG API",
-    description="Enterprise Retrieval-Augmented Generation API",
-    version="1.0.0",
-)
+# ---------------------------------------------------------
+# Global pipeline
+# ---------------------------------------------------------
 
+pipeline: QueryPipeline | None = None
+
+
+# ---------------------------------------------------------
+# Request / Response models
+# ---------------------------------------------------------
 
 class QueryRequest(BaseModel):
-    query: str
+    query: str = Field(
+        ...,
+        min_length=1,
+        max_length=2000,
+        description="Question to ask the Enterprise RAG system.",
+    )
 
 
-class Citation(BaseModel):
-    source: int
-    document: str
-    page: int | None
-    chunk_id: str
+# ---------------------------------------------------------
+# Application lifecycle
+# ---------------------------------------------------------
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+
+    global pipeline
+
+    print("=" * 80)
+    print("ENTERPRISE RAG API")
+    print("=" * 80)
+
+    print("Loading QueryPipeline...")
+
+    pipeline = QueryPipeline(
+        retrieval_top_k=10,
+        rerank_top_k=5,
+        candidate_k=10,
+    )
+
+    print("QueryPipeline loaded successfully.")
+    print("API ready.")
+
+    yield
+
+    print("Shutting down Enterprise RAG API...")
 
 
-class Evaluation(BaseModel):
-    citation_score: float
-    relevance_score: float
-    support_score: float
-    overall_score: float
-    total_citations: int
-    valid_citations: list[int]
-    invalid_citations: list[int]
-    passed: bool
+# ---------------------------------------------------------
+# FastAPI application
+# ---------------------------------------------------------
 
-
-class Metrics(BaseModel):
-    retrieval_ms: float
-    reranking_ms: float
-    generation_ms: float
-    evaluation_ms: float
-    total_ms: float
-
-    retrieved_count: int
-    reranked_count: int
-
-    citation_score: float
-    relevance_score: float
-    support_score: float
-    overall_score: float
-
-
-class QueryResponse(BaseModel):
-    query: str
-    answer: str
-    citations: list[Citation]
-
-    retrieved_count: int
-    reranked_count: int
-
-    evaluation: Evaluation
-    metrics: Metrics
-
-
-pipeline = QueryPipeline(
-    retrieval_top_k=10,
-    rerank_top_k=5,
-    candidate_k=10,
+app = FastAPI(
+    title="Enterprise RAG API",
+    description=(
+        "Evidence-grounded Enterprise RAG API providing "
+        "hybrid retrieval, reranking, cited answers, "
+        "evaluation metrics, and pipeline observability."
+    ),
+    version="1.0.0",
+    lifespan=lifespan,
 )
 
 
-@app.get("/")
-def root():
-    return {
-        "service": "Enterprise RAG API",
-        "status": "running",
-        "version": "1.0.0",
-    }
+# ---------------------------------------------------------
+# CORS
+# ---------------------------------------------------------
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+
+# ---------------------------------------------------------
+# Health check
+# ---------------------------------------------------------
 
 @app.get("/health")
 def health():
+
     return {
-        "status": "healthy"
+        "status": "ok",
+        "service": "enterprise-rag",
+        "pipeline_loaded": pipeline is not None,
     }
 
 
-@app.post(
-    "/query",
-    response_model=QueryResponse,
-)
+# ---------------------------------------------------------
+# Query endpoint
+# ---------------------------------------------------------
+
+@app.post("/query")
 def query(request: QueryRequest):
 
-    result = pipeline.run(request.query)
+    if pipeline is None:
+        raise HTTPException(
+            status_code=503,
+            detail="RAG pipeline is not loaded.",
+        )
 
-    return {
-        "query": request.query,
-        "answer": result["answer"],
-        "citations": result["citations"],
-        "retrieved_count": result["retrieved_count"],
-        "reranked_count": result["reranked_count"],
-        "evaluation": result["evaluation"],
-        "metrics": result["metrics"],
-    }
+    query_text = request.query.strip()
+
+    if not query_text:
+        raise HTTPException(
+            status_code=400,
+            detail="Query cannot be empty.",
+        )
+
+    try:
+
+        result = pipeline.run(query_text)
+
+        return result
+
+    except Exception as exc:
+
+        print("=" * 80)
+        print("QUERY ERROR")
+        print("=" * 80)
+        print(exc)
+
+        raise HTTPException(
+            status_code=500,
+            detail="Failed to process the query.",
+        )
