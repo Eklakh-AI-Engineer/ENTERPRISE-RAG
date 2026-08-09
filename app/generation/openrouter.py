@@ -35,6 +35,7 @@ class OpenRouterClient:
                     "content": prompt,
                 }
             ],
+            max_tokens=1024,
         )
 
         return response.choices[0].message.content
