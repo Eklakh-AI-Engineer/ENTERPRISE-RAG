@@ -1,0 +1,50 @@
+from app.query.pipeline import QueryPipeline
+
+
+def main():
+
+    print("=" * 80)
+    print("INITIALIZING ENTERPRISE RAG QUERY PIPELINE")
+    print("=" * 80)
+
+    pipeline = QueryPipeline(
+        retrieval_top_k=10,
+        rerank_top_k=5,
+        candidate_k=10,
+    )
+
+    query = "What problems exist in the current job application process?"
+
+    print("\n")
+    print("=" * 80)
+    print("QUERY")
+    print("=" * 80)
+    print(query)
+
+    result = pipeline.run(query)
+
+    print("\n")
+    print("=" * 80)
+    print("FINAL RAG ANSWER")
+    print("=" * 80)
+    print(result["answer"])
+
+    print("\n")
+    print("=" * 80)
+    print("CITATIONS")
+    print("=" * 80)
+
+    for citation in result["citations"]:
+        print(citation)
+
+    print("\n")
+    print("=" * 80)
+    print("PIPELINE STATISTICS")
+    print("=" * 80)
+
+    print("Retrieved documents :", result["retrieved_count"])
+    print("Reranked documents  :", result["reranked_count"])
+
+
+if __name__ == "__main__":
+    main()

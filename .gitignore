@@ -1,0 +1,31 @@
+# Node
+node_modules/
+
+# Python
+.venv/
+venv/
+__pycache__/
+*.pyc
+
+# Environment / secrets
+.env
+.env.*
+!.env.example
+
+# IDE
+.vscode/
+.idea/
+
+# Data
+data/raw/*
+data/processed/*
+data/evaluation/*
+
+# Generated indexes / models
+*.faiss
+*.index
+*.pkl
+*.bin
+*.pt
+*.pth
+*.safetensors
