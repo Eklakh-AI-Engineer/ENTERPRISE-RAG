@@ -22,7 +22,10 @@ def main():
 
     cases = [
 
-        # Case 1 — broad problem identification
+        # ---------------------------------------------------------
+        # Problem understanding
+        # ---------------------------------------------------------
+
         BenchmarkCase(
             query="What problems exist in the current job application process?",
             expected_chunks=[
@@ -32,7 +35,6 @@ def main():
             ],
         ),
 
-        # Case 2 — efficiency / workflow reasoning
         BenchmarkCase(
             query="Why is the current job application process inefficient?",
             expected_chunks=[
@@ -42,11 +44,89 @@ def main():
             ],
         ),
 
-        # Case 3 — specific evidence retrieval
         BenchmarkCase(
             query="What causes candidates to miss job opportunities?",
             expected_chunks=[
                 "sample-p001-c002",
+            ],
+        ),
+
+        # ---------------------------------------------------------
+        # Application workflow
+        # ---------------------------------------------------------
+
+        BenchmarkCase(
+            query="Why do candidates spend so much time applying for jobs?",
+            expected_chunks=[
+                "sample-p001-c001",
+                "sample-p001-c002",
+            ],
+        ),
+
+        BenchmarkCase(
+            query="What repetitive tasks do job applicants perform?",
+            expected_chunks=[
+                "sample-p001-c002",
+                "sample-p001-c003",
+            ],
+        ),
+
+        BenchmarkCase(
+            query="Why is job discovery difficult for candidates?",
+            expected_chunks=[
+                "sample-p001-c001",
+                "sample-p001-c003",
+            ],
+        ),
+
+        # ---------------------------------------------------------
+        # ATS / personalization
+        # ---------------------------------------------------------
+
+        BenchmarkCase(
+            query="Why do candidates need to customize their resumes?",
+            expected_chunks=[
+                "sample-p001-c001",
+                "sample-p001-c002",
+            ],
+        ),
+
+        BenchmarkCase(
+            query="What is the problem with using a generic resume?",
+            expected_chunks=[
+                "sample-p001-c002",
+            ],
+        ),
+
+        BenchmarkCase(
+            query="Why is personalization difficult at scale?",
+            expected_chunks=[
+                "sample-p001-c002",
+            ],
+        ),
+
+        # ---------------------------------------------------------
+        # Administrative problems
+        # ---------------------------------------------------------
+
+        BenchmarkCase(
+            query="Why do applicants repeatedly enter the same information?",
+            expected_chunks=[
+                "sample-p001-c003",
+            ],
+        ),
+
+        BenchmarkCase(
+            query="How do manual processes affect application quality?",
+            expected_chunks=[
+                "sample-p001-c003",
+            ],
+        ),
+
+        BenchmarkCase(
+            query="What makes the current hiring workflow difficult to scale?",
+            expected_chunks=[
+                "sample-p001-c003",
             ],
         ),
     ]
@@ -87,8 +167,23 @@ def main():
         )
 
         print(
-            "Retrieval recall   :",
-            result["retrieval_recall"],
+            "Recall@K           :",
+            result["recall_at_k"],
+        )
+
+        print(
+            "Precision@K        :",
+            result["precision_at_k"],
+        )
+
+        print(
+            "Hit@K              :",
+            result["hit_at_k"],
+        )
+
+        print(
+            "Reciprocal Rank    :",
+            result["reciprocal_rank"],
         )
 
         print(
@@ -132,22 +227,37 @@ def main():
     )
 
     print(
-        "Average retrieval recall:",
-        results["average_retrieval_recall"],
+        "Average Recall@K         :",
+        results["average_recall"],
     )
 
     print(
-        "Average citation recall :",
+        "Average Precision@K      :",
+        results["average_precision"],
+    )
+
+    print(
+        "Average Hit@K            :",
+        results["average_hit"],
+    )
+
+    print(
+        "Average MRR              :",
+        results["average_mrr"],
+    )
+
+    print(
+        "Average Citation Recall  :",
         results["average_citation_recall"],
     )
 
     print(
-        "Average overall score   :",
+        "Average Overall Score    :",
         results["average_overall_score"],
     )
 
     print(
-        "Pass rate               :",
+        "Pass Rate                :",
         results["pass_rate"],
     )
 
