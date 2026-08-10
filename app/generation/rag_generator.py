@@ -25,6 +25,7 @@ STRICT EVIDENCE RULES:
 14. Keep the answer concise but complete.
 
 Before answering, internally determine:
+
 - which sources directly answer the question
 - which claims each source supports
 - which citations are actually necessary
@@ -39,6 +40,22 @@ class RAGGenerator:
         self.llm = OpenRouterClient()
 
     def generate(self, query: str, context: str) -> str:
+
+        # ---------------------------------------------------------
+        # Temporary RAG diagnostics
+        # ---------------------------------------------------------
+
+        print(
+            f"[RAG DEBUG] Context characters: {len(context):,}"
+        )
+
+        print(
+            f"[RAG DEBUG] Estimated tokens: {len(context) // 4:,}"
+        )
+
+        # ---------------------------------------------------------
+        # Build generation prompt
+        # ---------------------------------------------------------
 
         prompt = f"""
 {SYSTEM_PROMPT}
@@ -62,5 +79,9 @@ explicitly state that there is insufficient information.
 
 Answer:
 """
+
+        # ---------------------------------------------------------
+        # Generate grounded answer
+        # ---------------------------------------------------------
 
         return self.llm.generate(prompt)
