@@ -51,4 +51,14 @@ def test_retrieval_run_policy_uses_answer_alias():
     section = _policy("users can read their retrieval runs")
     assert "a.id = retrieval_runs.answer_id" in section
     assert "answers.message_id" not in section
+    assert "m.id = a.message_id" in section
 
+
+
+def test_claim_function_has_valid_dollar_quoted_body():
+    start = SCHEMA.index("create or replace function public.claim_ingestion_job")
+    end = SCHEMA.index("-- Invoker function:", start)
+    section = SCHEMA[start:end]
+    assert "as $$" in section
+    assert "declare" in section
+    assert "$$;" in section
