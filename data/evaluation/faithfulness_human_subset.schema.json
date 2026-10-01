@@ -1,0 +1,58 @@
+{
+  "title": "Faithfulness Human Validation Subset",
+  "type": "object",
+  "required": [
+    "subset_version",
+    "judge_model",
+    "judge_prompt_version",
+    "items"
+  ],
+  "properties": {
+    "subset_version": {
+      "type": "string"
+    },
+    "judge_model": {
+      "type": "string"
+    },
+    "judge_prompt_version": {
+      "type": "string"
+    },
+    "judge_temperature": {
+      "type": "number"
+    },
+    "items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "item_id",
+          "judge_supported",
+          "human_supported"
+        ],
+        "properties": {
+          "item_id": {
+            "type": "string"
+          },
+          "judge_supported": {
+            "type": "boolean"
+          },
+          "human_supported": {
+            "type": "boolean"
+          },
+          "query": {
+            "type": "string"
+          },
+          "claim": {
+            "type": "string"
+          },
+          "evidence": {
+            "type": "string"
+          },
+          "human_rationale": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}
