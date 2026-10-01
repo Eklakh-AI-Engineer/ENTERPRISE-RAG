@@ -140,3 +140,23 @@ Then compare the judge against human labels:
 
 The resulting accuracy, precision, recall, and F1 describe agreement with the
 human subset; they do not turn the judge into ground truth.
+
+
+## CHA corpus v1
+
+The first real Phase 2 corpus is the four-document CHA policy set registered in
+`data/evaluation/cha_corpus_manifest.json`.
+
+Build the span-aware corpus locally:
+
+    python scripts/build_corpus.py \
+      --input-dir data/raw/cha \
+      --output data/processed/cha_chunks.json
+
+The corpus contains 50 candidate evaluation queries in
+`data/evaluation/cha_queries_v1.json`, five per category across ten categories.
+
+These queries are intentionally not yet a benchmark. The next required step is
+to build the Dense ∪ BM25 pool and have a human label the pooled candidates with
+relevance 0–3. Do not convert the query set into a benchmark until those
+judgments are frozen.
