@@ -51,7 +51,6 @@ Confidence must be between 0 and 1."""
         json={
             "model": model,
             "temperature": 0,
-            "response_format": {"type": "json_object"},
             "messages": [
                 {"role": "system", "content": system},
                 {"role": "user", "content": json.dumps(user, ensure_ascii=False)},
@@ -60,7 +59,10 @@ Confidence must be between 0 and 1."""
         timeout=120,
     )
     response.raise_for_status()
-    judgments = json.loads(response.json()["choices"][0]["message"]["content"]).get("judgments", [])
+    content = response.json()["choices"][0]["message"]["content"].strip()
+    if content.startswith("```"):
+        content = content.removeprefix("```json").removeprefix("```").removesuffix("```").strip()
+    judgments = json.loads(content).get("judgments", [])
     if len(judgments) != len(candidates):
         raise ValueError(f"Expected {len(candidates)} judgments, got {len(judgments)}")
     out = []
@@ -81,7 +83,7 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--pool", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
-    parser.add_argument("--model", default=os.getenv("OPENROUTER_MODEL", "openai/gpt-4o-mini"))
+    parser.add_argument("--model", default=os.getenv("OPENROUTER_MODEL", "openrouter/free"))
     parser.add_argument("--delay", type=float, default=0.5)
     args = parser.parse_args()
 
