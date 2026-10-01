@@ -1,0 +1,17 @@
+{
+  "subset_version": "v0.1",
+  "judge_model": "REPLACE",
+  "judge_prompt_version": "faithfulness-v1",
+  "judge_temperature": 0,
+  "items": [
+    {
+      "item_id": "claim-001",
+      "judge_supported": false,
+      "human_supported": true,
+      "query": "REPLACE",
+      "claim": "REPLACE",
+      "evidence": "REPLACE",
+      "human_rationale": "REPLACE"
+    }
+  ]
+}
