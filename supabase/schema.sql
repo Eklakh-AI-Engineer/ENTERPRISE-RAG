@@ -468,7 +468,7 @@ using (
   and exists (
     select 1
     from public.organization_members om
-    where om.organization_id = split_part(name, '/', 2)::uuid
+    where om.organization_id::text = split_part(name, '/', 2)
       and om.user_id = (select auth.uid())
   )
 );
@@ -482,7 +482,7 @@ with check (
   and exists (
     select 1
     from public.organization_members om
-    where om.organization_id = split_part(name, '/', 2)::uuid
+    where om.organization_id::text = split_part(name, '/', 2)
       and om.user_id = (select auth.uid())
   )
   and split_part(name, '/', 1) = 'organizations'
@@ -498,7 +498,7 @@ using (
   and exists (
     select 1
     from public.organization_members om
-    where om.organization_id = split_part(name, '/', 2)::uuid
+    where om.organization_id::text = split_part(name, '/', 2)
       and om.user_id = (select auth.uid())
   )
 );
