@@ -60,6 +60,8 @@ class Settings:
     SUPABASE_PUBLISHABLE_KEY = os.getenv("SUPABASE_PUBLISHABLE_KEY", "")
     SUPABASE_SERVICE_ROLE_KEY = os.getenv("SUPABASE_SERVICE_ROLE_KEY", "")
     SUPABASE_DOCUMENTS_BUCKET = os.getenv("SUPABASE_DOCUMENTS_BUCKET", "documents")
+    MAX_UPLOAD_BYTES = int(os.getenv("MAX_UPLOAD_BYTES", str(20 * 1024 * 1024)))
+    INGESTION_PIPELINE_VERSION = os.getenv("INGESTION_PIPELINE_VERSION", "pdf-ingest-v2-ocr-recursive-v2")
 
 
 settings = Settings()
