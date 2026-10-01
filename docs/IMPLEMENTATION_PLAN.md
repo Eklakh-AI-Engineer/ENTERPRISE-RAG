@@ -349,7 +349,10 @@ Replace local-only persistence/index assumptions with production-managed storage
 - [x] Reference HNSW index uses `vector_cosine_ops`.
 - [x] Reference similarity function uses cosine distance and `security invoker`.
 - [ ] Verify the live project's pgvector/Postgres versions.
-- [ ] Store production embeddings.
+- [x] Added an embedding-provider boundary matching the normalized 384-d FAISS baseline.
+- [x] Added a document indexing pipeline from durable chunks to embeddings.
+- [x] Added a Supabase/pgvector chunk persistence adapter boundary.
+- [ ] Store production embeddings on the dedicated project.
 - [ ] Validate top-k parity against the local FAISS baseline.
 - [ ] Benchmark latency and filtered-search behavior.
 
@@ -359,6 +362,7 @@ Replace local-only persistence/index assumptions with production-managed storage
 - [x] Added an injected Supabase Storage adapter boundary.
 - [x] Added tenant-scoped private Storage bucket/policy reference DDL.
 - [x] Added Storage contract tests.
+- [x] Connected the worker architecture to the durable indexing boundary.
 - [ ] Configure/apply Storage on the dedicated project.
 - [ ] Store uploaded PDFs through the live Storage adapter.
 - [ ] Define file lifecycle/deletion behavior on the live project.
