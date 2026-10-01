@@ -10,7 +10,7 @@ Therefore this repository does **not** contain an applied Enterprise RAG migrati
 
 ## Files
 
-- `schema.sql` — reviewed Phase 3 reference DDL for the intended production schema.
+- `schema.sql` — reviewed Phase 3 reference DDL for the intended production schema, including an atomic trusted-worker ingestion claim RPC.
 - `../docs/DATABASE.md` — architectural data-model and parity decisions.
 
 ## Migration rule
@@ -39,3 +39,18 @@ The reference schema uses the current repository baseline:
 - HNSW index with `vector_cosine_ops`
 
 These are **provisional production choices** until the FAISS-vs-pgvector parity benchmark is executed.
+
+
+## Application adapter boundary
+
+The repository now contains `app/persistence/supabase.py` with adapters for:
+
+- tenant-scoped document reads/writes;
+- tenant-scoped ingestion-job reads/writes;
+- atomic worker job claiming through `claim_ingestion_job`.
+
+The adapter receives an injected Supabase client. It does not create credentials itself, so the application can use user-JWT clients for RLS-protected request paths and a trusted worker client for the privileged claim operation.
+
+The atomic claim RPC is deliberately not granted to `authenticated`. It uses row locking with `FOR UPDATE SKIP LOCKED`, claims the oldest eligible tenant job, increments `attempt_count`, and assigns a lease.
+
+This remains an **unapplied reference design** until the dedicated Enterprise RAG Supabase project is selected.
