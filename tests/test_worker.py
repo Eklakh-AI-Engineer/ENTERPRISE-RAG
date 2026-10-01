@@ -43,3 +43,17 @@ def test_worker_processes_only_claimed_job():
     assert indexer.calls == [("doc-1", [{"chunk_id": "c1"}])]
     assert document.status == "READY"
     assert document.page_count == 0
+
+
+def test_worker_factory_builds_all_production_boundaries(monkeypatch):
+    import app.ingestion.factory as factory
+
+    class FakeEmbeddings:
+        dimension = 384
+        model_name = "test"
+
+    monkeypatch.setattr(factory, "SentenceTransformerEmbeddingProvider", lambda _: FakeEmbeddings())
+    worker = factory.build_worker(object(), organization_id="org-a")
+    assert worker.config.lease_seconds == 300
+    assert worker.pipeline is not None
+    assert worker.indexer is not None
