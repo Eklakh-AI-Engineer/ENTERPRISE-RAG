@@ -8,7 +8,7 @@ from app.persistence.entities import DocumentRecord
 class ChunkRepository(Protocol):
     """Durable chunk/evidence persistence boundary."""
 
-    def replace_for_document(
+    def upsert_for_document(
         self,
         *,
         document: DocumentRecord,
