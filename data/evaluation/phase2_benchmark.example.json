@@ -1,0 +1,33 @@
+{
+  "benchmark_version": "v0.1",
+  "corpus": {
+    "corpus_id": "REPLACE_WITH_FROZEN_CORPUS_ID",
+    "document_hash": "REPLACE_WITH_SHA256"
+  },
+  "configuration": {
+    "chunker_version": "REPLACE",
+    "embedding_model": "sentence-transformers/all-MiniLM-L6-v2",
+    "embedding_version": "REPLACE",
+    "reranker_model": "cross-encoder/ms-marco-MiniLM-L-6-v2",
+    "retrieval_top_k": 10,
+    "candidate_k": 10,
+    "rrf_k": 60,
+    "random_seed": 42
+  },
+  "queries": [
+    {
+      "query_id": "q001",
+      "category": "REPLACE_CATEGORY",
+      "query": "REPLACE_QUERY",
+      "relevance": [
+        {
+          "document_id": "REPLACE_DOCUMENT",
+          "page": 1,
+          "start_char": 0,
+          "end_char": 100,
+          "relevance": 3
+        }
+      ]
+    }
+  ]
+}
