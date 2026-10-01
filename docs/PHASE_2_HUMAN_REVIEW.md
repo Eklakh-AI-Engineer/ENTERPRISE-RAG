@@ -19,6 +19,13 @@ Judge each candidate independently. Keyword overlap alone is not sufficient.
 
 ## Generate silver labels
 
+The GitHub Actions workflow defaults to the OpenRouter free routing model:
+
+    openrouter/free
+
+You can override it when manually dispatching the workflow. For local runs,
+set `OPENROUTER_MODEL=openrouter/free` or another available model.
+
 Set the OpenRouter credentials in the environment:
 
     export OPENROUTER_API_KEY=...
