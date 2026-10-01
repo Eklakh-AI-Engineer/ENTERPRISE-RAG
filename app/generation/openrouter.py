@@ -25,17 +25,25 @@ class OpenRouterClient:
             api_key=api_key,
         )
 
-    def generate(self, prompt: str) -> str:
-
-        response = self.client.chat.completions.create(
-            model=self.model,
-            messages=[
+    def generate(
+        self,
+        prompt: str,
+        temperature: float | None = None,
+    ) -> str:
+        request = {
+            "model": self.model,
+            "messages": [
                 {
                     "role": "user",
                     "content": prompt,
                 }
             ],
-            max_tokens=1024,
-        )
+            "max_tokens": 1024,
+        }
+
+        if temperature is not None:
+            request["temperature"] = temperature
+
+        response = self.client.chat.completions.create(**request)
 
         return response.choices[0].message.content
