@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from app.persistence.chunks import ChunkRepository
+from app.persistence.chunks import ChunkRepository, ChunkSearchResult
 from app.persistence.entities import DocumentRecord
 
 
@@ -59,3 +59,35 @@ class SupabaseChunkRepository(ChunkRepository):
         if error:
             raise RuntimeError(str(error))
         return len(rows)
+
+
+    def search_similar(
+        self,
+        *,
+        organization_id: str,
+        query_embedding: list[float],
+        top_k: int = 10,
+    ) -> list[ChunkSearchResult]:
+        if not organization_id.strip():
+            raise ValueError("organization_id is required")
+        if len(query_embedding) != self.embedding_dimension:
+            raise ValueError("query embedding dimension does not match pgvector contract")
+        if top_k <= 0:
+            raise ValueError("top_k must be positive")
+        response = self.client.rpc(
+            "match_document_chunks",
+            {
+                "query_embedding": "[" + ",".join(str(float(v)) for v in query_embedding) + "]",
+                "match_count": min(top_k, 200),
+                "organization_id": organization_id,
+            },
+        ).execute()
+        error = getattr(response, "error", None)
+        if error:
+            raise RuntimeError(str(error))
+        return [ChunkSearchResult(
+            id=row["id"], document_id=row["document_id"], chunk_id=row["chunk_id"],
+            content=row["content"], page=row["page"], section=row.get("section"),
+            start_char=row.get("start_char"), end_char=row.get("end_char"),
+            similarity=float(row["similarity"]),
+        ) for row in (getattr(response, "data", None) or [])]
