@@ -451,6 +451,59 @@ using (
   )
 );
 
+-- Atomic worker claim. This is intentionally a trusted-worker operation:
+-- the function locks one eligible row before updating its lease, preventing two
+-- workers from claiming the same job. It is not exposed to ordinary users.
+create or replace function public.claim_ingestion_job(
+  p_organization_id uuid,
+  p_lease_seconds integer default 300
+)
+returns public.ingestion_jobs
+language plpgsql
+security definer
+set search_path = public
+as $
+declare
+  claimed public.ingestion_jobs;
+begin
+  if p_lease_seconds <= 0 then
+    raise exception 'lease_seconds must be positive';
+  end if;
+
+  select ij.*
+    into claimed
+  from public.ingestion_jobs ij
+  where ij.organization_id = p_organization_id
+    and (
+      ij.status = 'PENDING'
+      or (ij.status = 'PROCESSING' and ij.lease_until <= now())
+    )
+  order by ij.created_at asc
+  for update skip locked
+  limit 1;
+
+  if claimed.id is null then
+    return null;
+  end if;
+
+  update public.ingestion_jobs
+  set status = 'PROCESSING',
+      attempt_count = claimed.attempt_count + 1,
+      lease_until = now() + make_interval(secs => p_lease_seconds),
+      last_error = null,
+      updated_at = now()
+  where id = claimed.id
+  returning * into claimed;
+
+  return claimed;
+end;
+$;
+
+revoke execute on function public.claim_ingestion_job(uuid, integer) from public;
+revoke execute on function public.claim_ingestion_job(uuid, integer) from anon;
+revoke execute on function public.claim_ingestion_job(uuid, integer) from authenticated;
+grant execute on function public.claim_ingestion_job(uuid, integer) to service_role;
+
 -- Invoker function: RLS on document_chunks/documents remains active for the
 -- caller. No SECURITY DEFINER is used here.
 create or replace function public.match_document_chunks(
