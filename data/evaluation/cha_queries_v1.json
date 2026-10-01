@@ -1,0 +1,256 @@
+{
+  "query_set_version": "cha-v1-50",
+  "corpus_id": "CHA-POLICY-CORPUS-V1",
+  "queries": [
+    {
+      "query_id": "CHA-001",
+      "category": "Employee Relations & Conduct",
+      "query": "What does CHA say about employment at will?"
+    },
+    {
+      "query_id": "CHA-002",
+      "category": "Employee Relations & Conduct",
+      "query": "What workplace conduct can lead to disciplinary action?"
+    },
+    {
+      "query_id": "CHA-003",
+      "category": "Employee Relations & Conduct",
+      "query": "What are the rules for personal relationships between employees who work together?"
+    },
+    {
+      "query_id": "CHA-004",
+      "category": "Employee Relations & Conduct",
+      "query": "What does the handbook require employees to do when they become aware of waste, fraud, or abuse?"
+    },
+    {
+      "query_id": "CHA-005",
+      "category": "Employee Relations & Conduct",
+      "query": "What happens when an employee resigns or separates from CHA?"
+    },
+    {
+      "query_id": "CHA-006",
+      "category": "Equal Employment & Accommodation",
+      "query": "What is CHA’s policy on harassment and sexual harassment?"
+    },
+    {
+      "query_id": "CHA-007",
+      "category": "Equal Employment & Accommodation",
+      "query": "What reasonable accommodations does CHA provide for qualified employees with disabilities?"
+    },
+    {
+      "query_id": "CHA-008",
+      "category": "Equal Employment & Accommodation",
+      "query": "What protections apply to pregnancy and childbirth accommodations?"
+    },
+    {
+      "query_id": "CHA-009",
+      "category": "Equal Employment & Accommodation",
+      "query": "How should an employee report discrimination or harassment?"
+    },
+    {
+      "query_id": "CHA-010",
+      "category": "Equal Employment & Accommodation",
+      "query": "What does CHA say about inclusion and belonging in the workplace?"
+    },
+    {
+      "query_id": "CHA-011",
+      "category": "Ethics, Investigations & Compliance",
+      "query": "What ethical standards are employees expected to follow?"
+    },
+    {
+      "query_id": "CHA-012",
+      "category": "Ethics, Investigations & Compliance",
+      "query": "What are employees required to do when cooperating with an Office of Inspector General investigation?"
+    },
+    {
+      "query_id": "CHA-013",
+      "category": "Ethics, Investigations & Compliance",
+      "query": "What information may the OIG request from CHA employees?"
+    },
+    {
+      "query_id": "CHA-014",
+      "category": "Ethics, Investigations & Compliance",
+      "query": "What conduct involving CHA property or records can result in discipline?"
+    },
+    {
+      "query_id": "CHA-015",
+      "category": "Ethics, Investigations & Compliance",
+      "query": "What are the consequences of failing to comply with CHA policies?"
+    },
+    {
+      "query_id": "CHA-016",
+      "category": "Drug, Alcohol & Workplace Safety",
+      "query": "Where is smoking or use of electronic cigarettes prohibited at CHA?"
+    },
+    {
+      "query_id": "CHA-017",
+      "category": "Drug, Alcohol & Workplace Safety",
+      "query": "When can CHA require an employee to undergo drug or alcohol testing?"
+    },
+    {
+      "query_id": "CHA-018",
+      "category": "Drug, Alcohol & Workplace Safety",
+      "query": "What is CHA’s policy regarding a drug-free workplace?"
+    },
+    {
+      "query_id": "CHA-019",
+      "category": "Drug, Alcohol & Workplace Safety",
+      "query": "What workplace behavior involving violence or weapons can result in discipline?"
+    },
+    {
+      "query_id": "CHA-020",
+      "category": "Drug, Alcohol & Workplace Safety",
+      "query": "What should an employee do after a work-related automobile accident?"
+    },
+    {
+      "query_id": "CHA-021",
+      "category": "Compensation & Benefits",
+      "query": "What retirement benefits are available to eligible CHA employees?"
+    },
+    {
+      "query_id": "CHA-022",
+      "category": "Compensation & Benefits",
+      "query": "How does the employer match work for the deferred savings plan?"
+    },
+    {
+      "query_id": "CHA-023",
+      "category": "Compensation & Benefits",
+      "query": "How does CHA vacation allowance change with years of service?"
+    },
+    {
+      "query_id": "CHA-024",
+      "category": "Compensation & Benefits",
+      "query": "How much sick leave can an employee carry over?"
+    },
+    {
+      "query_id": "CHA-025",
+      "category": "Compensation & Benefits",
+      "query": "Who is eligible for paid holidays?"
+    },
+    {
+      "query_id": "CHA-026",
+      "category": "Leave & Time Off",
+      "query": "What are the eligibility requirements for FMLA leave at CHA?"
+    },
+    {
+      "query_id": "CHA-027",
+      "category": "Leave & Time Off",
+      "query": "How much FMLA leave may an eligible employee take?"
+    },
+    {
+      "query_id": "CHA-028",
+      "category": "Leave & Time Off",
+      "query": "What are the rules for family bereavement leave?"
+    },
+    {
+      "query_id": "CHA-029",
+      "category": "Leave & Time Off",
+      "query": "What notice is required for school visitation leave?"
+    },
+    {
+      "query_id": "CHA-030",
+      "category": "Leave & Time Off",
+      "query": "What leave is available under VESSA?"
+    },
+    {
+      "query_id": "CHA-031",
+      "category": "Work Environment & Equipment",
+      "query": "What are CHA’s expectations for workplace attire?"
+    },
+    {
+      "query_id": "CHA-032",
+      "category": "Work Environment & Equipment",
+      "query": "What are the rules for using CHA-issued equipment?"
+    },
+    {
+      "query_id": "CHA-033",
+      "category": "Work Environment & Equipment",
+      "query": "Who is responsible for lost, damaged, or stolen CHA equipment?"
+    },
+    {
+      "query_id": "CHA-034",
+      "category": "Work Environment & Equipment",
+      "query": "What does CHA require regarding a clear desk?"
+    },
+    {
+      "query_id": "CHA-035",
+      "category": "Work Environment & Equipment",
+      "query": "What is CHA’s policy on personal use of CHA internet and email systems?"
+    },
+    {
+      "query_id": "CHA-036",
+      "category": "Information Security",
+      "query": "What is the purpose of the CHA Information Security Policy?"
+    },
+    {
+      "query_id": "CHA-037",
+      "category": "Information Security",
+      "query": "What does the principle of least privilege require?"
+    },
+    {
+      "query_id": "CHA-038",
+      "category": "Information Security",
+      "query": "Who is responsible for protecting CHA information assets?"
+    },
+    {
+      "query_id": "CHA-039",
+      "category": "Information Security",
+      "query": "What are CHA users required to do if they suspect an information security breach?"
+    },
+    {
+      "query_id": "CHA-040",
+      "category": "Information Security",
+      "query": "What security requirements apply to third-party managed cloud services?"
+    },
+    {
+      "query_id": "CHA-041",
+      "category": "Procurement",
+      "query": "What are CHA’s stated goals for procurement?"
+    },
+    {
+      "query_id": "CHA-042",
+      "category": "Procurement",
+      "query": "When can CHA make a non-competitive procurement?"
+    },
+    {
+      "query_id": "CHA-043",
+      "category": "Procurement",
+      "query": "What is the micro-purchase threshold stated in the procurement policy?"
+    },
+    {
+      "query_id": "CHA-044",
+      "category": "Procurement",
+      "query": "What rules apply to procurement protests?"
+    },
+    {
+      "query_id": "CHA-045",
+      "category": "Procurement",
+      "query": "What restrictions apply to gifts and gratuities for CHA procurement staff?"
+    },
+    {
+      "query_id": "CHA-046",
+      "category": "Business Expense & Travel",
+      "query": "What expenses are eligible for reimbursement under CHA’s business expense policy?"
+    },
+    {
+      "query_id": "CHA-047",
+      "category": "Business Expense & Travel",
+      "query": "What documentation is required for a business expense reimbursement?"
+    },
+    {
+      "query_id": "CHA-048",
+      "category": "Business Expense & Travel",
+      "query": "What travel expenses can CHA employees claim for business travel?"
+    },
+    {
+      "query_id": "CHA-049",
+      "category": "Business Expense & Travel",
+      "query": "What are the approval requirements for business travel?"
+    },
+    {
+      "query_id": "CHA-050",
+      "category": "Business Expense & Travel",
+      "query": "What are the deadlines or procedures for submitting travel expense reports?"
+    }
+  ]
+}
