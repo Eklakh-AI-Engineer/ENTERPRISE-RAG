@@ -337,7 +337,7 @@ Replace local-only persistence/index assumptions with production-managed storage
 - [x] Domain persistence records defined in `app/persistence/entities.py`.
 - [x] Repository contracts defined in `app/persistence/repositories.py`.
 - [x] In-memory adapters added for tests without requiring a live database.
-- [ ] Implement the Postgres/Supabase repository adapter after the target project is selected.
+- [x] Implemented the first Postgres/Supabase repository adapter boundary (`app/persistence/supabase.py`) with injected-client semantics; live-project wiring remains pending.
 - [x] Wire initial document/ingestion lifecycle logic through repository interfaces rather than direct database calls.
 - [ ] Wire the remaining query/conversation services through repository interfaces.
 
@@ -514,6 +514,7 @@ Use the mechanism selected during Phase 1.
 - [x] Failed jobs can be reclaimed after a valid retry transition.
 - [x] Document submission is idempotent for identical tenant-scoped content/pipeline identity.
 - [x] Job ownership/tenant context is carried by the service contract.
+- [x] Added the atomic `claim_ingestion_job` database contract using row locking + `SKIP LOCKED`; live migration/application remains pending.
 - [ ] Implement the selected queue/worker process against the production database.
 - [ ] Ensure failed jobs cannot partially expose another tenant's data in integration/RLS tests.
 
