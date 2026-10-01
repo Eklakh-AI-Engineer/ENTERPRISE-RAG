@@ -3,6 +3,7 @@
 > Living implementation plan for taking Enterprise RAG from the current retrieval-engineering baseline to a production-ready Vercel + Supabase product.
 
 **Last updated:** 2026-10-01  
+**Architecture decision gate:** Phase 1 must resolve Vercel inference feasibility, async worker placement, BM25 tenant isolation, and Supabase auth/RLS request-path strategy before Phases 3–6 begin.  
 **Current phase:** Phase 0 complete → Phase 1 next  
 **Baseline commit:** `f91ecff3a1a2d430e83ba2fafa3b40d72b2f3a8f`  
 **Phase 0 freeze commit:** `298a8e5aa886793d56a18dc0426a8952c681f1d6`
@@ -123,6 +124,7 @@ Make the existing system deterministic, installable, understandable, and safe to
 
 - [ ] Populate `requirements.txt` with actual backend dependencies.
 - [ ] Pin or constrain versions where reproducibility matters.
+- [ ] Choose and add a stronger reproducibility mechanism: **Docker** or a Python lockfile/tooling such as `uv` / `pip-tools`.
 - [ ] Separate runtime and development/test dependencies if useful.
 - [ ] Verify clean virtual-environment installation.
 - [ ] Verify frontend `npm install` + build from a clean checkout.
@@ -136,7 +138,95 @@ Make the existing system deterministic, installable, understandable, and safe to
 - [ ] Remove assumptions about Windows/WSL/local model locations.
 - [ ] Make model names, retrieval parameters, API settings, and provider settings configurable.
 
-### 1.4 Documentation
+### 1.4 Minimal CI protection
+
+- [ ] Add GitHub Actions for push/PR.
+- [ ] Run backend tests.
+- [ ] Run frontend build.
+- [ ] Fail the workflow on test/build failure.
+- [ ] Keep this CI intentionally minimal; production deployment gates come later.
+
+### 1.5 Vercel / inference feasibility spike — **MUST HAPPEN IN PHASE 1**
+
+The current backend loads heavyweight ML components including SentenceTransformers and a cross-encoder. Do not assume the full inference path belongs inside Vercel Functions.
+
+- [ ] Measure Python function bundle/package size.
+- [ ] Measure cold-start latency.
+- [ ] Measure peak memory during model loading and inference.
+- [ ] Measure execution duration.
+- [ ] Measure concurrent-request behavior.
+- [ ] Measure model initialization time separately from request inference.
+- [ ] Record results in `docs/DEPLOYMENT.md`.
+- [ ] Decide production compute topology **before Phase 3**.
+
+Preferred decision branches:
+
+```
+Frontend/UI → Vercel
+API/orchestration → Vercel only if resource tests pass
+Heavy embedding/reranking/inference → long-running worker/service if required
+Supabase → Auth + Postgres/pgvector + Storage
+```
+
+If Vercel is unsuitable for heavy inference:
+
+- [ ] Select a long-running inference host (for example Fly.io, Railway, Cloud Run, or equivalent).
+- [ ] Define the API boundary between Vercel and inference.
+- [ ] Define authentication propagation between services.
+- [ ] Keep the retrieval engine provider-agnostic.
+
+### 1.6 Async ingestion architecture spike — **MUST HAPPEN IN PHASE 1**
+
+Vercel request handlers are not the ingestion worker.
+
+- [ ] Choose the production job mechanism.
+- [ ] Document queue/job ownership.
+- [ ] Define retry semantics.
+- [ ] Define idempotency keys.
+- [ ] Define status transitions.
+- [ ] Define where OCR, embedding, indexing, and BM25 updates execute.
+
+Candidate architecture:
+
+```
+Supabase DB/queue
+      ↓
+Long-running worker
+      ↓
+parse → OCR → chunk → embed → index
+      ↓
+READY / FAILED
+```
+
+The final mechanism must be selected before Phase 5 implementation.
+
+### 1.7 Tenant-safe BM25 + RLS architecture decision — **MUST HAPPEN IN PHASE 1**
+
+BM25 cannot be a global cross-tenant index with post-filtering.
+
+Choose one:
+
+- [ ] Per-tenant BM25 indexes with explicit tenant-scoped lifecycle.
+- [ ] PostgreSQL full-text search as an RLS-native lexical alternative, with the limitation that it is not identical to BM25.
+- [ ] Another explicitly tenant-aware lexical service.
+
+For whichever option is selected:
+
+- [ ] Define index isolation.
+- [ ] Define refresh/rebuild behavior.
+- [ ] Define deletion behavior.
+- [ ] Define benchmark comparability against Phase 2.
+- [ ] Document the trade-off.
+
+### 1.8 Supabase request-path security decision — **MUST HAPPEN BEFORE PHASE 4**
+
+- [ ] Decide whether user JWTs are passed through to Supabase for RLS enforcement.
+- [ ] If a service-role key is used for trusted server operations, document exactly which operations use it and why.
+- [ ] Do not treat service-role access as evidence that RLS works.
+- [ ] Test the real API request path, including authorization context.
+- [ ] Add cross-tenant negative tests.
+
+### 1.9 Documentation
 
 - [ ] Update README installation instructions.
 - [ ] Add `docs/ARCHITECTURE.md`.
@@ -154,8 +244,14 @@ Before Phase 2:
 - [ ] Backend starts.
 - [ ] Frontend starts/builds.
 - [ ] Existing test suite passes.
+- [ ] Minimal CI passes on push/PR.
 - [ ] No secrets or accidental files remain.
 - [ ] Existing baseline behavior remains intact.
+- [ ] Vercel/inference feasibility has been measured and architecture chosen.
+- [ ] Async ingestion mechanism has been selected.
+- [ ] Tenant-safe BM25 strategy has been selected.
+- [ ] Supabase JWT/RLS/service-role strategy has been documented.
+- [ ] Docker or a Python lockfile/reproducibility mechanism exists.
 
 ---
 
@@ -171,15 +267,24 @@ Convert the existing retrieval implementation into a defensible, measurable retr
 
 - [ ] Select a fixed corpus.
 - [ ] Freeze document versions.
-- [ ] Freeze chunking configuration.
+- [ ] Freeze chunking configuration for the benchmark version.
 - [ ] Generate stable chunk IDs.
 - [ ] Record corpus version/hash.
 - [ ] Record embedding model/version.
 - [ ] Record reranker model/version.
+- [ ] Record chunker version/configuration.
+- [ ] Record benchmark schema/version.
+
+**Important:** labels must not depend only on chunk IDs. Store document-level and page/span-level evidence so labels survive chunking changes.
+
+- [ ] Define a benchmark versioning policy.
+- [ ] When chunking changes, regenerate/version the benchmark rather than silently reusing old chunk labels.
 
 ## 2.2 Build labeled evaluation dataset
 
 Target: **50–100 queries**.
+
+The dataset should use durable document/page/span evidence rather than only chunk IDs.
 
 Required query categories:
 
@@ -218,7 +323,14 @@ Each evaluation item should contain:
 - [ ] Candidate count
 - [ ] Reranking latency
 
-## 2.4 Dense baseline
+## 2.4 Build an unbiased relevance pool
+
+- [ ] Generate candidate pools from the **union of Dense and BM25** results.
+- [ ] Include candidates from both systems before judging relevance.
+- [ ] Do not construct ground truth using only the system being evaluated.
+- [ ] Freeze relevance judgments before comparing final metrics.
+
+## 2.5 Dense baseline
 
 - [ ] Run dense retrieval alone.
 - [ ] Save results.
@@ -226,7 +338,7 @@ Each evaluation item should contain:
 - [ ] Save configuration.
 - [ ] Produce reproducible benchmark artifact.
 
-## 2.5 Hybrid experiment
+## 2.6 Hybrid experiment
 
 - [ ] Run BM25 + dense + RRF.
 - [ ] Use identical corpus.
@@ -235,7 +347,7 @@ Each evaluation item should contain:
 - [ ] Keep reranking conditions controlled.
 - [ ] Measure quality and latency.
 
-## 2.6 Failure analysis
+## 2.7 Failure analysis
 
 For failed queries:
 
@@ -248,7 +360,7 @@ For failed queries:
 
 Produce a failure taxonomy and representative case studies.
 
-## 2.7 Evaluation integrity
+## 2.8 Evaluation integrity
 
 - [ ] Do not present development-run scores as benchmark results.
 - [ ] Record model versions.
@@ -258,6 +370,13 @@ Produce a failure taxonomy and representative case studies.
 - [ ] Separate retrieval quality from answer quality.
 - [ ] Separate citation validity from semantic support.
 - [ ] Document limitations of LLM-based faithfulness judging.
+- [ ] Add bootstrap confidence intervals for headline retrieval metrics.
+- [ ] Use paired query-level comparisons between Dense and Hybrid.
+- [ ] Report effect sizes/deltas with uncertainty, not point estimates alone.
+- [ ] Define a held-out answer-evaluation set or scheduled answer-level evaluation.
+- [ ] Create a human-labeled subset for faithfulness judging.
+- [ ] Compare the LLM faithfulness judge against human labels.
+- [ ] Record judge model, prompt, temperature/configuration, and version.
 
 ### Phase 2 gate
 
@@ -330,14 +449,16 @@ Document chunk fields should include:
 
 ## 3.5 BM25 strategy
 
-Initially:
+Phase 1 must already select the tenant-safe architecture.
 
-- [ ] Keep BM25 as a separate lexical retrieval component.
-- [ ] Define how its corpus is built from production documents.
+- [ ] Implement the selected tenant-isolated lexical strategy.
+- [ ] Ensure lexical retrieval cannot score or retrieve another tenant's corpus.
 - [ ] Define index refresh behavior.
+- [ ] Define deletion behavior.
 - [ ] Measure operational complexity.
+- [ ] Re-run the relevant Phase 2 comparison under the production lexical strategy.
 
-Do not prematurely replace BM25 with a different search engine unless measurements justify it.
+Do not assume that a global BM25 index plus post-filtering is safe for multi-tenant production.
 
 ### Phase 3 gate
 
@@ -380,6 +501,12 @@ Make the application safely multi-user.
 - [ ] Policies for conversations/messages.
 - [ ] Policies for citations/answers.
 - [ ] Policies for organization/tenant membership.
+
+### Service-role / RLS test
+
+- [ ] Verify the API request path carries the correct user authorization context.
+- [ ] Verify RLS behavior through the actual application path.
+- [ ] If service-role access exists, separately test application-layer authorization and explicitly document why that operation bypasses RLS.
 
 ### Security test
 
@@ -446,6 +573,13 @@ READY
 - [ ] Extraction error handling.
 - [ ] Large-document handling.
 
+### Document identity
+
+- [ ] Compute a content hash for uploaded documents.
+- [ ] Deduplicate identical documents.
+- [ ] Define behavior for same-content re-upload.
+- [ ] Keep source-document identity separate from chunk/index identity.
+
 ### Chunking
 
 - [x] Recursive chunking exists.
@@ -456,11 +590,15 @@ READY
 
 ### Async execution
 
-- [ ] Do not parse/embed large documents inside upload request.
-- [ ] Introduce background job execution.
+Use the mechanism selected during Phase 1.
+
+- [ ] Do not parse/embed large documents inside the upload request.
+- [ ] Implement the selected queue/worker architecture.
 - [ ] Persist job status.
 - [ ] Retry failed jobs.
 - [ ] Make jobs idempotent.
+- [ ] Add job ownership/tenant context.
+- [ ] Ensure failed jobs cannot partially expose another tenant's data.
 
 ### Phase 5 gate
 
@@ -603,6 +741,22 @@ If the workload is unsuitable:
 ## Security
 
 - [ ] Strict CORS.
+- [ ] Prompt-injection handling for uploaded documents.
+- [ ] Treat retrieved document text as untrusted data.
+- [ ] Prevent retrieved content from overriding system/developer instructions.
+- [ ] Sanitize/structure evidence passed to the generation model.
+- [ ] Add adversarial prompt-injection test cases.
+
+### Abuse controls
+
+- [ ] Per-user request rate limits.
+- [ ] Per-user token quotas.
+- [ ] Per-user estimated-cost quotas.
+- [ ] Storage/upload quotas.
+
+### Request security
+
+- [ ] Input validation.
 - [ ] Input validation.
 - [ ] PDF type validation.
 - [ ] File-size limits.
@@ -628,6 +782,7 @@ Persist:
 - [ ] total latency
 - [ ] input/output tokens
 - [ ] estimated cost
+- [ ] quota usage / remaining budget
 - [ ] retrieved count
 - [ ] reranked count
 - [ ] citation validity
@@ -772,81 +927,43 @@ Documentation ✓
 
 ---
 
-# 13. Exact Execution Order From Here
+# 13. Cross-Phase Execution Rule
 
-### NOW — Phase 1
+The phase checklists above are the **single source of truth**. Do not maintain a second numbered execution checklist.
 
-1. Clean accidental repository files.
-2. Fix `requirements.txt`.
-3. Add `.env.example`.
-4. Standardize configuration.
-5. Verify clean installation.
-6. Run the complete existing test suite.
-7. Verify backend startup.
-8. Verify frontend build.
-9. Update development/reproducibility documentation.
-10. Commit Phase 1.
+The dependency order is:
 
-### THEN — Phase 2
+```
+Phase 0
+  ↓
+Phase 1
+  ├── reproducibility + minimal CI
+  ├── Vercel/inference feasibility
+  ├── async worker architecture
+  ├── tenant-safe BM25 strategy
+  └── Supabase JWT/RLS strategy
+  ↓
+Phase 2
+  ├── versioned span/page-level evaluation
+  ├── unbiased relevance pooling
+  ├── Dense vs Hybrid benchmark
+  ├── confidence intervals / paired comparisons
+  └── answer + faithfulness judge validation
+  ↓
+Phase 3 — Supabase/pgvector/Storage
+  ↓
+Phase 4 — Auth/RLS
+  ↓
+Phase 5 — Async ingestion/OCR/indexing
+  ↓
+Phase 6 — Query/conversations
+  ↓
+Phase 7 — Deployment/security/observability
+  ↓
+Phase 8 — Product QA/release
+```
 
-11. Freeze evaluation corpus.
-12. Build 50–100 labeled queries.
-13. Add/verify nDCG.
-14. Run Dense baseline.
-15. Run Hybrid baseline.
-16. Compare quality + latency.
-17. Analyze failures.
-18. Commit benchmark artifacts/results.
-
-### THEN — Phase 3
-
-19. Design Supabase schema.
-20. Enable pgvector.
-21. Implement document/chunk persistence.
-22. Implement vector retrieval.
-23. Add Storage.
-24. Verify retrieval parity.
-
-### THEN — Phase 4
-
-25. Add Supabase Auth.
-26. Add JWT validation.
-27. Add RLS.
-28. Test cross-user isolation.
-
-### THEN — Phase 5
-
-29. Build production upload flow.
-30. Add async ingestion.
-31. Add OCR fallback.
-32. Build indexing lifecycle.
-33. Add retries/idempotency.
-
-### THEN — Phase 6
-
-34. Productionize query endpoint.
-35. Add optional/evaluated query rewriting.
-36. Persist conversations.
-37. Build evidence-first chat UX.
-
-### THEN — Phase 7
-
-38. Benchmark Vercel architecture.
-39. Deploy frontend.
-40. Deploy API if resource tests pass.
-41. Otherwise separate heavy inference.
-42. Add CI/CD.
-43. Add production security.
-44. Add operational observability.
-
-### FINALLY — Phase 8
-
-45. Complete UX.
-46. Run backend tests.
-47. Run frontend tests/build.
-48. Run browser end-to-end smoke.
-49. Complete production documentation.
-50. Release.
+Production architecture decisions made in Phase 1 constrain implementation in Phases 3–6; they must not be deferred until Phase 7.
 
 ---
 
@@ -874,4 +991,4 @@ Enterprise RAG is considered **production-ready** only when:
 - [ ] Browser end-to-end flow passes.
 - [ ] Production documentation is complete.
 
-**Current position: Phase 0 complete. Phase 1 is the next active implementation target.**
+**Current position: Phase 0 complete. Phase 1 is the next active implementation target, with architecture feasibility decisions required before production data-layer work.**
