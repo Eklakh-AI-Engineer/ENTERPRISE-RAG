@@ -19,3 +19,5 @@ openai>=2,<3
 
 # Development / verification
 pytest>=9,<10
+
+supabase>=2.27,<3
