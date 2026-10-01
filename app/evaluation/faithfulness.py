@@ -313,7 +313,8 @@ Required JSON format:
         try:
 
             response = self.llm.generate(
-                prompt
+                prompt,
+                temperature=self.JUDGE_TEMPERATURE,
             )
 
             return self._parse_verification(
