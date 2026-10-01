@@ -451,6 +451,58 @@ using (
   )
 );
 
+-- Supabase Storage reference policies. The bucket/object path is tenant-scoped:
+-- organizations/{organization_id}/documents/{document_id}/{filename}
+-- These policies are part of the reference design and must be validated on the
+-- dedicated project before accepting production files.
+insert into storage.buckets (id, name, public)
+values ('documents', 'documents', false)
+on conflict (id) do nothing;
+
+create policy "members can read organization documents"
+on storage.objects
+for select
+to authenticated
+using (
+  bucket_id = 'documents'
+  and exists (
+    select 1
+    from public.organization_members om
+    where om.organization_id = split_part(name, '/', 2)::uuid
+      and om.user_id = (select auth.uid())
+  )
+);
+
+create policy "members can upload organization documents"
+on storage.objects
+for insert
+to authenticated
+with check (
+  bucket_id = 'documents'
+  and exists (
+    select 1
+    from public.organization_members om
+    where om.organization_id = split_part(name, '/', 2)::uuid
+      and om.user_id = (select auth.uid())
+  )
+  and split_part(name, '/', 1) = 'organizations'
+  and split_part(name, '/', 3) = 'documents'
+);
+
+create policy "members can delete organization documents"
+on storage.objects
+for delete
+to authenticated
+using (
+  bucket_id = 'documents'
+  and exists (
+    select 1
+    from public.organization_members om
+    where om.organization_id = split_part(name, '/', 2)::uuid
+      and om.user_id = (select auth.uid())
+  )
+);
+
 -- Atomic worker claim. This is intentionally a trusted-worker operation:
 -- the function locks one eligible row before updating its lease, preventing two
 -- workers from claiming the same job. It is not exposed to ordinary users.
