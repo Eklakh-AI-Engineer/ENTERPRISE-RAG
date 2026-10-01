@@ -329,6 +329,8 @@ Replace local-only persistence/index assumptions with production-managed storage
 - [ ] Verify schema against the live database.
 - [x] Added application persistence entities and repository interfaces decoupled from Supabase/Postgres.
 - [x] Added in-memory repository adapters for deterministic unit tests and local boundary validation.
+- [x] Added document submission service with SHA-256 identity, tenant-scoped deduplication, deterministic storage paths, and ingestion-job creation.
+- [x] Added ingestion lifecycle service with PENDING → PROCESSING → READY / FAILED transitions, leases, expiry retry, attempt counts, and bounded errors.
 
 ## 3.3 Application persistence boundary
 
@@ -336,7 +338,8 @@ Replace local-only persistence/index assumptions with production-managed storage
 - [x] Repository contracts defined in `app/persistence/repositories.py`.
 - [x] In-memory adapters added for tests without requiring a live database.
 - [ ] Implement the Postgres/Supabase repository adapter after the target project is selected.
-- [ ] Wire query/ingestion services through repository interfaces rather than direct database calls.
+- [x] Wire initial document/ingestion lifecycle logic through repository interfaces rather than direct database calls.
+- [ ] Wire the remaining query/conversation services through repository interfaces.
 
 ## 3.4 pgvector
 
@@ -487,10 +490,11 @@ READY
 
 ### Document identity
 
-- [ ] Compute a content hash for uploaded documents.
-- [ ] Deduplicate identical documents.
-- [ ] Define behavior for same-content re-upload.
-- [ ] Keep source-document identity separate from chunk/index identity.
+- [x] Compute a SHA-256 content hash for uploaded documents.
+- [x] Deduplicate identical documents within the organization and pipeline version.
+- [x] Define same-content re-upload as an idempotent submission returning the existing document/job.
+- [x] Keep source-document identity separate from chunk/index identity.
+- [ ] Materialize the deterministic storage path in Supabase Storage.
 
 ### Chunking
 
@@ -504,13 +508,14 @@ READY
 
 Use the mechanism selected during Phase 1.
 
-- [ ] Do not parse/embed large documents inside the upload request.
-- [ ] Implement the selected queue/worker architecture.
-- [ ] Persist job status.
-- [ ] Retry failed jobs.
-- [ ] Make jobs idempotent.
-- [ ] Add job ownership/tenant context.
-- [ ] Ensure failed jobs cannot partially expose another tenant's data.
+- [x] Application service does not parse/embed documents inside the upload request.
+- [x] Defined worker lifecycle operations for claim, completion, failure, lease expiry, and retry.
+- [x] Persisted job state is represented behind the repository boundary.
+- [x] Failed jobs can be reclaimed after a valid retry transition.
+- [x] Document submission is idempotent for identical tenant-scoped content/pipeline identity.
+- [x] Job ownership/tenant context is carried by the service contract.
+- [ ] Implement the selected queue/worker process against the production database.
+- [ ] Ensure failed jobs cannot partially expose another tenant's data in integration/RLS tests.
 
 ### Phase 5 gate
 
@@ -903,4 +908,4 @@ Enterprise RAG is considered **production-ready** only when:
 - [ ] Browser end-to-end flow passes.
 - [ ] Production documentation is complete.
 
-**Current position: Phase 2 empirical benchmark is active. The real 50-query CHA Dense ∪ BM25 pool is frozen, while silver labeling is quota-limited and human review remains pending. Phase 3 database design is being prepared in parallel without applying production schema changes.**
+**Current position: Phase 2 empirical benchmark is active. The real 50-query CHA Dense ∪ BM25 pool is frozen, while silver labeling is quota-limited and human review remains pending. Phase 3 database design and the application persistence/service boundary are being prepared in parallel without applying production schema changes.**
