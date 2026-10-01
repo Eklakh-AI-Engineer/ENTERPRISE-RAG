@@ -1,0 +1,44 @@
+{
+  "corpus_id": "CHA-POLICY-CORPUS-V1",
+  "corpus_version": "v1.0",
+  "description": "Four Chicago Housing Authority policy documents supplied for the Phase 2 retrieval benchmark.",
+  "corpus_hash": "777a6a95690f0e20b7dcf1bf14732befd69696cbb3787ee0b0077505df165ddf",
+  "documents": [
+    {
+      "document_id": "CHA Business Expense Reimbursement & Travel Policy",
+      "filename": "CHA Business Expense Reimbursement & Travel Policy.pdf",
+      "sha256": "08c11fda8698fc121f45922cd5334bb749e70a8c04a43dfdfe57a74487ef1649",
+      "pages": 6,
+      "native_text_chars": 0,
+      "extraction": "OCR required; Tesseract fallback",
+      "source_url": "https://www.thecha.org/sites/default/files/2024-09/2023BusinessExpenseReimbursementTravelPolicy_03.23_BoardApprovedPolicies.pdf"
+    },
+    {
+      "document_id": "CHA Employee Handbook 2025",
+      "filename": "CHA Employee Handbook 2025.pdf",
+      "sha256": "4516291ff3259d3ffce60bdb3ed17fb6ea2363aad159f9d1d5ab8a1488cf16bd",
+      "pages": 35,
+      "native_text_chars": 106317,
+      "extraction": "Native PDF text",
+      "source_url": "https://www.thecha.org/sites/default/files/2026-05/2025-Employee-Handbook_05.26_BoardPolicies.pdf"
+    },
+    {
+      "document_id": "CHA Information Security Policy",
+      "filename": "CHA Information Security Policy.pdf",
+      "sha256": "d4cf9ed7702524daefe04bb9869a8c67afe9998c99ab9bd95c40dc21130d3375",
+      "pages": 8,
+      "native_text_chars": 0,
+      "extraction": "OCR required; Tesseract fallback",
+      "source_url": "https://www.thecha.org/sites/default/files/2024-11/InformationSecurityPolicy_07.23_BoardApprovedPolicies.pdf"
+    },
+    {
+      "document_id": "CHA Procurement Policy",
+      "filename": "CHA Procurement Policy.pdf",
+      "sha256": "501acd5b098d8ef35ccbbee4f5cec766c5709ac6dc57b0513983371ee600d84b",
+      "pages": 5,
+      "native_text_chars": 0,
+      "extraction": "OCR required; Tesseract fallback",
+      "source_url": "https://www.thecha.org/sites/default/files/2024-09/2022ProcurementPolicy_11.22_BoardApprovedPolicies.pdf"
+    }
+  ]
+}
