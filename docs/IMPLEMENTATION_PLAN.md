@@ -207,139 +207,94 @@ Still required before declaring the Phase 1 gate fully closed:
 
 # 5. Phase 2 — Evaluation Completion + Retrieval Experiment
 
-**Status: [~] PARTIAL — CORE EVALUATION EXISTS, EXPERIMENTAL RIGOR INCOMPLETE**
+**Status: 🟡 IMPLEMENTED HARNESS + PROTOCOL; LABELED DATASET AND EXPERIMENT RUN REMAIN**
 
 ## Objective
 
-Convert the existing retrieval implementation into a defensible, measurable retrieval-engineering system.
+Turn the existing retrieval implementation into a reproducible, statistically defensible retrieval evaluation.
 
-## 2.1 Freeze evaluation corpus
+### 2.1 Benchmark freeze
 
-- [ ] Select a fixed corpus.
-- [ ] Freeze document versions.
-- [ ] Freeze chunking configuration for the benchmark version.
-- [ ] Generate stable chunk IDs.
-- [ ] Record corpus version/hash.
-- [ ] Record embedding model/version.
-- [ ] Record reranker model/version.
-- [ ] Record chunker version/configuration.
-- [ ] Record benchmark schema/version.
+- [x] Added a versioned Phase 2 benchmark schema.
+- [x] Added a benchmark example/template.
+- [x] Defined 50–100 labeled queries as the acceptance range.
+- [x] Defined durable document/page/span evidence labels.
+- [x] Defined benchmark versioning and reproducibility metadata.
+- [ ] Populate the final 50–100 labeled-query benchmark from the frozen corpus.
+- [ ] Freeze the actual corpus hash and preprocessing configuration.
 
-**Important:** labels must not depend only on chunk IDs. Store document-level and page/span-level evidence so labels survive chunking changes.
+### 2.2 Unbiased relevance pooling
 
-- [ ] Define a benchmark versioning policy.
-- [ ] When chunking changes, regenerate/version the benchmark rather than silently reusing old chunk labels.
+- [x] Added scripts/build_relevance_pool.py.
+- [x] Pooling rule is Dense(query) ∪ BM25(query).
+- [x] Pool artifact preserves document/page/section/text and retrieval source/rank.
+- [ ] Run pooling against the frozen corpus.
+- [ ] Human-judge the pooled candidates.
+- [ ] Freeze the resulting relevance judgments.
 
-## 2.2 Build labeled evaluation dataset
+### 2.3 Retrieval metrics
 
-Target: **50–100 queries**.
+- [x] Recall@5 and Recall@10.
+- [x] MRR.
+- [x] Graded nDCG@5 and nDCG@10.
+- [x] Bootstrap confidence intervals.
+- [x] Paired bootstrap treatment-minus-baseline confidence intervals.
+- [x] Added automated tests for nDCG/bootstrap behavior.
 
-The dataset should use durable document/page/span evidence rather than only chunk IDs.
+### 2.4 Controlled Dense-vs-Hybrid experiment
 
-Required query categories:
+- [x] Added scripts/run_dense_vs_hybrid.py.
+- [x] Dense is the baseline.
+- [x] Dense + BM25 + RRF is the treatment.
+- [x] Same corpus, queries, judgments, and evaluation code.
+- [x] Reranker excluded from this experiment to isolate retrieval strategy.
+- [x] Query-level paired deltas are recorded.
+- [x] Aggregate and category-level results are recorded.
+- [ ] Run the experiment on the frozen benchmark.
+- [ ] Publish the resulting raw JSON artifact and analysis.
+- [ ] Perform failure analysis before making a retrieval-quality claim.
 
-- [ ] Exact identifiers
-- [ ] Acronym-heavy queries
-- [ ] Semantic paraphrases
-- [ ] Keyword-sensitive queries
-- [ ] Negation
-- [ ] Modifier-sensitive queries
-- [ ] Multi-intent queries
-- [ ] Cross-reference queries
-- [ ] Metadata-filtered queries
-- [ ] Page/section evidence queries
+### 2.5 Faithfulness judge validation
 
-Each evaluation item should contain:
+- [x] Faithfulness output now records judge model, prompt version, and temperature.
+- [x] Faithfulness judge temperature is explicitly set.
+- [x] Added human-validation subset schema/template.
+- [x] Added scripts/evaluate_faithfulness_judge.py.
+- [ ] Label the human validation subset.
+- [ ] Compare judge vs human labels.
+- [ ] Record accuracy, precision, recall, F1, and failure cases.
+- [ ] Freeze judge configuration for published answer-level evaluation.
 
-```json
-{
-  "query": "...",
-  "relevant_chunk_ids": ["..."],
-  "graded_relevance": {
-    "chunk-id": 3
-  },
-  "category": "..."
-}
-```
+### 2.6 Answer-level evaluation
 
-## 2.3 Retrieval metrics
-
-- [ ] Recall@5
-- [ ] Recall@10
-- [ ] MRR
-- [ ] nDCG@5
-- [ ] nDCG@10
-- [ ] Retrieval latency
-- [ ] Candidate count
-- [ ] Reranking latency
-
-## 2.4 Build an unbiased relevance pool
-
-- [ ] Generate candidate pools from the **union of Dense and BM25** results.
-- [ ] Include candidates from both systems before judging relevance.
-- [ ] Do not construct ground truth using only the system being evaluated.
-- [ ] Freeze relevance judgments before comparing final metrics.
-
-## 2.5 Dense baseline
-
-- [ ] Run dense retrieval alone.
-- [ ] Save results.
-- [ ] Save metrics.
-- [ ] Save configuration.
-- [ ] Produce reproducible benchmark artifact.
-
-## 2.6 Hybrid experiment
-
-- [ ] Run BM25 + dense + RRF.
-- [ ] Use identical corpus.
-- [ ] Use identical query set.
-- [ ] Use identical relevance judgments.
-- [ ] Keep reranking conditions controlled.
-- [ ] Measure quality and latency.
-
-## 2.7 Failure analysis
-
-For failed queries:
-
-- [ ] Identify retrieval failure.
-- [ ] Identify ranking failure.
-- [ ] Identify chunking failure.
-- [ ] Identify query-language failure.
-- [ ] Identify evidence/citation failure.
-- [ ] Identify generation failure.
-
-Produce a failure taxonomy and representative case studies.
-
-## 2.8 Evaluation integrity
-
-- [ ] Do not present development-run scores as benchmark results.
-- [ ] Record model versions.
-- [ ] Record random seeds where applicable.
-- [ ] Record configuration.
-- [ ] Store raw experiment results.
-- [ ] Separate retrieval quality from answer quality.
-- [ ] Separate citation validity from semantic support.
-- [ ] Document limitations of LLM-based faithfulness judging.
-- [ ] Add bootstrap confidence intervals for headline retrieval metrics.
-- [ ] Use paired query-level comparisons between Dense and Hybrid.
-- [ ] Report effect sizes/deltas with uncertainty, not point estimates alone.
-- [ ] Define a held-out answer-evaluation set or scheduled answer-level evaluation.
-- [ ] Create a human-labeled subset for faithfulness judging.
-- [ ] Compare the LLM faithfulness judge against human labels.
-- [ ] Record judge model, prompt, temperature/configuration, and version.
+- [x] Existing retrieval/citation/faithfulness dimensions remain separate.
+- [x] Evaluation documentation explicitly rejects a single collapsed quality score.
+- [ ] Create a held-out answer-evaluation set.
+- [ ] Schedule repeatable answer-level evaluation using the frozen benchmark/judge configuration.
+- [ ] Report citation validity, answer relevance, faithfulness, and operational latency separately.
 
 ### Phase 2 gate
 
-Required before production retrieval migration:
+Implemented:
 
-- [ ] Frozen benchmark dataset.
-- [ ] Dense baseline.
-- [ ] Hybrid result.
-- [ ] nDCG.
-- [ ] Failure analysis.
-- [ ] Reproducible experiment artifacts.
+- [x] Evaluation schema.
+- [x] Unbiased pooling mechanism.
+- [x] nDCG.
+- [x] Bootstrap statistics.
+- [x] Controlled Dense-vs-Hybrid experiment harness.
+- [x] Faithfulness judge metadata and human-validation harness.
 
----
+Still required before declaring Phase 2 closed:
+
+- [ ] 50–100 final labeled queries.
+- [ ] Frozen corpus/configuration hashes.
+- [ ] Human-judged Dense ∪ BM25 pool.
+- [ ] Dense-vs-Hybrid experiment execution.
+- [ ] Failure analysis/case studies.
+- [ ] Human validation of faithfulness judge.
+- [ ] Held-out answer-level evaluation.
+
+**Phase 3 production data migration should wait until the retrieval benchmark is frozen, even though the Phase 3 schema can be designed in parallel.**
 
 # 6. Phase 3 — Production Data Layer: Supabase + pgvector
 
