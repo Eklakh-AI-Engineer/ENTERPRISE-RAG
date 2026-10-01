@@ -44,6 +44,15 @@ class InMemoryIngestionJobRepository:
             return item
         return None
 
+    def get_by_document(self, document_id: str, organization_id: str):
+        for item in self._items.values():
+            if (
+                item.document_id == document_id
+                and item.organization_id == organization_id
+            ):
+                return item
+        return None
+
     def create(self, job: IngestionJobRecord):
         if job.id in self._items:
             raise ValueError(f"Ingestion job already exists: {job.id}")
