@@ -9,6 +9,10 @@ import requests
 PROMPT_VERSION = "phase2-relevance-silver-v1"
 LABELS = {0, 1, 2, 3}
 
+
+class RateLimitError(RuntimeError):
+    pass
+
 def load_json(path: Path) -> Any:
     with path.open("r", encoding="utf-8") as f:
         return json.load(f)
@@ -58,6 +62,8 @@ Confidence must be between 0 and 1."""
         },
         timeout=120,
     )
+    if response.status_code == 429:
+        raise RateLimitError("OpenRouter HTTP 429 Too Many Requests")
     response.raise_for_status()
     content = response.json()["choices"][0]["message"]["content"].strip()
     if content.startswith("```"):
@@ -84,7 +90,7 @@ def main() -> None:
     parser.add_argument("--pool", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--model", default=os.getenv("OPENROUTER_MODEL", "qwen/qwen3.8-27b:free"))
-    parser.add_argument("--delay", type=float, default=1.0)
+    parser.add_argument("--delay", type=float, default=2.0)
     parser.add_argument("--retries", type=int, default=3)
     parser.add_argument("--batch-size", type=int, default=8)
     args = parser.parse_args()
@@ -103,6 +109,9 @@ def main() -> None:
         "queries": [],
     }
     done = {q["query_id"]: q for q in existing.get("queries", [])}
+    existing["total_queries"] = len(pool["queries"])
+    existing["status"] = "running"
+    save_json(args.output, existing)
 
     for qi, query in enumerate(pool["queries"], start=1):
         if query["query_id"] in done:
@@ -116,6 +125,13 @@ def main() -> None:
                     batch_judgments = call_model(api_key, args.model, query["query"], batch)
                     judgments.extend([{**j, "candidate_index": j["candidate_index"] + start} for j in batch_judgments])
                     break
+                except RateLimitError:
+                    existing["status"] = "rate_limited"
+                    existing["last_stop_reason"] = "OpenRouter HTTP 429 Too Many Requests"
+                    existing["completed_queries"] = len(done)
+                    save_json(args.output, existing)
+                    print(f"Rate limit reached at {query['query_id']} batch {start}:{start + len(batch)}. Checkpoint saved; rerun later to resume.")
+                    return
                 except Exception as exc:
                     if attempt >= args.retries:
                         raise
@@ -145,9 +161,16 @@ def main() -> None:
         existing["queries"] = [done[key] for key in sorted(done)]
         existing["completed_queries"] = len(done)
         existing["total_queries"] = len(pool["queries"])
+        existing["status"] = "running"
         save_json(args.output, existing)
         print("[{}/{}] {} labeled".format(qi, len(pool["queries"]), query["query_id"]))
         time.sleep(args.delay)
+
+    existing["status"] = "complete"
+    existing["completed_queries"] = len(done)
+    existing["total_queries"] = len(pool["queries"])
+    save_json(args.output, existing)
+    print(f"Completed {len(done)}/{len(pool['queries'])} queries.")
 
 if __name__ == "__main__":
     main()
