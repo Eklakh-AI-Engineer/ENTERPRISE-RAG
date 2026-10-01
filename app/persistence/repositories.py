@@ -33,6 +33,14 @@ class IngestionJobRepository(Protocol):
     def update(self, job: IngestionJobRecord) -> IngestionJobRecord: ...
 
 
+class WorkerJobRepository(IngestionJobRepository, Protocol):
+    """Worker contract: lifecycle persistence plus atomic database claiming."""
+
+    def claim_atomic(
+        self, *, organization_id: str, lease_seconds: int
+    ) -> IngestionJobRecord | None: ...
+
+
 class ConversationRepository(Protocol):
     def get(self, conversation_id: str, user_id: str) -> ConversationRecord | None: ...
     def save(self, conversation: ConversationRecord) -> ConversationRecord: ...
