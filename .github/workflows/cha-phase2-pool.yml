@@ -1,0 +1,94 @@
+name: CHA Phase 2 Corpus Pool
+
+on:
+  push:
+    paths:
+      - ".github/workflows/cha-phase2-pool.yml"
+      - "scripts/build_corpus.py"
+      - "scripts/build_relevance_pool.py"
+      - "app/parsing/**"
+      - "app/chunking/**"
+      - "app/retrieval/**"
+      - "data/evaluation/cha_queries_v1.json"
+      - "data/evaluation/cha_corpus_manifest.json"
+      - "requirements.txt"
+  workflow_dispatch:
+
+jobs:
+  build-pool:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Tesseract
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends tesseract-ocr
+          tesseract --version | head -1
+
+      - name: Install dependencies
+        run: python -m pip install -r requirements.txt
+
+      - name: Download CHA corpus
+        run: |
+          mkdir -p data/raw/cha
+          curl -L --fail --retry 3 -o "data/raw/cha/CHA Employee Handbook 2025.pdf"             "https://www.thecha.org/sites/default/files/2026-05/2025-Employee-Handbook_05.26_BoardPolicies.pdf"
+          curl -L --fail --retry 3 -o "data/raw/cha/CHA Business Expense Reimbursement & Travel Policy.pdf"             "https://www.thecha.org/sites/default/files/2024-09/2023BusinessExpenseReimbursementTravelPolicy_03.23_BoardApprovedPolicies.pdf"
+          curl -L --fail --retry 3 -o "data/raw/cha/CHA Information Security Policy.pdf"             "https://www.thecha.org/sites/default/files/2024-11/InformationSecurityPolicy_07.23_BoardApprovedPolicies.pdf"
+          curl -L --fail --retry 3 -o "data/raw/cha/CHA Procurement Policy.pdf"             "https://www.thecha.org/sites/default/files/2024-09/2022ProcurementPolicy_11.22_BoardApprovedPolicies.pdf"
+
+      - name: Verify corpus hashes
+        run: |
+          sha256sum data/raw/cha/*.pdf
+          python - <<'PY'
+          import hashlib, json
+          from pathlib import Path
+          manifest = json.loads(Path("data/evaluation/cha_corpus_manifest.json").read_text())
+          expected = {d["filename"]: d["sha256"] for d in manifest["documents"]}
+          for path in sorted(Path("data/raw/cha").glob("*.pdf")):
+              actual = hashlib.sha256(path.read_bytes()).hexdigest()
+              if expected.get(path.name) != actual:
+                  raise SystemExit(f"SHA-256 mismatch: {path.name}")
+          print("All CHA document hashes match the frozen manifest.")
+          PY
+
+      - name: Build span-aware corpus
+        run: |
+          python scripts/build_corpus.py             --input-dir data/raw/cha             --output data/processed/cha_chunks.json
+
+      - name: Build real Dense union BM25 pool
+        run: |
+          python scripts/build_relevance_pool.py             --chunks data/processed/cha_chunks.json             --queries data/evaluation/cha_queries_v1.json             --output data/evaluation/cha_pool_v1.json             --candidate-k 10
+
+      - name: Pool sanity check
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p = json.loads(Path("data/evaluation/cha_pool_v1.json").read_text())
+          qs = p["queries"]
+          assert len(qs) == 50
+          assert all(q["candidate_count"] > 0 for q in qs)
+          assert p["pooling_rule"] == "Dense(query) UNION BM25(query)"
+          print("queries:", len(qs))
+          print("candidate_count_min:", min(q["candidate_count"] for q in qs))
+          print("candidate_count_max:", max(q["candidate_count"] for q in qs))
+          print("candidate_count_mean:", sum(q["candidate_count"] for q in qs) / len(qs))
+          PY
+
+      - name: Upload Phase 2 pool
+        uses: actions/upload-artifact@v4
+        with:
+          name: cha-phase2-pool
+          path: |
+            data/processed/cha_chunks.json
+            data/evaluation/cha_pool_v1.json
+          retention-days: 30
