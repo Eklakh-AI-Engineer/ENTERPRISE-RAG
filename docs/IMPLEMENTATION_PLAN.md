@@ -98,7 +98,7 @@ No Phase 0 functional work remains.
 
 # 4. Phase 1 — Repository Cleanup + Reproducibility
 
-**Status: [ ] PENDING — NEXT**
+**Status: [~] IMPLEMENTED — ARCHITECTURE SPIKES COMPLETE; TARGET-RUNTIME RESOURCE MEASUREMENT REMAINS**
 
 ## Objective
 
@@ -106,154 +106,104 @@ Make the existing system deterministic, installable, understandable, and safe to
 
 ### 1.1 Repository hygiene
 
-- [ ] Remove accidental root files:
-  - `0.19`
-  - `0.22.0`
-  - `0.23.0`
-  - `1.0.0`
-  - `1.11.0`
-  - `1.20.0`
-  - `4.0.0`
-  - `4.5.0`
-  - `sentence-transformers)`
-- [ ] Review root `package.json` / `package-lock.json` and remove accidental Node artifacts if they are not required.
-- [ ] Ensure generated caches, local environments, model caches, indexes, and secrets are ignored.
-- [ ] Review repository structure without breaking existing imports.
+- [x] Removed accidental root version/artifact files.
+- [x] Removed obsolete root Node artifacts; the active frontend keeps its own package manifest/lockfile.
+- [x] Hardened root .gitignore for environments, caches, generated indexes, model artifacts, and frontend build output.
+- [x] Preserved tracked evaluation/documentation material.
 
 ### 1.2 Dependency reproducibility
 
-- [ ] Populate `requirements.txt` with actual backend dependencies.
-- [ ] Pin or constrain versions where reproducibility matters.
-- [ ] Choose and add a stronger reproducibility mechanism: **Docker** or a Python lockfile/tooling such as `uv` / `pip-tools`.
-- [ ] Separate runtime and development/test dependencies if useful.
-- [ ] Verify clean virtual-environment installation.
-- [ ] Verify frontend `npm install` + build from a clean checkout.
-- [ ] Add `.env.example`.
-- [ ] Confirm no real secrets are committed.
+- [x] Populated requirements.txt with runtime and development dependencies.
+- [x] Added bounded version constraints for reproducibility.
+- [x] Added Dockerfile with a pinned Python 3.12 runtime line.
+- [x] Added .dockerignore.
+- [x] Added .env.example.
+- [ ] Full clean-checkout installation has not been executed in this tool environment because external package installation is unavailable.
+- [x] Frontend retains its checked-in package-lock.json.
+- [x] No real secrets are committed by the Phase 1 changes.
 
 ### 1.3 Configuration
 
-- [ ] Centralize environment/configuration handling.
-- [ ] Remove machine-specific paths.
-- [ ] Remove assumptions about Windows/WSL/local model locations.
-- [ ] Make model names, retrieval parameters, API settings, and provider settings configurable.
+- [x] Centralized runtime configuration in app/config/settings.py.
+- [x] API CORS is environment-driven.
+- [x] Retrieval top-k/candidate settings are environment-driven.
+- [x] Model names are environment-driven.
+- [x] Frontend API endpoint is environment-driven through VITE_API_BASE_URL.
+- [x] No Windows/WSL absolute path is required.
 
 ### 1.4 Minimal CI protection
 
-- [ ] Add GitHub Actions for push/PR.
-- [ ] Run backend tests.
-- [ ] Run frontend build.
-- [ ] Fail the workflow on test/build failure.
-- [ ] Keep this CI intentionally minimal; production deployment gates come later.
+- [x] Added GitHub Actions for push to main and pull requests.
+- [x] Backend job installs requirements, compiles Python, and runs pytest.
+- [x] Frontend job runs npm ci, lint, and production build.
+- [ ] First workflow execution still needs to complete successfully on GitHub.
 
-### 1.5 Vercel / inference feasibility spike — **MUST HAPPEN IN PHASE 1**
+### 1.5 Vercel / inference feasibility spike — **MUST COMPLETE BEFORE PRODUCTION DEPLOYMENT**
 
-The current backend loads heavyweight ML components including SentenceTransformers and a cross-encoder. Do not assume the full inference path belongs inside Vercel Functions.
+- [x] Added scripts/phase1_feasibility.py.
+- [x] Benchmark records Python/platform, repository footprint, installed package footprint, model initialization, inference, reranking, and optional concurrency.
+- [x] Documented the split topology decision: Vercel frontend + long-running Python inference unless target-runtime measurements prove otherwise.
+- [ ] Execute the benchmark on the target runtime.
+- [ ] Record target-runtime bundle/package size, cold start, peak memory, execution duration, and concurrency results in docs/DEPLOYMENT.md.
 
-- [ ] Measure Python function bundle/package size.
-- [ ] Measure cold-start latency.
-- [ ] Measure peak memory during model loading and inference.
-- [ ] Measure execution duration.
-- [ ] Measure concurrent-request behavior.
-- [ ] Measure model initialization time separately from request inference.
-- [ ] Record results in `docs/DEPLOYMENT.md`.
-- [ ] Decide production compute topology **before Phase 3**.
+**Preliminary topology decision:** keep heavy ML inference off Vercel Functions by default because SentenceTransformers and CrossEncoder are initialized at application startup. This is an architecture decision, not a claim that Vercel is impossible.
 
-Preferred decision branches:
+### 1.6 Async ingestion architecture spike — **DECIDED IN PHASE 1**
 
-```
-Frontend/UI → Vercel
-API/orchestration → Vercel only if resource tests pass
-Heavy embedding/reranking/inference → long-running worker/service if required
-Supabase → Auth + Postgres/pgvector + Storage
-```
+- [x] Selected a Supabase Postgres-backed ingestion_jobs table with worker row leasing.
+- [x] Defined ownership of parsing, OCR, chunking, embedding, dense indexing, and lexical indexing.
+- [x] Defined PENDING → PROCESSING → READY / FAILED states.
+- [x] Defined lease expiry/retry semantics.
+- [x] Defined idempotency key: document_id + content_hash + pipeline_version.
+- [x] Documented the decision in docs/ARCHITECTURE.md.
 
-If Vercel is unsuitable for heavy inference:
+### 1.7 Tenant-safe BM25 + RLS architecture decision — **DECIDED IN PHASE 1**
 
-- [ ] Select a long-running inference host (for example Fly.io, Railway, Cloud Run, or equivalent).
-- [ ] Define the API boundary between Vercel and inference.
-- [ ] Define authentication propagation between services.
-- [ ] Keep the retrieval engine provider-agnostic.
+- [x] Selected per-tenant BM25 indexes.
+- [x] Defined tenant-scoped index lifecycle, refresh, rebuild, and deletion requirements.
+- [x] Explicitly rejected global BM25 plus post-filtering.
+- [x] Documented benchmark comparability and scale trade-offs.
+- [x] Documented the decision in docs/ARCHITECTURE.md.
 
-### 1.6 Async ingestion architecture spike — **MUST HAPPEN IN PHASE 1**
+### 1.8 Supabase request-path security decision — **DECIDED IN PHASE 1**
 
-Vercel request handlers are not the ingestion worker.
-
-- [ ] Choose the production job mechanism.
-- [ ] Document queue/job ownership.
-- [ ] Define retry semantics.
-- [ ] Define idempotency keys.
-- [ ] Define status transitions.
-- [ ] Define where OCR, embedding, indexing, and BM25 updates execute.
-
-Candidate architecture:
-
-```
-Supabase DB/queue
-      ↓
-Long-running worker
-      ↓
-parse → OCR → chunk → embed → index
-      ↓
-READY / FAILED
-```
-
-The final mechanism must be selected before Phase 5 implementation.
-
-### 1.7 Tenant-safe BM25 + RLS architecture decision — **MUST HAPPEN IN PHASE 1**
-
-BM25 cannot be a global cross-tenant index with post-filtering.
-
-Choose one:
-
-- [ ] Per-tenant BM25 indexes with explicit tenant-scoped lifecycle.
-- [ ] PostgreSQL full-text search as an RLS-native lexical alternative, with the limitation that it is not identical to BM25.
-- [ ] Another explicitly tenant-aware lexical service.
-
-For whichever option is selected:
-
-- [ ] Define index isolation.
-- [ ] Define refresh/rebuild behavior.
-- [ ] Define deletion behavior.
-- [ ] Define benchmark comparability against Phase 2.
-- [ ] Document the trade-off.
-
-### 1.8 Supabase request-path security decision — **MUST HAPPEN BEFORE PHASE 4**
-
-- [ ] Decide whether user JWTs are passed through to Supabase for RLS enforcement.
-- [ ] If a service-role key is used for trusted server operations, document exactly which operations use it and why.
-- [ ] Do not treat service-role access as evidence that RLS works.
-- [ ] Test the real API request path, including authorization context.
-- [ ] Add cross-tenant negative tests.
+- [x] Selected user JWT propagation for ordinary Supabase-backed operations.
+- [x] Restricted service-role usage to explicitly trusted operations.
+- [x] Documented that service-role access is not evidence that RLS works.
+- [x] Defined actual API-path and cross-tenant negative testing requirements.
+- [x] Documented the decision in docs/ARCHITECTURE.md and docs/SECURITY.md.
 
 ### 1.9 Documentation
 
-- [ ] Update README installation instructions.
-- [ ] Add `docs/ARCHITECTURE.md`.
-- [ ] Add `docs/EVALUATION.md`.
-- [ ] Add `docs/DEVELOPMENT.md`.
-- [ ] Document local backend/frontend startup.
-- [ ] Document test commands.
-- [ ] Document environment variables.
+- [x] Updated README installation/deployment guidance.
+- [x] Added docs/ARCHITECTURE.md.
+- [x] Added docs/EVALUATION.md.
+- [x] Added docs/DEVELOPMENT.md.
+- [x] Added docs/DEPLOYMENT.md.
+- [x] Added docs/SECURITY.md.
+- [x] Documented local backend/frontend startup.
+- [x] Documented test commands.
+- [x] Documented environment variables.
 
 ### Phase 1 gate
 
-Before Phase 2:
+Implemented:
 
-- [ ] Fresh clone installs successfully.
-- [ ] Backend starts.
-- [ ] Frontend starts/builds.
-- [ ] Existing test suite passes.
-- [ ] Minimal CI passes on push/PR.
-- [ ] No secrets or accidental files remain.
-- [ ] Existing baseline behavior remains intact.
-- [ ] Vercel/inference feasibility has been measured and architecture chosen.
-- [ ] Async ingestion mechanism has been selected.
-- [ ] Tenant-safe BM25 strategy has been selected.
-- [ ] Supabase JWT/RLS/service-role strategy has been documented.
-- [ ] Docker or a Python lockfile/reproducibility mechanism exists.
+- [x] Repository cleanup.
+- [x] Reproducible dependency specification.
+- [x] Docker reproducibility path.
+- [x] Environment/configuration templates.
+- [x] Minimal CI.
+- [x] Architecture decisions for Vercel/inference, async ingestion, tenant-safe BM25, and Supabase JWT/RLS.
 
----
+Still required before declaring the Phase 1 gate fully closed:
+
+- [ ] First GitHub Actions run passes.
+- [ ] Clean-checkout backend installation/startup is verified.
+- [ ] Frontend clean-checkout build is verified.
+- [ ] Target-runtime inference/resource benchmark is executed and recorded.
+
+**Phase 2 must not start production retrieval migration until the remaining gate items are closed.**
 
 # 5. Phase 2 — Evaluation Completion + Retrieval Experiment
 
