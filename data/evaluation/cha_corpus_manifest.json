@@ -2,7 +2,7 @@
   "corpus_id": "CHA-POLICY-CORPUS-V1",
   "corpus_version": "v1.0",
   "description": "Four Chicago Housing Authority policy documents supplied for the Phase 2 retrieval benchmark.",
-  "corpus_hash": "777a6a95690f0e20b7dcf1bf14732befd69696cbb3787ee0b0077505df165ddf",
+  "corpus_hash": "29eaab9ba87abe6fcc31100fede864e9a3cdef32ab2e9f9c9adcb06e90192870",
   "documents": [
     {
       "document_id": "CHA Business Expense Reimbursement & Travel Policy",
@@ -40,5 +40,6 @@
       "extraction": "OCR required; Tesseract fallback",
       "source_url": "https://www.thecha.org/sites/default/files/2024-09/2022ProcurementPolicy_11.22_BoardApprovedPolicies.pdf"
     }
-  ]
+  ],
+  "hash_definition": "SHA-256 of the newline-delimited, lexicographically ordered document SHA-256 values."
 }
