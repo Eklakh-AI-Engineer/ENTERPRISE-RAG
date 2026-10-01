@@ -56,5 +56,10 @@ class Settings:
 
     APP_VERSION = os.getenv("APP_VERSION", "1.0.0")
 
+    SUPABASE_URL = os.getenv("SUPABASE_URL", "")
+    SUPABASE_PUBLISHABLE_KEY = os.getenv("SUPABASE_PUBLISHABLE_KEY", "")
+    SUPABASE_SERVICE_ROLE_KEY = os.getenv("SUPABASE_SERVICE_ROLE_KEY", "")
+    SUPABASE_DOCUMENTS_BUCKET = os.getenv("SUPABASE_DOCUMENTS_BUCKET", "documents")
+
 
 settings = Settings()
