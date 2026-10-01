@@ -32,6 +32,17 @@ def main() -> None:
             f"Expected at least 10 evaluation categories, found {len(categories)}."
         )
 
+    out_of_range = {
+        category: count
+        for category, count in categories.items()
+        if count < 5 or count > 10
+    }
+    if out_of_range:
+        raise SystemExit(
+            "Each category must contain 5–10 queries: "
+            + json.dumps(out_of_range, sort_keys=True)
+        )
+
     for item in queries:
         if not item.get("query"):
             raise SystemExit(f"{item['query_id']}: query is empty.")
