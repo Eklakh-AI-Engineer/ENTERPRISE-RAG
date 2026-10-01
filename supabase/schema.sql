@@ -443,7 +443,7 @@ using (
   exists (
     select 1
     from public.answers a
-    join public.messages m on m.id = answers.message_id
+    join public.messages m on m.id = a.message_id
     join public.conversations c on c.id = m.conversation_id
     where a.id = retrieval_runs.answer_id
       and c.user_id = (select auth.uid())
