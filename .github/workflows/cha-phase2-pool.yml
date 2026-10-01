@@ -18,6 +18,8 @@ jobs:
   build-pool:
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    env:
+      PYTHONPATH: .
     permissions:
       contents: write
 
