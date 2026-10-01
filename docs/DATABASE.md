@@ -1,6 +1,6 @@
 # Enterprise RAG — Production Data Model
 
-**Phase 3 design draft — not applied to Supabase**
+**Phase 3 reference schema — not applied to Supabase**
 
 This document defines the production persistence model that will replace the current local-only persistence while preserving the existing retrieval architecture.
 
@@ -15,7 +15,7 @@ This document defines the production persistence model that will replace the cur
 - RLS is enabled on exposed user-data tables.
 - Service-role access is restricted to trusted worker/admin operations.
 - The production lexical strategy remains per-tenant BM25, outside the Postgres schema.
-- pgvector uses the same embedding dimensionality and distance convention as the validated FAISS baseline.
+- pgvector uses the current FAISS baseline dimensionality and cosine distance as a provisional parity target; final production selection remains gated by the FAISS-vs-pgvector benchmark.
 
 ## 2. Entity model
 
@@ -81,7 +81,7 @@ This prevents identical content from being unnecessarily re-indexed while allowi
 
 Recommended uniqueness: `(document_id, chunk_id, chunker_version)`.
 
-The exact pgvector dimension must be pinned after the production embedding model is selected and measured against the existing FAISS baseline.
+The current repository baseline is `sentence-transformers/all-MiniLM-L6-v2` with 384 dimensions and normalized embeddings. The reference schema therefore uses `extensions.vector(384)` and cosine distance. This remains provisional until the production embedding model is explicitly frozen.
 
 ### ingestion_jobs
 
@@ -195,7 +195,13 @@ Lifecycle: upload → document row → ingestion job → READY.
 
 Deletion must be idempotent and must invalidate both dense and tenant-scoped BM25 representations.
 
-## 7. Deliberately not implemented yet
+## 7. Repository implementation status
+
+The reviewed reference DDL is stored in `supabase/schema.sql`. It includes the core entities, explicit authenticated-role grants, RLS policies, and an invoker-scoped pgvector similarity function. It is intentionally **not** a live migration because the connected Supabase account currently exposes only an unrelated project (`Tackboard`).
+
+The repository does not claim that pgvector parity, RLS isolation, or Storage behavior has been verified against a live Enterprise RAG database.
+
+## 8. Deliberately not implemented yet
 
 This is a schema/design artifact only. It does not create or modify a Supabase project, apply production DDL, choose a live embedding dimension, claim pgvector parity, implement RLS policies, implement Storage policies, or migrate local data.
 
