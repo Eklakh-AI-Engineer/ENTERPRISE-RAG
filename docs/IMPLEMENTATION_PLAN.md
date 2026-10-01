@@ -339,7 +339,8 @@ Replace local-only persistence/index assumptions with production-managed storage
 - [x] In-memory adapters added for tests without requiring a live database.
 - [x] Implemented the first Postgres/Supabase repository adapter boundary (`app/persistence/supabase.py`) with injected-client semantics; live-project wiring remains pending.
 - [x] Wire initial document/ingestion lifecycle logic through repository interfaces rather than direct database calls.
-- [ ] Wire the remaining query/conversation services through repository interfaces.
+- [x] Wire the remaining query/conversation services through repository interfaces.
+- [x] Added Supabase conversation/answer/citation/retrieval telemetry adapters.
 
 ## 3.4 pgvector
 
@@ -354,11 +355,13 @@ Replace local-only persistence/index assumptions with production-managed storage
 
 ## 3.5 Source storage
 
-- [ ] Configure Supabase Storage on the dedicated project.
-- [ ] Store uploaded PDFs.
-- [ ] Store document metadata/path.
-- [ ] Define file lifecycle/deletion behavior.
-- [ ] Add Storage RLS/policy tests.
+- [x] Defined a DocumentStorage abstraction and deterministic in-memory adapter.
+- [x] Added an injected Supabase Storage adapter boundary.
+- [x] Added tenant-scoped private Storage bucket/policy reference DDL.
+- [x] Added Storage contract tests.
+- [ ] Configure/apply Storage on the dedicated project.
+- [ ] Store uploaded PDFs through the live Storage adapter.
+- [ ] Define file lifecycle/deletion behavior on the live project.
 
 ## 3.6 BM25 strategy
 
@@ -515,6 +518,10 @@ Use the mechanism selected during Phase 1.
 - [x] Document submission is idempotent for identical tenant-scoped content/pipeline identity.
 - [x] Job ownership/tenant context is carried by the service contract.
 - [x] Added the atomic `claim_ingestion_job` database contract using row locking + `SKIP LOCKED`; live migration/application remains pending.
+- [x] Added the ingestion worker orchestration boundary.
+- [x] Worker execution starts only from an atomically claimed PROCESSING job.
+- [x] Added PDF → OCR → recursive chunk pipeline boundary.
+- [x] Added worker/storage/pipeline contract tests.
 - [ ] Implement the selected queue/worker process against the production database.
 - [ ] Ensure failed jobs cannot partially expose another tenant's data in integration/RLS tests.
 
@@ -578,10 +585,12 @@ Response
 
 ### Conversations
 
-- [ ] Conversations table.
-- [ ] Messages table.
-- [ ] Answers table.
-- [ ] Citation relationships.
+- [x] Conversations table.
+- [x] Messages table.
+- [x] Answers table.
+- [x] Citation relationships.
+- [x] Added conversation/message persistence service.
+- [x] Added answer/citation/retrieval-run persistence service.
 - [ ] Create chat.
 - [ ] Rename chat.
 - [ ] Delete chat.
