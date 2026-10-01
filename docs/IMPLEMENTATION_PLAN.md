@@ -405,7 +405,8 @@ Make the application safely multi-user.
 - [x] Added an authenticated-principal/token-verifier application boundary.
 - [x] Added a Supabase verified-claims adapter boundary.
 - [x] Added unit tests for missing/invalid/wrong-role tokens.
-- [ ] Wire the verifier to the dedicated Supabase project.
+- [x] Dedicated Enterprise RAG Supabase project created and migration applied.
+- [x] Wire the verifier to the dedicated Supabase project through the application integration boundary.
 - [ ] Supabase Auth.
 - [ ] Email/password.
 - [ ] Magic link.
@@ -416,7 +417,7 @@ Make the application safely multi-user.
 - [ ] User owns/has access to documents.
 - [ ] User owns conversations.
 - [ ] Retrieval is scoped to authorized documents.
-- [ ] API validates JWT.
+- [x] API validates JWT through the Supabase verified-claims boundary (`/auth/me`).
 - [ ] Server never trusts client-supplied ownership IDs.
 
 ### Row Level Security
