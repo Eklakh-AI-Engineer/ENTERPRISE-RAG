@@ -7,7 +7,7 @@ from app.indexing.pipeline import IndexingResult
 
 class FakePipeline:
     def run(self, **_kwargs):
-        return type("Artifact", (), {"chunks": [{"chunk_id": "c1"}]})()
+        return type("Artifact", (), {"pages": [], "chunks": [{"chunk_id": "c1"}]})()
 
 
 class FakeIndexer:
