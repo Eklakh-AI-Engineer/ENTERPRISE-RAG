@@ -72,43 +72,82 @@ def chunk_relevance(chunk: dict, judgments: list[dict]) -> float:
     return best
 
 
+def judgment_matches_chunk(chunk: dict, judgment: dict) -> bool:
+    if judgment.get("document_id") != normalize_document_id(chunk):
+        return False
+    if judgment.get("page") != chunk.get("page"):
+        return False
+
+    if span_overlap(
+        chunk.get("start_char"),
+        chunk.get("end_char"),
+        judgment.get("start_char"),
+        judgment.get("end_char"),
+    ):
+        return True
+
+    return bool(
+        judgment.get("chunk_id")
+        and judgment.get("chunk_id") == chunk.get("chunk_id")
+    )
+
+
 def evaluate_ranked(results: list[dict], judgments: list[dict]) -> dict:
-    ranked_ids = [
-        item.get("chunk_id")
-        for item in results
+    ranked = [
+        item for item in results
         if item.get("chunk_id")
     ]
 
-    relevance = {
-        item_id: chunk_relevance(item, judgments)
-        for item in results
-        if item.get("chunk_id")
-    }
+    ranked_ids = [item["chunk_id"] for item in ranked]
+    relevance = {}
 
-    relevant_ids = {
-        item_id
-        for item_id, score in relevance.items()
-        if score > 0
-    }
+    for item in ranked:
+        relevance[item["chunk_id"]] = max(
+            (
+                float(judgment.get("relevance", 0.0))
+                for judgment in judgments
+                if judgment_matches_chunk(item, judgment)
+            ),
+            default=0.0,
+        )
 
-    # The denominator for recall is the complete judged relevant set,
-    # not only the retrieved set.
-    all_relevant_ids = set()
-    for judgment in judgments:
-        chunk_id = judgment.get("chunk_id")
-        if chunk_id and float(judgment.get("relevance", 0.0)) > 0:
-            all_relevant_ids.add(chunk_id)
+    positive_judgments = [
+        judgment
+        for judgment in judgments
+        if float(judgment.get("relevance", 0.0)) > 0
+    ]
 
-    metrics = {
-        "recall_at_5": recall_at_k(ranked_ids, all_relevant_ids, 5),
-        "recall_at_10": recall_at_k(ranked_ids, all_relevant_ids, 10),
-        "mrr": reciprocal_rank(ranked_ids, all_relevant_ids),
+    covered = set()
+    for item in ranked[:10]:
+        for index, judgment in enumerate(positive_judgments):
+            if judgment_matches_chunk(item, judgment):
+                covered.add(index)
+
+    def recall_for_k(k: int) -> float:
+        if not positive_judgments:
+            return 0.0
+        covered_at_k = set()
+        for item in ranked[:k]:
+            for index, judgment in enumerate(positive_judgments):
+                if judgment_matches_chunk(item, judgment):
+                    covered_at_k.add(index)
+        return len(covered_at_k) / len(positive_judgments)
+
+    return {
+        "recall_at_5": recall_for_k(5),
+        "recall_at_10": recall_for_k(10),
+        "mrr": next(
+            (
+                1.0 / rank
+                for rank, item in enumerate(ranked, start=1)
+                if relevance.get(item["chunk_id"], 0.0) > 0
+            ),
+            0.0,
+        ),
         "ndcg_at_5": ndcg_at_k(ranked_ids, relevance, 5),
         "ndcg_at_10": ndcg_at_k(ranked_ids, relevance, 10),
-        "candidate_count": len(results),
+        "candidate_count": len(ranked),
     }
-
-    return metrics
 
 
 def main() -> None:
