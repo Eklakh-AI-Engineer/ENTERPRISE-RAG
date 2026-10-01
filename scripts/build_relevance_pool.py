@@ -56,8 +56,22 @@ def main() -> None:
     parser.add_argument("--candidate-k", type=int, default=10)
     args = parser.parse_args()
 
-    chunks = load_json(args.chunks)
-    queries = load_json(args.queries)
+    chunks_payload = load_json(args.chunks)
+    queries_payload = load_json(args.queries)
+
+    chunks = (
+        chunks_payload["chunks"]
+        if isinstance(chunks_payload, dict) and "chunks" in chunks_payload
+        else chunks_payload
+    )
+    queries = (
+        queries_payload["queries"]
+        if isinstance(queries_payload, dict) and "queries" in queries_payload
+        else queries_payload
+    )
+
+    if not isinstance(chunks, list) or not isinstance(queries, list):
+        raise TypeError("chunks and queries must resolve to lists.")
 
     dense = DenseRetriever()
     dense.build_index(chunks)
