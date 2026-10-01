@@ -81,3 +81,29 @@ def test_indexing_serialization_is_adapter_owned():
     document = DocumentRecord(id="d", organization_id="o", owner_user_id="u", filename="x.pdf", storage_path="x", content_hash="h", pipeline_version="v")
     repo.upsert_for_document(document=document, chunks=[{"chunk_id":"c","text":"x","page":1,"chunker_version":"v"}], embeddings=[[1.0,0.0,0.0]], embedding_model="test")
     assert client.query.rows[0]["embedding"] == "[1.0,0.0,0.0]"
+
+
+def test_supabase_search_requires_organization_scope():
+    from app.persistence.supabase_chunks import SupabaseChunkRepository
+
+    class Response:
+        data = []
+        error = None
+
+    class Query:
+        def __init__(self): self.args = None
+        def execute(self): return Response()
+
+    class Client:
+        def __init__(self): self.q = Query()
+        def rpc(self, name, args):
+            self.q.args = (name, args)
+            return self.q
+
+    client = Client()
+    repo = SupabaseChunkRepository(client, embedding_dimension=3)
+    result = repo.search_similar(organization_id="org-a", query_embedding=[1,0,0], top_k=5)
+    assert result == []
+    assert client.q.args[0] == "match_document_chunks"
+    assert client.q.args[1]["organization_id"] == "org-a"
+    assert client.q.args[1]["match_count"] == 5
