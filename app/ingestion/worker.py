@@ -6,6 +6,7 @@ from typing import Protocol
 from app.ingestion.pipeline import PdfIngestionPipeline
 from app.persistence.entities import DocumentRecord, IngestionJobRecord
 from app.persistence.repositories import DocumentRepository, WorkerJobRepository
+from app.indexing.pipeline import DocumentIndexingPipeline
 from app.services.ingestion import IngestionService
 from app.storage.base import DocumentStorage
 
@@ -35,14 +36,14 @@ class IngestionWorker:
         documents: DocumentRepository,
         storage: DocumentStorage,
         pipeline: PdfIngestionPipeline,
-        chunks: ChunkSink,
+        indexer: DocumentIndexingPipeline,
         config: WorkerConfig | None = None,
     ) -> None:
         self.jobs = jobs
         self.documents = documents
         self.storage = storage
         self.pipeline = pipeline
-        self.chunks = chunks
+        self.indexer = indexer
         self.config = config or WorkerConfig()
         self.lifecycle = IngestionService(jobs)
 
@@ -68,18 +69,30 @@ class IngestionWorker:
             )
 
         try:
+            document.status = "PROCESSING"
+            self.documents.save(document)
             content = self.storage.download(path=document.storage_path)
             artifact = self.pipeline.run(
                 content=content,
                 filename=document.filename,
                 document_id=document.id,
             )
-            self.chunks.persist(document=document, chunks=artifact.chunks)
+            document.page_count = len(artifact.pages)
+            document.status = "INDEXING"
+            self.documents.save(document)
+            self.indexer.run(document=document, chunk_records=artifact.chunks)
+            document.status = "READY"
+            self.documents.save(document)
             return self.lifecycle.complete(
                 job_id=job.id,
                 organization_id=job.organization_id,
             )
         except Exception as exc:
+            document.status = "FAILED"
+            try:
+                self.documents.save(document)
+            except Exception:
+                pass
             return self.lifecycle.fail(
                 job_id=job.id,
                 organization_id=job.organization_id,
