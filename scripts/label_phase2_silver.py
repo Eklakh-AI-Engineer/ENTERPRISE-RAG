@@ -83,8 +83,10 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--pool", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
-    parser.add_argument("--model", default=os.getenv("OPENROUTER_MODEL", "openrouter/free"))
-    parser.add_argument("--delay", type=float, default=0.5)
+    parser.add_argument("--model", default=os.getenv("OPENROUTER_MODEL", "qwen/qwen3.8-27b:free"))
+    parser.add_argument("--delay", type=float, default=1.0)
+    parser.add_argument("--retries", type=int, default=3)
+    parser.add_argument("--batch-size", type=int, default=8)
     args = parser.parse_args()
 
     api_key = os.getenv("OPENROUTER_API_KEY")
@@ -105,7 +107,24 @@ def main() -> None:
     for qi, query in enumerate(pool["queries"], start=1):
         if query["query_id"] in done:
             continue
-        judgments = call_model(api_key, args.model, query["query"], query["candidates"])
+        judgments = []
+        candidates = query["candidates"]
+        for start in range(0, len(candidates), args.batch_size):
+            batch = candidates[start:start + args.batch_size]
+            for attempt in range(args.retries + 1):
+                try:
+                    batch_judgments = call_model(api_key, args.model, query["query"], batch)
+                    judgments.extend([{**j, "candidate_index": j["candidate_index"] + start} for j in batch_judgments])
+                    break
+                except Exception as exc:
+                    if attempt >= args.retries:
+                        raise
+                    wait = min(30.0, 2.0 ** attempt)
+                    print(f"Retrying {query['query_id']} batch {start}:{start + len(batch)} after error: {exc}; waiting {wait:.1f}s")
+                    time.sleep(wait)
+            time.sleep(args.delay)
+        if len(judgments) != len(candidates):
+            raise ValueError(f"Expected {len(candidates)} total judgments, got {len(judgments)}")
         records = []
         for judgment in judgments:
             candidate = query["candidates"][judgment["candidate_index"]]
