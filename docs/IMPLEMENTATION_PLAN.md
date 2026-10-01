@@ -1,0 +1,877 @@
+# Enterprise RAG — End-to-End Implementation Plan
+
+> Living implementation plan for taking Enterprise RAG from the current retrieval-engineering baseline to a production-ready Vercel + Supabase product.
+
+**Last updated:** 2026-10-01  
+**Current phase:** Phase 0 complete → Phase 1 next  
+**Baseline commit:** `f91ecff3a1a2d430e83ba2fafa3b40d72b2f3a8f`  
+**Phase 0 freeze commit:** `298a8e5aa886793d56a18dc0426a8952c681f1d6`
+
+---
+
+## 1. Status Legend
+
+- [x] **COMPLETE** — implemented and verified enough to count as done.
+- [~] **PARTIAL / INCOMPLETE** — meaningful implementation exists, but required scope is not complete.
+- [ ] **PENDING** — not implemented yet.
+- **Gate** — work that must be completed before the next production stage.
+
+---
+
+# 2. Current State
+
+## Overall assessment
+
+The core RAG/retrieval engine is substantially implemented. The remaining work is concentrated in:
+
+1. reproducibility and repository hygiene,
+2. rigorous retrieval evaluation,
+3. production persistence,
+4. ingestion reliability,
+5. authentication and tenant isolation,
+6. production query/conversation architecture,
+7. deployment/security/observability,
+8. final product QA.
+
+The project should **not** be treated as production-ready yet.
+
+### Current maturity
+
+| Area | Status | State |
+|---|---|---|
+| Retrieval architecture | [x] | Core engine implemented |
+| Dense retrieval | [x] | SentenceTransformers + FAISS |
+| BM25 | [x] | Lexical retrieval implemented |
+| Hybrid retrieval | [x] | RRF-based fusion implemented |
+| Cross-encoder reranking | [x] | Implemented |
+| Citation mapping | [x] | Implemented |
+| Citation validation | [x] | Implemented |
+| Faithfulness verification | [x] | Implemented |
+| Pipeline metrics | [x] | Stage-level latency/quality metrics |
+| FastAPI API | [x] | Working development API |
+| React/Vite UI | [x] | Working inspection/demo UI |
+| Evaluation metrics | [~] | Recall/MRR infrastructure exists; nDCG/controlled benchmark incomplete |
+| Evaluation dataset | [ ] | Frozen 50–100 query benchmark still required |
+| Dense vs Hybrid experiment | [ ] | Not completed |
+| Failure analysis | [ ] | Not completed systematically |
+| Query rewriting | [ ] | Not implemented |
+| OCR fallback | [ ] | Not complete |
+| Semantic chunking | [ ] | Not implemented |
+| Token/cost accounting | [~] | Partial observability; systematic accounting required |
+| Reproducible dependencies | [ ] | `requirements.txt` currently incomplete/empty |
+| Production database | [ ] | Local indexes currently used |
+| Supabase/pgvector | [ ] | Not implemented |
+| Supabase Storage | [ ] | Not implemented |
+| Authentication | [ ] | Not implemented |
+| RLS / tenant isolation | [ ] | Not implemented |
+| Persistent conversations | [ ] | Not implemented |
+| Async ingestion | [ ] | Not implemented |
+| Production deployment | [ ] | Not implemented |
+| CI/CD | [ ] | Not implemented as production gate |
+| Production security | [ ] | Not complete |
+| Production browser QA | [ ] | Not complete |
+
+---
+
+# 3. Phase 0 — Baseline Freeze
+
+**Status: [x] COMPLETE**
+
+### Completed
+
+- [x] Identified the current working baseline.
+- [x] Preserved the existing retrieval/generation behavior.
+- [x] Documented the frozen pipeline.
+- [x] Documented implemented capabilities.
+- [x] Documented known limitations.
+- [x] Added `docs/PHASE_0_BASELINE.md`.
+- [x] Committed the freeze as `298a8e5aa886793d56a18dc0426a8952c681f1d6`.
+
+### Exit condition
+
+**Complete.**
+
+No Phase 0 functional work remains.
+
+---
+
+# 4. Phase 1 — Repository Cleanup + Reproducibility
+
+**Status: [ ] PENDING — NEXT**
+
+## Objective
+
+Make the existing system deterministic, installable, understandable, and safe to modify before production migration.
+
+### 1.1 Repository hygiene
+
+- [ ] Remove accidental root files:
+  - `0.19`
+  - `0.22.0`
+  - `0.23.0`
+  - `1.0.0`
+  - `1.11.0`
+  - `1.20.0`
+  - `4.0.0`
+  - `4.5.0`
+  - `sentence-transformers)`
+- [ ] Review root `package.json` / `package-lock.json` and remove accidental Node artifacts if they are not required.
+- [ ] Ensure generated caches, local environments, model caches, indexes, and secrets are ignored.
+- [ ] Review repository structure without breaking existing imports.
+
+### 1.2 Dependency reproducibility
+
+- [ ] Populate `requirements.txt` with actual backend dependencies.
+- [ ] Pin or constrain versions where reproducibility matters.
+- [ ] Separate runtime and development/test dependencies if useful.
+- [ ] Verify clean virtual-environment installation.
+- [ ] Verify frontend `npm install` + build from a clean checkout.
+- [ ] Add `.env.example`.
+- [ ] Confirm no real secrets are committed.
+
+### 1.3 Configuration
+
+- [ ] Centralize environment/configuration handling.
+- [ ] Remove machine-specific paths.
+- [ ] Remove assumptions about Windows/WSL/local model locations.
+- [ ] Make model names, retrieval parameters, API settings, and provider settings configurable.
+
+### 1.4 Documentation
+
+- [ ] Update README installation instructions.
+- [ ] Add `docs/ARCHITECTURE.md`.
+- [ ] Add `docs/EVALUATION.md`.
+- [ ] Add `docs/DEVELOPMENT.md`.
+- [ ] Document local backend/frontend startup.
+- [ ] Document test commands.
+- [ ] Document environment variables.
+
+### Phase 1 gate
+
+Before Phase 2:
+
+- [ ] Fresh clone installs successfully.
+- [ ] Backend starts.
+- [ ] Frontend starts/builds.
+- [ ] Existing test suite passes.
+- [ ] No secrets or accidental files remain.
+- [ ] Existing baseline behavior remains intact.
+
+---
+
+# 5. Phase 2 — Evaluation Completion + Retrieval Experiment
+
+**Status: [~] PARTIAL — CORE EVALUATION EXISTS, EXPERIMENTAL RIGOR INCOMPLETE**
+
+## Objective
+
+Convert the existing retrieval implementation into a defensible, measurable retrieval-engineering system.
+
+## 2.1 Freeze evaluation corpus
+
+- [ ] Select a fixed corpus.
+- [ ] Freeze document versions.
+- [ ] Freeze chunking configuration.
+- [ ] Generate stable chunk IDs.
+- [ ] Record corpus version/hash.
+- [ ] Record embedding model/version.
+- [ ] Record reranker model/version.
+
+## 2.2 Build labeled evaluation dataset
+
+Target: **50–100 queries**.
+
+Required query categories:
+
+- [ ] Exact identifiers
+- [ ] Acronym-heavy queries
+- [ ] Semantic paraphrases
+- [ ] Keyword-sensitive queries
+- [ ] Negation
+- [ ] Modifier-sensitive queries
+- [ ] Multi-intent queries
+- [ ] Cross-reference queries
+- [ ] Metadata-filtered queries
+- [ ] Page/section evidence queries
+
+Each evaluation item should contain:
+
+```json
+{
+  "query": "...",
+  "relevant_chunk_ids": ["..."],
+  "graded_relevance": {
+    "chunk-id": 3
+  },
+  "category": "..."
+}
+```
+
+## 2.3 Retrieval metrics
+
+- [ ] Recall@5
+- [ ] Recall@10
+- [ ] MRR
+- [ ] nDCG@5
+- [ ] nDCG@10
+- [ ] Retrieval latency
+- [ ] Candidate count
+- [ ] Reranking latency
+
+## 2.4 Dense baseline
+
+- [ ] Run dense retrieval alone.
+- [ ] Save results.
+- [ ] Save metrics.
+- [ ] Save configuration.
+- [ ] Produce reproducible benchmark artifact.
+
+## 2.5 Hybrid experiment
+
+- [ ] Run BM25 + dense + RRF.
+- [ ] Use identical corpus.
+- [ ] Use identical query set.
+- [ ] Use identical relevance judgments.
+- [ ] Keep reranking conditions controlled.
+- [ ] Measure quality and latency.
+
+## 2.6 Failure analysis
+
+For failed queries:
+
+- [ ] Identify retrieval failure.
+- [ ] Identify ranking failure.
+- [ ] Identify chunking failure.
+- [ ] Identify query-language failure.
+- [ ] Identify evidence/citation failure.
+- [ ] Identify generation failure.
+
+Produce a failure taxonomy and representative case studies.
+
+## 2.7 Evaluation integrity
+
+- [ ] Do not present development-run scores as benchmark results.
+- [ ] Record model versions.
+- [ ] Record random seeds where applicable.
+- [ ] Record configuration.
+- [ ] Store raw experiment results.
+- [ ] Separate retrieval quality from answer quality.
+- [ ] Separate citation validity from semantic support.
+- [ ] Document limitations of LLM-based faithfulness judging.
+
+### Phase 2 gate
+
+Required before production retrieval migration:
+
+- [ ] Frozen benchmark dataset.
+- [ ] Dense baseline.
+- [ ] Hybrid result.
+- [ ] nDCG.
+- [ ] Failure analysis.
+- [ ] Reproducible experiment artifacts.
+
+---
+
+# 6. Phase 3 — Production Data Layer: Supabase + pgvector
+
+**Status: [ ] PENDING**
+
+## Objective
+
+Replace local-only persistence/index assumptions with production-managed storage while preserving the retrieval architecture.
+
+## 3.1 Supabase project
+
+- [ ] Create production Supabase project.
+- [ ] Configure environment variables.
+- [ ] Enable required extensions/features.
+- [ ] Establish development/staging separation where practical.
+
+## 3.2 Database schema
+
+Initial entities:
+
+- [ ] `organizations`
+- [ ] `users` / profile mapping
+- [ ] `documents`
+- [ ] `document_chunks`
+- [ ] `queries`
+- [ ] `answers`
+- [ ] `citations`
+- [ ] `retrieval_runs`
+- [ ] `evaluation_runs`
+
+Document chunk fields should include:
+
+- [ ] document ID
+- [ ] stable chunk ID
+- [ ] content
+- [ ] page
+- [ ] section
+- [ ] document type
+- [ ] metadata
+- [ ] embedding
+- [ ] timestamps
+
+## 3.3 pgvector
+
+- [ ] Enable pgvector.
+- [ ] Store dense embeddings.
+- [ ] Implement similarity search.
+- [ ] Validate result parity against the local dense baseline.
+- [ ] Benchmark latency.
+
+## 3.4 Source storage
+
+- [ ] Configure Supabase Storage.
+- [ ] Store uploaded PDFs.
+- [ ] Store document metadata.
+- [ ] Define file lifecycle/deletion behavior.
+
+## 3.5 BM25 strategy
+
+Initially:
+
+- [ ] Keep BM25 as a separate lexical retrieval component.
+- [ ] Define how its corpus is built from production documents.
+- [ ] Define index refresh behavior.
+- [ ] Measure operational complexity.
+
+Do not prematurely replace BM25 with a different search engine unless measurements justify it.
+
+### Phase 3 gate
+
+- [ ] Upload → DB → chunk → embedding flow works.
+- [ ] pgvector retrieval matches expected baseline behavior.
+- [ ] Source PDFs persist correctly.
+- [ ] Data model supports multi-user isolation.
+- [ ] No production secrets are exposed.
+
+---
+
+# 7. Phase 4 — Authentication + Authorization + RLS
+
+**Status: [ ] PENDING**
+
+## Objective
+
+Make the application safely multi-user.
+
+### Authentication
+
+- [ ] Supabase Auth.
+- [ ] Email/password.
+- [ ] Magic link.
+- [ ] Add OAuth providers later if needed.
+
+### Authorization
+
+- [ ] User owns/has access to documents.
+- [ ] User owns conversations.
+- [ ] Retrieval is scoped to authorized documents.
+- [ ] API validates JWT.
+- [ ] Server never trusts client-supplied ownership IDs.
+
+### Row Level Security
+
+- [ ] Enable RLS.
+- [ ] Policies for documents.
+- [ ] Policies for chunks.
+- [ ] Policies for conversations/messages.
+- [ ] Policies for citations/answers.
+- [ ] Policies for organization/tenant membership.
+
+### Security test
+
+- [ ] User A cannot retrieve User B's documents.
+- [ ] User A cannot access User B's source PDFs.
+- [ ] User A cannot manipulate another user's conversation IDs.
+- [ ] Unauthorized API requests fail safely.
+
+### Phase 4 gate
+
+**RLS isolation must be tested before production user data is accepted.**
+
+---
+
+# 8. Phase 5 — Production Ingestion Pipeline
+
+**Status: [ ] PENDING**
+
+## Objective
+
+Create a reliable document ingestion lifecycle.
+
+## Flow
+
+```
+Upload PDF
+   ↓
+Storage
+   ↓
+Document record
+   ↓
+Processing job
+   ↓
+Text extraction
+   ↓
+OCR fallback
+   ↓
+Chunking
+   ↓
+Metadata
+   ↓
+Embeddings
+   ↓
+Dense index
+   ↓
+BM25 index
+   ↓
+READY
+```
+
+### Document states
+
+- [ ] UPLOADED
+- [ ] PROCESSING
+- [ ] INDEXING
+- [ ] READY
+- [ ] FAILED
+
+### Parsing
+
+- [x] Native PDF extraction exists.
+- [ ] OCR fallback.
+- [ ] Scanned-PDF detection.
+- [ ] Extraction error handling.
+- [ ] Large-document handling.
+
+### Chunking
+
+- [x] Recursive chunking exists.
+- [ ] Semantic chunking evaluation.
+- [ ] Stable deterministic chunk IDs.
+- [ ] Metadata preservation.
+- [ ] Chunking benchmark.
+
+### Async execution
+
+- [ ] Do not parse/embed large documents inside upload request.
+- [ ] Introduce background job execution.
+- [ ] Persist job status.
+- [ ] Retry failed jobs.
+- [ ] Make jobs idempotent.
+
+### Phase 5 gate
+
+A user can upload a document and reliably receive a **READY / FAILED** outcome without holding the HTTP request open for the entire indexing operation.
+
+---
+
+# 9. Phase 6 — Production Query + Conversation System
+
+**Status: [ ] PENDING**
+
+## Objective
+
+Convert the development query pipeline into a persistent authenticated product workflow.
+
+## Query flow
+
+```
+JWT
+ ↓
+Authorization
+ ↓
+Validate query
+ ↓
+Optional query rewriting
+ ↓
+Metadata filters
+ ↓
+Dense retrieval
+ ↓
+BM25 retrieval
+ ↓
+RRF fusion
+ ↓
+Cross-encoder reranking
+ ↓
+Context assembly
+ ↓
+LLM generation
+ ↓
+Citation mapping
+ ↓
+Citation verification
+ ↓
+Faithfulness verification
+ ↓
+Persist result
+ ↓
+Response
+```
+
+### Query rewriting
+
+- [ ] Implement as an explicit stage.
+- [ ] Keep original query.
+- [ ] Store rewritten query.
+- [ ] Evaluate whether rewriting improves retrieval.
+- [ ] Do not add it merely because it is fashionable.
+
+### Conversations
+
+- [ ] Conversations table.
+- [ ] Messages table.
+- [ ] Answers table.
+- [ ] Citation relationships.
+- [ ] Create chat.
+- [ ] Rename chat.
+- [ ] Delete chat.
+- [ ] Continue chat.
+- [ ] History.
+
+### Evidence-first response
+
+The UI/API should expose:
+
+- [ ] Answer.
+- [ ] Source IDs.
+- [ ] Document.
+- [ ] Page.
+- [ ] Chunk.
+- [ ] Retrieved passage.
+- [ ] Citation validity.
+- [ ] Faithfulness result.
+- [ ] Retrieval mode.
+- [ ] Pipeline timing.
+
+### Phase 6 gate
+
+Authenticated user can:
+
+**login → upload → wait for indexing → ask → receive grounded answer → inspect evidence → return to history.**
+
+---
+
+# 10. Phase 7 — Vercel Deployment + CI/CD + Security + Observability
+
+**Status: [ ] PENDING**
+
+## Objective
+
+Deploy the product safely and establish an operational baseline.
+
+## Vercel
+
+- [ ] Production project.
+- [ ] Frontend deployment.
+- [ ] Backend/API deployment strategy.
+- [ ] Environment variables.
+- [ ] Preview deployments.
+- [ ] Production deployment.
+
+### Critical architecture test
+
+The current system loads ML models at startup. Before putting the FastAPI inference path directly into Vercel Functions:
+
+- [ ] Measure bundle size.
+- [ ] Measure cold start.
+- [ ] Measure memory.
+- [ ] Measure execution duration.
+- [ ] Measure concurrent requests.
+- [ ] Measure model loading cost.
+
+If the workload is unsuitable:
+
+- [ ] Keep frontend/API on Vercel.
+- [ ] Move heavy inference/reranking to an appropriate long-running service.
+- [ ] Keep the architecture modular.
+
+## CI/CD
+
+- [ ] GitHub Actions.
+- [ ] Lint.
+- [ ] Unit tests.
+- [ ] Integration tests.
+- [ ] Frontend build.
+- [ ] API smoke test.
+- [ ] Evaluation smoke test.
+- [ ] Deployment gate.
+
+## Security
+
+- [ ] Strict CORS.
+- [ ] Input validation.
+- [ ] PDF type validation.
+- [ ] File-size limits.
+- [ ] Rate limiting.
+- [ ] Request-size limits.
+- [ ] Secret isolation.
+- [ ] Safe error responses.
+- [ ] No stack traces in production.
+- [ ] Safe logging.
+- [ ] Abuse protection.
+- [ ] RLS verification.
+
+Never expose provider keys through public frontend environment variables.
+
+## Observability
+
+Persist:
+
+- [ ] retrieval latency
+- [ ] reranking latency
+- [ ] generation latency
+- [ ] faithfulness latency
+- [ ] total latency
+- [ ] input/output tokens
+- [ ] estimated cost
+- [ ] retrieved count
+- [ ] reranked count
+- [ ] citation validity
+- [ ] faithfulness result
+- [ ] errors
+
+### Phase 7 gate
+
+Production deployment must pass automated health, API, auth, RLS, and browser smoke tests.
+
+---
+
+# 11. Phase 8 — Product UX + QA + Release
+
+**Status: [ ] PENDING**
+
+## UX
+
+- [ ] Responsive layout.
+- [ ] Authentication screens.
+- [ ] Document management.
+- [ ] Upload progress.
+- [ ] Indexing state.
+- [ ] Chat interface.
+- [ ] Source/evidence panel.
+- [ ] Conversation history.
+- [ ] Empty states.
+- [ ] Loading states.
+- [ ] Error states.
+- [ ] Retry behavior.
+- [ ] Copy answer.
+- [ ] Copy citation/source.
+- [ ] Source document preview.
+- [ ] Settings/logout.
+
+## Testing
+
+### Backend
+
+- [ ] Parser tests.
+- [ ] OCR tests.
+- [ ] Chunking tests.
+- [ ] Dense retrieval tests.
+- [ ] BM25 tests.
+- [ ] Hybrid tests.
+- [ ] Reranker tests.
+- [ ] Citation tests.
+- [ ] Faithfulness tests.
+- [ ] API tests.
+- [ ] Auth tests.
+- [ ] RLS tests.
+- [ ] Storage tests.
+- [ ] Database integration tests.
+
+### Frontend
+
+- [ ] Production build.
+- [ ] Authentication flow.
+- [ ] Upload flow.
+- [ ] Query flow.
+- [ ] Citation inspection.
+- [ ] Conversation history.
+- [ ] Error handling.
+
+### End-to-end browser smoke
+
+```
+Sign up
+  ↓
+Login
+  ↓
+Upload document
+  ↓
+Wait for READY
+  ↓
+Ask question
+  ↓
+Read answer
+  ↓
+Open citation
+  ↓
+Inspect evidence
+  ↓
+Open history
+  ↓
+Logout
+```
+
+## Release documentation
+
+- [ ] README
+- [ ] ARCHITECTURE
+- [ ] DATABASE
+- [ ] API
+- [ ] EVALUATION
+- [ ] DEPLOYMENT
+- [ ] SECURITY
+- [ ] CHANGELOG
+
+### Final release gate
+
+All critical paths must pass:
+
+```
+Engine ✓
+Evaluation ✓
+Persistence ✓
+Auth ✓
+RLS ✓
+Ingestion ✓
+Query ✓
+Citations ✓
+Faithfulness ✓
+Deployment ✓
+Security ✓
+Browser QA ✓
+Documentation ✓
+```
+
+---
+
+# 12. Cross-Phase Technical Decisions
+
+## Do not do yet
+
+- [ ] Do not redesign the retrieval architecture without benchmark evidence.
+- [ ] Do not remove BM25 without measuring its contribution.
+- [ ] Do not add query rewriting without evaluating it.
+- [ ] Do not claim hybrid retrieval is superior before the controlled experiment.
+- [ ] Do not claim production readiness before deployment/resource testing.
+- [ ] Do not move heavy ML inference to Vercel blindly.
+- [ ] Do not expose local development scores as benchmark results.
+
+## Preserve
+
+- [x] Modular retrieval components.
+- [x] Explicit retrieval stages.
+- [x] Citation traceability.
+- [x] Faithfulness evaluation.
+- [x] Pipeline observability.
+- [x] Evidence-first product positioning.
+
+---
+
+# 13. Exact Execution Order From Here
+
+### NOW — Phase 1
+
+1. Clean accidental repository files.
+2. Fix `requirements.txt`.
+3. Add `.env.example`.
+4. Standardize configuration.
+5. Verify clean installation.
+6. Run the complete existing test suite.
+7. Verify backend startup.
+8. Verify frontend build.
+9. Update development/reproducibility documentation.
+10. Commit Phase 1.
+
+### THEN — Phase 2
+
+11. Freeze evaluation corpus.
+12. Build 50–100 labeled queries.
+13. Add/verify nDCG.
+14. Run Dense baseline.
+15. Run Hybrid baseline.
+16. Compare quality + latency.
+17. Analyze failures.
+18. Commit benchmark artifacts/results.
+
+### THEN — Phase 3
+
+19. Design Supabase schema.
+20. Enable pgvector.
+21. Implement document/chunk persistence.
+22. Implement vector retrieval.
+23. Add Storage.
+24. Verify retrieval parity.
+
+### THEN — Phase 4
+
+25. Add Supabase Auth.
+26. Add JWT validation.
+27. Add RLS.
+28. Test cross-user isolation.
+
+### THEN — Phase 5
+
+29. Build production upload flow.
+30. Add async ingestion.
+31. Add OCR fallback.
+32. Build indexing lifecycle.
+33. Add retries/idempotency.
+
+### THEN — Phase 6
+
+34. Productionize query endpoint.
+35. Add optional/evaluated query rewriting.
+36. Persist conversations.
+37. Build evidence-first chat UX.
+
+### THEN — Phase 7
+
+38. Benchmark Vercel architecture.
+39. Deploy frontend.
+40. Deploy API if resource tests pass.
+41. Otherwise separate heavy inference.
+42. Add CI/CD.
+43. Add production security.
+44. Add operational observability.
+
+### FINALLY — Phase 8
+
+45. Complete UX.
+46. Run backend tests.
+47. Run frontend tests/build.
+48. Run browser end-to-end smoke.
+49. Complete production documentation.
+50. Release.
+
+---
+
+# 14. Definition of Done
+
+Enterprise RAG is considered **production-ready** only when:
+
+- [ ] Retrieval quality is measured on a frozen labeled dataset.
+- [ ] Dense and Hybrid retrieval have been fairly evaluated.
+- [ ] Failure modes are documented.
+- [ ] Dependencies are reproducible.
+- [ ] Documents persist in Supabase.
+- [ ] Dense retrieval works through pgvector.
+- [ ] BM25 remains operational and measurable.
+- [ ] Users authenticate.
+- [ ] RLS prevents cross-user data access.
+- [ ] Upload/indexing is asynchronous and reliable.
+- [ ] Query results and conversations persist.
+- [ ] Citations resolve to real evidence.
+- [ ] Faithfulness verification is operational.
+- [ ] Token/cost/latency telemetry is available.
+- [ ] Vercel deployment has passed resource tests.
+- [ ] CI/CD gates changes.
+- [ ] Security controls are tested.
+- [ ] Browser end-to-end flow passes.
+- [ ] Production documentation is complete.
+
+**Current position: Phase 0 complete. Phase 1 is the next active implementation target.**
