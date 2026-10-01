@@ -105,3 +105,38 @@ Report:
 - bootstrap confidence intervals
 
 Do not claim Hybrid is better until this experiment is complete.
+
+
+## Phase 2 execution commands
+
+Validate the final benchmark before running the experiment:
+
+    python scripts/validate_phase2_benchmark.py data/evaluation/phase2_benchmark.json
+
+Build the unbiased annotation pool from the frozen corpus:
+
+    python scripts/build_relevance_pool.py \
+      --queries data/evaluation/phase2_queries.json
+
+Run the controlled Dense-vs-Hybrid experiment:
+
+    python scripts/run_dense_vs_hybrid.py \
+      --benchmark data/evaluation/phase2_benchmark.json
+
+The experiment intentionally fails when fewer than 50 or more than 100 labeled
+queries are supplied. This prevents a development sample from being reported
+as the Phase 2 benchmark.
+
+## Faithfulness judge validation
+
+Record a human-labeled subset using:
+
+    data/evaluation/faithfulness_human_subset.example.json
+
+Then compare the judge against human labels:
+
+    python scripts/evaluate_faithfulness_judge.py \
+      --labels data/evaluation/faithfulness_human_subset.json
+
+The resulting accuracy, precision, recall, and F1 describe agreement with the
+human subset; they do not turn the judge into ground truth.
