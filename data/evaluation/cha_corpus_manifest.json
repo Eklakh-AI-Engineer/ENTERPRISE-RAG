@@ -1,13 +1,13 @@
 {
   "corpus_id": "CHA-POLICY-CORPUS-V1",
-  "corpus_version": "v1.0",
+  "corpus_version": "v1.1",
   "description": "Four Chicago Housing Authority policy documents supplied for the Phase 2 retrieval benchmark.",
-  "corpus_hash": "29eaab9ba87abe6fcc31100fede864e9a3cdef32ab2e9f9c9adcb06e90192870",
+  "corpus_hash": "c85eaf4bd9a958f1864f4c030be5ea04f69faf20a3c011cf50239b67cf1fccc0",
   "documents": [
     {
       "document_id": "CHA Business Expense Reimbursement & Travel Policy",
       "filename": "CHA Business Expense Reimbursement & Travel Policy.pdf",
-      "sha256": "08c11fda8698fc121f45922cd5334bb749e70a8c04a43dfdfe57a74487ef1649",
+      "sha256": "6dc43acdd25718a3bd331c8d20e245746b66883d5f0bffcc0becd3d866be0936",
       "pages": 6,
       "native_text_chars": 0,
       "extraction": "OCR required; Tesseract fallback",
@@ -16,7 +16,7 @@
     {
       "document_id": "CHA Employee Handbook 2025",
       "filename": "CHA Employee Handbook 2025.pdf",
-      "sha256": "4516291ff3259d3ffce60bdb3ed17fb6ea2363aad159f9d1d5ab8a1488cf16bd",
+      "sha256": "3144831b2b2aed0cf2bb0cda2ca2187dab75bc6572bd5ef224febfdef4ecf9e8",
       "pages": 35,
       "native_text_chars": 106317,
       "extraction": "Native PDF text",
@@ -25,7 +25,7 @@
     {
       "document_id": "CHA Information Security Policy",
       "filename": "CHA Information Security Policy.pdf",
-      "sha256": "d4cf9ed7702524daefe04bb9869a8c67afe9998c99ab9bd95c40dc21130d3375",
+      "sha256": "181fe5c4feaf88d41160b1b4a8845f4d590732fce69396213dde040ff7b90eca",
       "pages": 8,
       "native_text_chars": 0,
       "extraction": "OCR required; Tesseract fallback",
@@ -34,12 +34,14 @@
     {
       "document_id": "CHA Procurement Policy",
       "filename": "CHA Procurement Policy.pdf",
-      "sha256": "501acd5b098d8ef35ccbbee4f5cec766c5709ac6dc57b0513983371ee600d84b",
+      "sha256": "8cab9330616c0c1fc7d6c0905124d0733a4ba628e58f21fa3c42d0ffdb186723",
       "pages": 5,
       "native_text_chars": 0,
       "extraction": "OCR required; Tesseract fallback",
       "source_url": "https://www.thecha.org/sites/default/files/2024-09/2022ProcurementPolicy_11.22_BoardApprovedPolicies.pdf"
     }
   ],
-  "hash_definition": "SHA-256 of the newline-delimited, lexicographically ordered document SHA-256 values."
+  "hash_definition": "SHA-256 of the newline-delimited, lexicographically ordered document SHA-256 values.",
+  "snapshot_date": "2026-10-01",
+  "snapshot_note": "Frozen against the byte-exact PDFs served by the recorded official CHA URLs on 2026-10-01. The four user-uploaded PDF byte hashes differed from the current official URL copies, so the benchmark uses this reproducible official-source snapshot."
 }
