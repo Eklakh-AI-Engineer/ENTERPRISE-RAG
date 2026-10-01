@@ -394,7 +394,7 @@ Do not assume that a global BM25 index plus post-filtering is safe for multi-ten
 
 # 7. Phase 4 — Authentication + Authorization + RLS
 
-**Status: [ ] PENDING**
+**Status: [~] AUTHENTICATION CONTRACT PREPARED; LIVE PROJECT WIRING PENDING**
 
 ## Objective
 
@@ -402,6 +402,10 @@ Make the application safely multi-user.
 
 ### Authentication
 
+- [x] Added an authenticated-principal/token-verifier application boundary.
+- [x] Added a Supabase verified-claims adapter boundary.
+- [x] Added unit tests for missing/invalid/wrong-role tokens.
+- [ ] Wire the verifier to the dedicated Supabase project.
 - [ ] Supabase Auth.
 - [ ] Email/password.
 - [ ] Magic link.
