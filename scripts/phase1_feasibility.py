@@ -21,7 +21,30 @@ def tree_size(path: Path) -> int:
         return 0
     if path.is_file():
         return path.stat().st_size
-    return sum(p.stat().st_size for p in path.rglob("*") if p.is_file())
+
+    ignored = {".git", ".venv", "venv", "node_modules", "__pycache__"}
+    total = 0
+
+    for child in path.rglob("*"):
+        if any(part in ignored for part in child.parts):
+            continue
+        if child.is_file():
+            total += child.stat().st_size
+
+    return total
+
+
+def peak_rss_mb() -> float | None:
+    status = Path("/proc/self/status")
+    if not status.exists():
+        return None
+
+    for line in status.read_text(encoding="utf-8").splitlines():
+        if line.startswith("VmHWM:"):
+            kb = float(line.split()[1])
+            return round(kb / 1024, 2)
+
+    return None
 
 
 def distribution_size(name: str) -> int | None:
@@ -40,7 +63,9 @@ def distribution_size(name: str) -> int | None:
 
 
 def model_benchmark(concurrency: int) -> dict:
+    import_start = time.perf_counter()
     from sentence_transformers import CrossEncoder, SentenceTransformer
+    library_import_ms = (time.perf_counter() - import_start) * 1000
 
     dense_name = os.getenv(
         "DENSE_MODEL",
@@ -54,6 +79,7 @@ def model_benchmark(concurrency: int) -> dict:
     result = {
         "dense_model": dense_name,
         "reranker_model": reranker_name,
+        "library_import_ms": round(library_import_ms, 2),
     }
 
     start = time.perf_counter()
@@ -107,6 +133,7 @@ def model_benchmark(concurrency: int) -> dict:
     result["concurrent_request_ms"] = [
         round(value, 2) for value in durations
     ]
+    result["peak_rss_mb"] = peak_rss_mb()
 
     return result
 
@@ -122,7 +149,8 @@ def main() -> None:
         "python": sys.version,
         "platform": platform.platform(),
         "cpu_count": os.cpu_count(),
-        "repository_source_bytes": tree_size(ROOT),
+        "deployable_source_bytes": tree_size(ROOT),
+        "peak_rss_mb_before_models": peak_rss_mb(),
         "environment": os.getenv("ENVIRONMENT", "development"),
         "packages": {
             name: distribution_size(name)
