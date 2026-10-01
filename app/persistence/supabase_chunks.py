@@ -13,7 +13,7 @@ class SupabaseChunkRepository(ChunkRepository):
         self.client = client
         self.embedding_dimension = embedding_dimension
 
-    def replace_for_document(
+    def upsert_for_document(
         self,
         *,
         document: DocumentRecord,
