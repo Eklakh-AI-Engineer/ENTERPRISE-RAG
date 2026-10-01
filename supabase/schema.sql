@@ -560,7 +560,8 @@ grant execute on function public.claim_ingestion_job(uuid, integer) to service_r
 -- caller. No SECURITY DEFINER is used here.
 create or replace function public.match_document_chunks(
   query_embedding extensions.vector(384),
-  match_count integer default 10
+  match_count integer default 10,
+  p_organization_id uuid default null
 )
 returns table (
   id uuid,
@@ -589,11 +590,16 @@ as $$
     dc.end_char,
     1 - (dc.embedding <=> query_embedding) as similarity
   from public.document_chunks dc
+  join public.documents d on d.id = dc.document_id
   where dc.embedding is not null
+    and (
+      p_organization_id is null
+      or d.organization_id = p_organization_id
+    )
   order by dc.embedding <=> query_embedding asc
   limit least(greatest(coalesce(match_count, 10), 1), 200);
 $$;
 
-revoke execute on function public.match_document_chunks(extensions.vector(384), integer) from public;
+revoke execute on function public.match_document_chunks(extensions.vector(384), integer, uuid) from public;
 revoke execute on function public.match_document_chunks(extensions.vector(384), integer) from anon;
 grant execute on function public.match_document_chunks(extensions.vector(384), integer) to authenticated;
