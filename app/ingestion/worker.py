@@ -5,7 +5,7 @@ from typing import Protocol
 
 from app.ingestion.pipeline import PdfIngestionPipeline
 from app.persistence.entities import DocumentRecord, IngestionJobRecord
-from app.persistence.repositories import DocumentRepository, IngestionJobRepository
+from app.persistence.repositories import DocumentRepository, WorkerJobRepository
 from app.services.ingestion import IngestionService
 from app.storage.base import DocumentStorage
 
@@ -31,7 +31,7 @@ class IngestionWorker:
     def __init__(
         self,
         *,
-        jobs: IngestionJobRepository,
+        jobs: WorkerJobRepository,
         documents: DocumentRepository,
         storage: DocumentStorage,
         pipeline: PdfIngestionPipeline,
@@ -45,6 +45,16 @@ class IngestionWorker:
         self.chunks = chunks
         self.config = config or WorkerConfig()
         self.lifecycle = IngestionService(jobs)
+
+    def run_once(self, *, organization_id: str) -> IngestionJobRecord | None:
+        """Atomically claim the oldest eligible job and process it."""
+        job = self.jobs.claim_atomic(
+            organization_id=organization_id,
+            lease_seconds=self.config.lease_seconds,
+        )
+        if job is None:
+            return None
+        return self.process_claimed(job)
 
     def process_claimed(self, job: IngestionJobRecord) -> IngestionJobRecord:
         if job.status != IngestionService.ACTIVE:
