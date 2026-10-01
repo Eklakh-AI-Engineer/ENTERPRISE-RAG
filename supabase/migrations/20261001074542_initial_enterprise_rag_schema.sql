@@ -601,3 +601,31 @@ $$;
 revoke execute on function public.match_document_chunks(extensions.vector(384), integer) from public;
 revoke execute on function public.match_document_chunks(extensions.vector(384), integer) from anon;
 grant execute on function public.match_document_chunks(extensions.vector(384), integer) to authenticated;
+
+
+-- Migration follow-up: tenant-scoped vector search.
+create or replace function public.match_document_chunks(
+  query_embedding extensions.vector(384),
+  match_count integer default 10,
+  p_organization_id uuid default null
+)
+returns table (
+  id uuid, document_id uuid, chunk_id text, content text, page integer,
+  section text, start_char integer, end_char integer, similarity double precision
+)
+language sql stable security invoker
+set search_path = public, extensions
+as $$
+  select dc.id, dc.document_id, dc.chunk_id, dc.content, dc.page, dc.section,
+         dc.start_char, dc.end_char,
+         1 - (dc.embedding <=> query_embedding) as similarity
+  from public.document_chunks dc
+  join public.documents d on d.id = dc.document_id
+  where dc.embedding is not null
+    and (p_organization_id is null or d.organization_id = p_organization_id)
+  order by dc.embedding <=> query_embedding asc
+  limit least(greatest(coalesce(match_count, 10), 1), 200);
+$$;
+revoke execute on function public.match_document_chunks(extensions.vector(384), integer, uuid) from public;
+revoke execute on function public.match_document_chunks(extensions.vector(384), integer, uuid) from anon;
+grant execute on function public.match_document_chunks(extensions.vector(384), integer, uuid) to authenticated;
