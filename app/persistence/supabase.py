@@ -250,3 +250,180 @@ def _job_payload(job: IngestionJobRecord) -> dict[str, Any]:
         "created_at": job.created_at.isoformat(),
         "updated_at": job.updated_at.isoformat(),
     }
+
+
+from app.persistence.entities import AnswerRecord, CitationRecord, ConversationRecord, MessageRecord, RetrievalRunRecord
+
+
+class SupabaseConversationRepository:
+    """RLS-aware persistence adapter for authenticated conversations."""
+
+    def __init__(self, client: Any) -> None:
+        self.client = client
+
+    def get(self, conversation_id: str, user_id: str) -> ConversationRecord | None:
+        response = (
+            self.client.table("conversations")
+            .select("*")
+            .eq("id", conversation_id)
+            .eq("user_id", user_id)
+            .maybe_single()
+            .execute()
+        )
+        _raise_on_error(response)
+        row = _one(response)
+        return _conversation(row) if row else None
+
+    def save(self, conversation: ConversationRecord) -> ConversationRecord:
+        response = (
+            self.client.table("conversations")
+            .upsert(_conversation_payload(conversation), on_conflict="id")
+            .select("*")
+            .single()
+            .execute()
+        )
+        _raise_on_error(response)
+        return _conversation(_require_one(response))
+
+    def add_message(self, message: MessageRecord) -> MessageRecord:
+        response = (
+            self.client.table("messages")
+            .insert(_message_payload(message))
+            .select("*")
+            .single()
+            .execute()
+        )
+        _raise_on_error(response)
+        return _message(_require_one(response))
+
+
+class SupabaseAnswerRepository:
+    """RLS-aware persistence adapter for answers, citations, and telemetry."""
+
+    def __init__(self, client: Any) -> None:
+        self.client = client
+
+    def save_answer(self, answer: AnswerRecord) -> AnswerRecord:
+        response = (
+            self.client.table("answers")
+            .insert(_answer_payload(answer))
+            .select("*")
+            .single()
+            .execute()
+        )
+        _raise_on_error(response)
+        return _answer(_require_one(response))
+
+    def save_citation(self, citation: CitationRecord) -> CitationRecord:
+        response = (
+            self.client.table("citations")
+            .insert(_citation_payload(citation))
+            .select("*")
+            .single()
+            .execute()
+        )
+        _raise_on_error(response)
+        return _citation(_require_one(response))
+
+    def save_retrieval_run(self, run: RetrievalRunRecord) -> RetrievalRunRecord:
+        response = (
+            self.client.table("retrieval_runs")
+            .insert(_retrieval_run_payload(run))
+            .select("*")
+            .single()
+            .execute()
+        )
+        _raise_on_error(response)
+        return _retrieval_run(_require_one(response))
+
+
+def _conversation(row: dict[str, Any]) -> ConversationRecord:
+    return ConversationRecord(
+        id=row["id"], organization_id=row["organization_id"], user_id=row["user_id"],
+        title=row.get("title"),
+        created_at=_parse_dt(row.get("created_at")) or ConversationRecord.__dataclass_fields__["created_at"].default_factory(),
+        updated_at=_parse_dt(row.get("updated_at")) or ConversationRecord.__dataclass_fields__["updated_at"].default_factory(),
+    )
+
+
+def _message(row: dict[str, Any]) -> MessageRecord:
+    return MessageRecord(
+        id=row["id"], conversation_id=row["conversation_id"], user_id=row["user_id"],
+        role=row["role"], content=row["content"],
+        created_at=_parse_dt(row.get("created_at")) or MessageRecord.__dataclass_fields__["created_at"].default_factory(),
+    )
+
+
+def _answer(row: dict[str, Any]) -> AnswerRecord:
+    return AnswerRecord(
+        id=row["id"], message_id=row["message_id"], query_text=row["query_text"],
+        answer_text=row["answer_text"], retrieval_mode=row["retrieval_mode"],
+        rewritten_query=row.get("rewritten_query"), faithfulness_status=row.get("faithfulness_status"),
+        created_at=_parse_dt(row.get("created_at")) or AnswerRecord.__dataclass_fields__["created_at"].default_factory(),
+    )
+
+
+def _citation(row: dict[str, Any]) -> CitationRecord:
+    return CitationRecord(
+        id=row["id"], answer_id=row["answer_id"], document_chunk_id=row["document_chunk_id"],
+        citation_label=row["citation_label"], valid=row.get("valid", False),
+        created_at=_parse_dt(row.get("created_at")) or CitationRecord.__dataclass_fields__["created_at"].default_factory(),
+    )
+
+
+def _retrieval_run(row: dict[str, Any]) -> RetrievalRunRecord:
+    return RetrievalRunRecord(
+        id=row["id"], answer_id=row["answer_id"], organization_id=row["organization_id"],
+        query_text=row["query_text"], retrieval_mode=row["retrieval_mode"],
+        dense_count=row.get("dense_count", 0), bm25_count=row.get("bm25_count", 0),
+        fused_count=row.get("fused_count", 0), reranked_count=row.get("reranked_count", 0),
+        retrieval_latency_ms=row.get("retrieval_latency_ms"), rerank_latency_ms=row.get("rerank_latency_ms"),
+        generation_latency_ms=row.get("generation_latency_ms"), verification_latency_ms=row.get("verification_latency_ms"),
+        total_latency_ms=row.get("total_latency_ms"), input_tokens=row.get("input_tokens"),
+        output_tokens=row.get("output_tokens"), estimated_cost=row.get("estimated_cost"),
+        created_at=_parse_dt(row.get("created_at")) or RetrievalRunRecord.__dataclass_fields__["created_at"].default_factory(),
+    )
+
+
+def _conversation_payload(item: ConversationRecord) -> dict[str, Any]:
+    return {
+        "id": item.id, "organization_id": item.organization_id, "user_id": item.user_id,
+        "title": item.title, "created_at": item.created_at.isoformat(), "updated_at": item.updated_at.isoformat(),
+    }
+
+
+def _message_payload(item: MessageRecord) -> dict[str, Any]:
+    return {
+        "id": item.id, "conversation_id": item.conversation_id, "user_id": item.user_id,
+        "role": item.role, "content": item.content, "created_at": item.created_at.isoformat(),
+    }
+
+
+def _answer_payload(item: AnswerRecord) -> dict[str, Any]:
+    return {
+        "id": item.id, "message_id": item.message_id, "query_text": item.query_text,
+        "answer_text": item.answer_text, "retrieval_mode": item.retrieval_mode,
+        "rewritten_query": item.rewritten_query, "faithfulness_status": item.faithfulness_status,
+        "created_at": item.created_at.isoformat(),
+    }
+
+
+def _citation_payload(item: CitationRecord) -> dict[str, Any]:
+    return {
+        "id": item.id, "answer_id": item.answer_id, "document_chunk_id": item.document_chunk_id,
+        "citation_label": item.citation_label, "valid": item.valid, "created_at": item.created_at.isoformat(),
+    }
+
+
+def _retrieval_run_payload(item: RetrievalRunRecord) -> dict[str, Any]:
+    return {
+        "id": item.id, "answer_id": item.answer_id, "organization_id": item.organization_id,
+        "query_text": item.query_text, "retrieval_mode": item.retrieval_mode,
+        "dense_count": item.dense_count, "bm25_count": item.bm25_count,
+        "fused_count": item.fused_count, "reranked_count": item.reranked_count,
+        "retrieval_latency_ms": item.retrieval_latency_ms, "rerank_latency_ms": item.rerank_latency_ms,
+        "generation_latency_ms": item.generation_latency_ms, "verification_latency_ms": item.verification_latency_ms,
+        "total_latency_ms": item.total_latency_ms, "input_tokens": item.input_tokens,
+        "output_tokens": item.output_tokens, "estimated_cost": item.estimated_cost,
+        "created_at": item.created_at.isoformat(),
+    }
