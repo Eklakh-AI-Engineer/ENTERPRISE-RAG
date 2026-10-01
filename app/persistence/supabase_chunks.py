@@ -38,7 +38,10 @@ class SupabaseChunkRepository(ChunkRepository):
                 "chunker_version": chunk["chunker_version"],
                 "embedding_model": embedding_model,
                 "embedding_dimension": self.embedding_dimension,
-                "embedding": embedding,
+                # PostgREST accepts pgvector values as vector literals. Keeping
+                # serialization here avoids coupling the indexing pipeline to
+                # a specific Supabase Python SDK version.
+                "embedding": "[" + ",".join(str(float(value)) for value in embedding) + "]",
                 "metadata": {
                     "source": chunk.get("source"),
                     "doc_type": chunk.get("doc_type"),
