@@ -344,8 +344,8 @@ enterprise-rag/
 ### 1. Clone
 
 ```bash
-git clone https://github.com/eklakhdewan/-ENTERPRISE-RAG.git
-cd -ENTERPRISE-RAG
+git clone https://github.com/Eklakh-AI-Engineer/ENTERPRISE-RAG.git
+cd ENTERPRISE-RAG
 ```
 
 ### 2. Create virtual environment
@@ -477,6 +477,29 @@ The core retrieval mechanics remain visible and modular.
 Latency and quality trade-offs should be measured before changing retrieval parameters or models.
 
 ---
+
+## Phase 1 Engineering Baseline
+
+Phase 1 hardens the repository without changing the retrieval pipeline:
+
+- reproducible Python runtime dependencies
+- Dockerized backend
+- environment-driven configuration
+- dependency-light backend smoke tests
+- GitHub Actions CI for backend and frontend
+- configurable frontend API endpoint
+- Vercel/inference feasibility benchmark
+- explicit production architecture decisions for async ingestion, tenant-safe BM25, and Supabase RLS
+
+Architecture decisions and operational notes:
+
+- docs/ARCHITECTURE.md
+- docs/DEPLOYMENT.md
+- docs/DEVELOPMENT.md
+- docs/EVALUATION.md
+- docs/SECURITY.md
+
+The quantitative inference benchmark must be executed on the target runtime before production deployment. Phase 1 does not claim Vercel compatibility from local measurements alone.
 
 ## Development Status
 
@@ -615,7 +638,7 @@ The central idea:
 **Eklakh Dewan**  
 B.Tech — Artificial Intelligence & Data Science
 
-GitHub: https://github.com/eklakhdewan/-ENTERPRISE-RAG
+GitHub: https://github.com/Eklakh-AI-Engineer/ENTERPRISE-RAG
 
 ---
 
