@@ -29,7 +29,7 @@ class DocumentIndexingPipeline:
         vectors: np.ndarray = self.embeddings.encode(texts)
         if len(vectors) != len(chunk_records):
             raise ValueError("embedding count does not match chunk count")
-        self.chunks.replace_for_document(
+        self.chunks.upsert_for_document(
             document=document,
             chunks=chunk_records,
             embeddings=vectors.tolist(),
