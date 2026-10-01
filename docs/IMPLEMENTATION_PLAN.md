@@ -327,8 +327,18 @@ Replace local-only persistence/index assumptions with production-managed storage
 - [ ] Generate the real migration filename with the installed Supabase CLI once the target project is selected.
 - [ ] Apply migration to the dedicated project.
 - [ ] Verify schema against the live database.
+- [x] Added application persistence entities and repository interfaces decoupled from Supabase/Postgres.
+- [x] Added in-memory repository adapters for deterministic unit tests and local boundary validation.
 
-## 3.3 pgvector
+## 3.3 Application persistence boundary
+
+- [x] Domain persistence records defined in `app/persistence/entities.py`.
+- [x] Repository contracts defined in `app/persistence/repositories.py`.
+- [x] In-memory adapters added for tests without requiring a live database.
+- [ ] Implement the Postgres/Supabase repository adapter after the target project is selected.
+- [ ] Wire query/ingestion services through repository interfaces rather than direct database calls.
+
+## 3.4 pgvector
 
 - [x] Reference schema enables the `vector` extension in the `extensions` schema.
 - [x] Current baseline target is 384-dimensional `all-MiniLM-L6-v2`.
@@ -339,7 +349,7 @@ Replace local-only persistence/index assumptions with production-managed storage
 - [ ] Validate top-k parity against the local FAISS baseline.
 - [ ] Benchmark latency and filtered-search behavior.
 
-## 3.4 Source storage
+## 3.5 Source storage
 
 - [ ] Configure Supabase Storage on the dedicated project.
 - [ ] Store uploaded PDFs.
@@ -347,7 +357,7 @@ Replace local-only persistence/index assumptions with production-managed storage
 - [ ] Define file lifecycle/deletion behavior.
 - [ ] Add Storage RLS/policy tests.
 
-## 3.5 BM25 strategy
+## 3.6 BM25 strategy
 
 Phase 1 selected the tenant-safe architecture.
 
@@ -363,6 +373,7 @@ Do not assume that a global BM25 index plus post-filtering is safe for multi-ten
 
 ### Phase 3 gate
 
+- [x] Application persistence boundary is defined and unit-tested without a live database.
 - [ ] Upload → DB → chunk → embedding flow works on the dedicated project.
 - [ ] pgvector retrieval matches the expected FAISS baseline.
 - [ ] Source PDFs persist correctly.
