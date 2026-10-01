@@ -4,7 +4,7 @@
 
 **Last updated:** 2026-10-01  
 **Architecture decision gate:** Phase 1 must resolve Vercel inference feasibility, async worker placement, BM25 tenant isolation, and Supabase auth/RLS request-path strategy before Phases 3–6 begin.  
-**Current phase:** Phase 2 empirical benchmark in progress → Phase 3 schema design in parallel  
+**Current phase:** Phase 2 empirical benchmark in progress → Phase 3 production data layer preparation in parallel  
 **Baseline commit:** `f91ecff3a1a2d430e83ba2fafa3b40d72b2f3a8f`  
 **Phase 0 freeze commit:** `298a8e5aa886793d56a18dc0426a8952c681f1d6`
 
@@ -60,8 +60,8 @@ The project should **not** be treated as production-ready yet.
 | Semantic chunking | [ ] | Not implemented |
 | Token/cost accounting | [~] | Partial observability; systematic accounting required |
 | Reproducible dependencies | [x] | Bounded requirements, Docker, env template implemented |
-| Production database | [ ] | Local indexes currently used |
-| Supabase/pgvector | [ ] | Not implemented |
+| Production database | [~] | Phase 3 reference schema implemented; live project not selected |
+| Supabase/pgvector | [~] | Reference DDL and similarity contract implemented; live verification pending |
 | Supabase Storage | [ ] | Not implemented |
 | Authentication | [ ] | Not implemented |
 | RLS / tenant isolation | [ ] | Not implemented |
@@ -300,82 +300,73 @@ Still required before declaring Phase 2 closed:
 
 # 6. Phase 3 — Production Data Layer: Supabase + pgvector
 
-**Status: [ ] PENDING**
+**Status: [~] REFERENCE SCHEMA IMPLEMENTED; LIVE PROJECT + VERIFICATION PENDING**
 
 ## Objective
 
-Replace local-only persistence/index assumptions with production-managed storage while preserving the retrieval architecture.
+Replace local-only persistence/index assumptions with production-managed storage while preserving the existing retrieval architecture.
 
 ## 3.1 Supabase project
 
 - [x] Production data model designed in `docs/DATABASE.md`.
+- [x] Reviewed the connected Supabase account without modifying any project.
+- [x] Confirmed the only currently visible project is unrelated `Tackboard`; it is explicitly excluded.
 - [ ] Identify/create the dedicated Enterprise RAG Supabase project.
-
-- [ ] Create production Supabase project.
 - [ ] Configure environment variables.
-- [ ] Enable required extensions/features.
 - [ ] Establish development/staging separation where practical.
 
 ## 3.2 Database schema
 
-Initial entities:
-
-- [ ] `organizations`
-- [ ] `users` / profile mapping
-- [ ] `documents`
-- [ ] `document_chunks`
-- [ ] `queries`
-- [ ] `answers`
-- [ ] `citations`
-- [ ] `retrieval_runs`
-- [ ] `evaluation_runs`
-
-Document chunk fields should include:
-
-- [ ] document ID
-- [ ] stable chunk ID
-- [ ] content
-- [ ] page
-- [ ] section
-- [ ] document type
-- [ ] metadata
-- [ ] embedding
-- [ ] timestamps
+- [x] Added reviewed reference DDL at `supabase/schema.sql`.
+- [x] `organizations` + `organization_members`.
+- [x] `documents` with content-hash/pipeline-version idempotency.
+- [x] `document_chunks` with page/span metadata and embedding provenance.
+- [x] `ingestion_jobs` with worker leasing fields.
+- [x] `conversations`, `messages`, `answers`, `citations`.
+- [x] `retrieval_runs` telemetry model.
+- [ ] Generate the real migration filename with the installed Supabase CLI once the target project is selected.
+- [ ] Apply migration to the dedicated project.
+- [ ] Verify schema against the live database.
 
 ## 3.3 pgvector
 
-- [ ] Enable pgvector.
-- [ ] Store dense embeddings.
-- [ ] Implement similarity search.
-- [ ] Validate result parity against the local dense baseline.
-- [ ] Benchmark latency.
+- [x] Reference schema enables the `vector` extension in the `extensions` schema.
+- [x] Current baseline target is 384-dimensional `all-MiniLM-L6-v2`.
+- [x] Reference HNSW index uses `vector_cosine_ops`.
+- [x] Reference similarity function uses cosine distance and `security invoker`.
+- [ ] Verify the live project's pgvector/Postgres versions.
+- [ ] Store production embeddings.
+- [ ] Validate top-k parity against the local FAISS baseline.
+- [ ] Benchmark latency and filtered-search behavior.
 
 ## 3.4 Source storage
 
-- [ ] Configure Supabase Storage.
+- [ ] Configure Supabase Storage on the dedicated project.
 - [ ] Store uploaded PDFs.
-- [ ] Store document metadata.
+- [ ] Store document metadata/path.
 - [ ] Define file lifecycle/deletion behavior.
+- [ ] Add Storage RLS/policy tests.
 
 ## 3.5 BM25 strategy
 
-Phase 1 must already select the tenant-safe architecture.
+Phase 1 selected the tenant-safe architecture.
 
-- [ ] Implement the selected tenant-isolated lexical strategy.
-- [ ] Ensure lexical retrieval cannot score or retrieve another tenant's corpus.
-- [ ] Define index refresh behavior.
-- [ ] Define deletion behavior.
+- [x] Per-tenant BM25 indexes selected.
+- [x] Global BM25 plus post-filtering rejected.
+- [ ] Implement tenant-scoped lexical index lifecycle.
+- [ ] Define index refresh/rebuild behavior in the worker.
+- [ ] Define deletion/invalidation behavior.
 - [ ] Measure operational complexity.
-- [ ] Re-run the relevant Phase 2 comparison under the production lexical strategy.
+- [ ] Re-run the relevant retrieval comparison under the production lexical strategy.
 
 Do not assume that a global BM25 index plus post-filtering is safe for multi-tenant production.
 
 ### Phase 3 gate
 
-- [ ] Upload → DB → chunk → embedding flow works.
-- [ ] pgvector retrieval matches expected baseline behavior.
+- [ ] Upload → DB → chunk → embedding flow works on the dedicated project.
+- [ ] pgvector retrieval matches the expected FAISS baseline.
 - [ ] Source PDFs persist correctly.
-- [ ] Data model supports multi-user isolation.
+- [ ] Data model supports tested multi-user isolation.
 - [ ] No production secrets are exposed.
 
 ---
