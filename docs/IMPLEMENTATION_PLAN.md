@@ -4,7 +4,7 @@
 
 **Last updated:** 2026-10-01  
 **Architecture decision gate:** Phase 1 must resolve Vercel inference feasibility, async worker placement, BM25 tenant isolation, and Supabase auth/RLS request-path strategy before Phases 3–6 begin.  
-**Current phase:** Phase 0 complete → Phase 1 next  
+**Current phase:** Phase 2 empirical benchmark in progress → Phase 3 schema design in parallel  
 **Baseline commit:** `f91ecff3a1a2d430e83ba2fafa3b40d72b2f3a8f`  
 **Phase 0 freeze commit:** `298a8e5aa886793d56a18dc0426a8952c681f1d6`
 
@@ -51,15 +51,15 @@ The project should **not** be treated as production-ready yet.
 | Pipeline metrics | [x] | Stage-level latency/quality metrics |
 | FastAPI API | [x] | Working development API |
 | React/Vite UI | [x] | Working inspection/demo UI |
-| Evaluation metrics | [~] | Recall/MRR infrastructure exists; nDCG/controlled benchmark incomplete |
-| Evaluation dataset | [ ] | Frozen 50–100 query benchmark still required |
+| Evaluation metrics | [x] | Recall/MRR/nDCG + bootstrap infrastructure implemented |
+| Evaluation dataset | [~] | 50-query CHA pool frozen; final relevance labels still pending |
 | Dense vs Hybrid experiment | [ ] | Not completed |
 | Failure analysis | [ ] | Not completed systematically |
 | Query rewriting | [ ] | Not implemented |
 | OCR fallback | [ ] | Not complete |
 | Semantic chunking | [ ] | Not implemented |
 | Token/cost accounting | [~] | Partial observability; systematic accounting required |
-| Reproducible dependencies | [ ] | `requirements.txt` currently incomplete/empty |
+| Reproducible dependencies | [x] | Bounded requirements, Docker, env template implemented |
 | Production database | [ ] | Local indexes currently used |
 | Supabase/pgvector | [ ] | Not implemented |
 | Supabase Storage | [ ] | Not implemented |
@@ -68,7 +68,7 @@ The project should **not** be treated as production-ready yet.
 | Persistent conversations | [ ] | Not implemented |
 | Async ingestion | [ ] | Not implemented |
 | Production deployment | [ ] | Not implemented |
-| CI/CD | [ ] | Not implemented as production gate |
+| CI/CD | [~] | Minimal GitHub Actions CI implemented; first full green verification remains |
 | Production security | [ ] | Not complete |
 | Production browser QA | [ ] | Not complete |
 
@@ -221,15 +221,16 @@ Turn the existing retrieval implementation into a reproducible, statistically de
 - [x] Defined durable document/page/span evidence labels.
 - [x] Added page character offsets and chunker version metadata to recursive chunks.
 - [x] Defined benchmark versioning and reproducibility metadata.
-- [ ] Populate the final 50–100 labeled-query benchmark from the frozen corpus.
-- [ ] Freeze the actual corpus hash and preprocessing configuration.
+- [x] Populate the 50-query CHA candidate pool from the frozen corpus.
+- [x] Freeze and record the CHA corpus snapshot hash.
+- [ ] Freeze the final relevance judgments and benchmark configuration hash.
 
 ### 2.2 Unbiased relevance pooling
 
 - [x] Added scripts/build_relevance_pool.py.
 - [x] Pooling rule is Dense(query) ∪ BM25(query).
 - [x] Pool artifact preserves document/page/section/text and retrieval source/rank.
-- [ ] Run pooling against the frozen corpus.
+- [x] Run pooling against the frozen CHA corpus.
 - [ ] Human-judge the pooled candidates.
 - [ ] Freeze the resulting relevance judgments.
 
@@ -251,7 +252,7 @@ Turn the existing retrieval implementation into a reproducible, statistically de
 - [x] Reranker excluded from this experiment to isolate retrieval strategy.
 - [x] Query-level paired deltas are recorded.
 - [x] Aggregate and category-level results are recorded.
-- [ ] Run the experiment on the frozen benchmark.
+- [ ] Run the experiment on the frozen benchmark after final human relevance labels are available.
 - [ ] Publish the resulting raw JSON artifact and analysis.
 - [ ] Perform failure analysis before making a retrieval-quality claim.
 
@@ -306,6 +307,9 @@ Still required before declaring Phase 2 closed:
 Replace local-only persistence/index assumptions with production-managed storage while preserving the retrieval architecture.
 
 ## 3.1 Supabase project
+
+- [x] Production data model designed in `docs/DATABASE.md`.
+- [ ] Identify/create the dedicated Enterprise RAG Supabase project.
 
 - [ ] Create production Supabase project.
 - [ ] Configure environment variables.
@@ -897,4 +901,4 @@ Enterprise RAG is considered **production-ready** only when:
 - [ ] Browser end-to-end flow passes.
 - [ ] Production documentation is complete.
 
-**Current position: Phase 0 complete. Phase 1 is the next active implementation target, with architecture feasibility decisions required before production data-layer work.**
+**Current position: Phase 2 empirical benchmark is active. The real 50-query CHA Dense ∪ BM25 pool is frozen, while silver labeling is quota-limited and human review remains pending. Phase 3 database design is being prepared in parallel without applying production schema changes.**
