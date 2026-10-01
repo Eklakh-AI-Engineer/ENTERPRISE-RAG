@@ -92,7 +92,7 @@ def judgment_matches_chunk(chunk: dict, judgment: dict) -> bool:
     )
 
 
-def evaluate_ranked(results: list[dict], judgments: list[dict]) -> dict:
+def evaluate_ranked(\n    results: list[dict],\n    judgments: list[dict],\n    all_chunks: list[dict],\n) -> dict:
     ranked = [
         item for item in results
         if item.get("chunk_id")
@@ -101,7 +101,9 @@ def evaluate_ranked(results: list[dict], judgments: list[dict]) -> dict:
     ranked_ids = [item["chunk_id"] for item in ranked]
     relevance = {}
 
-    for item in ranked:
+    for item in all_chunks:
+        if not item.get("chunk_id"):
+            continue
         relevance[item["chunk_id"]] = max(
             (
                 float(judgment.get("relevance", 0.0))
@@ -202,8 +204,8 @@ def main() -> None:
 
         # For controlled graded nDCG, map durable span judgments to retrieved
         # chunks. Production benchmark records should carry span offsets.
-        dense_metrics = evaluate_ranked(dense_results, judgments)
-        hybrid_metrics = evaluate_ranked(hybrid_results, judgments)
+        dense_metrics = evaluate_ranked(dense_results, judgments, chunks)
+        hybrid_metrics = evaluate_ranked(hybrid_results, judgments, chunks)
 
         dense_metrics["retrieval_latency_ms"] = round(dense_ms, 2)
         hybrid_metrics["retrieval_latency_ms"] = round(hybrid_ms, 2)
