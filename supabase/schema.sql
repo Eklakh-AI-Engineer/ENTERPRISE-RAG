@@ -514,7 +514,7 @@ returns public.ingestion_jobs
 language plpgsql
 security definer
 set search_path = public
-as $
+as $$
 declare
   claimed public.ingestion_jobs;
 begin
@@ -549,7 +549,7 @@ begin
 
   return claimed;
 end;
-$;
+$$;
 
 revoke execute on function public.claim_ingestion_job(uuid, integer) from public;
 revoke execute on function public.claim_ingestion_job(uuid, integer) from anon;
