@@ -1,10 +1,13 @@
 import json
+import os
 import re
 
 from app.generation.openrouter import OpenRouterClient
 
 
 class FaithfulnessVerifier:
+    JUDGE_PROMPT_VERSION = "faithfulness-v1"
+    JUDGE_TEMPERATURE = 0.0
     """
     Verifies whether claims in a generated answer are
     supported by the retrieved evidence.
@@ -40,6 +43,9 @@ class FaithfulnessVerifier:
         if not claims:
             return {
                 "faithfulness_score": 0.0,
+                "judge_model": getattr(self.llm, "model", os.getenv("OPENROUTER_MODEL", "")),
+                "judge_prompt_version": self.JUDGE_PROMPT_VERSION,
+                "judge_temperature": self.JUDGE_TEMPERATURE,
                 "total_claims": 0,
                 "supported_claims": 0,
                 "unsupported_claims": 0,
@@ -111,6 +117,9 @@ class FaithfulnessVerifier:
                 faithfulness_score,
                 4,
             ),
+            "judge_model": getattr(self.llm, "model", os.getenv("OPENROUTER_MODEL", "")),
+            "judge_prompt_version": self.JUDGE_PROMPT_VERSION,
+            "judge_temperature": self.JUDGE_TEMPERATURE,
             "total_claims": total,
             "supported_claims": supported,
             "unsupported_claims": total - supported,
