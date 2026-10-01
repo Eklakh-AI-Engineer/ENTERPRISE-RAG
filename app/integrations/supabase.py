@@ -25,7 +25,6 @@ def create_user_client(*, access_token: str | None = None) -> Any:
     )
     if access_token:
         client.postgrest.auth(access_token)
-        client.auth.set_session(access_token, "")
     return client
 
 
