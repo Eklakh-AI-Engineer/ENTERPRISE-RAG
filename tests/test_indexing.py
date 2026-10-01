@@ -16,7 +16,7 @@ class FakeChunks:
     def __init__(self):
         self.calls = []
 
-    def replace_for_document(self, **kwargs):
+    def upsert_for_document(self, **kwargs):
         self.calls.append(kwargs)
         return len(kwargs["chunks"])
 
