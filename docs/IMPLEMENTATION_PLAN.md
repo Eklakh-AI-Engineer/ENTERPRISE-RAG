@@ -288,7 +288,7 @@ Implemented:
 Still required before declaring Phase 2 closed:
 
 - [ ] 50–100 final labeled queries.
-- [ ] Frozen corpus/configuration hashes.
+- [x] Frozen CHA corpus hash recorded; configuration hash remains pending until benchmark freeze.
 - [ ] Human-judged Dense ∪ BM25 pool.
 - [ ] Dense-vs-Hybrid experiment execution.
 - [ ] Failure analysis/case studies.
@@ -474,8 +474,8 @@ READY
 ### Parsing
 
 - [x] Native PDF extraction exists.
-- [ ] OCR fallback.
-- [ ] Scanned-PDF detection.
+- [x] OCR fallback for low-text/scanned PDF pages.
+- [x] Scanned-PDF detection via native-text threshold.
 - [ ] Extraction error handling.
 - [ ] Large-document handling.
 
