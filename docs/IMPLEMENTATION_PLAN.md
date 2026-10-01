@@ -219,6 +219,7 @@ Turn the existing retrieval implementation into a reproducible, statistically de
 - [x] Added a benchmark example/template.
 - [x] Defined 50–100 labeled queries as the acceptance range.
 - [x] Defined durable document/page/span evidence labels.
+- [x] Added page character offsets and chunker version metadata to recursive chunks.
 - [x] Defined benchmark versioning and reproducibility metadata.
 - [ ] Populate the final 50–100 labeled-query benchmark from the frozen corpus.
 - [ ] Freeze the actual corpus hash and preprocessing configuration.
