@@ -1,0 +1,12 @@
+{
+  "schema_version": "phase2-silver-v1",
+  "label_source": "silver_ai",
+  "prompt_version": "phase2-relevance-silver-v1",
+  "model": "qwen/qwen3.8-27b:free",
+  "pool_file": "data/evaluation/cha_pool_v1.json",
+  "queries": [],
+  "total_queries": 50,
+  "status": "rate_limited",
+  "last_stop_reason": "OpenRouter HTTP 429 Too Many Requests",
+  "completed_queries": 0
+}
