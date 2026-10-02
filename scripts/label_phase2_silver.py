@@ -116,10 +116,10 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--pool", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
-    parser.add_argument("--model", default=os.getenv("OPENROUTER_MODEL", "qwen/qwen3.8-27b:free"))
+    parser.add_argument("--model", default=os.getenv("OPENROUTER_MODEL", "nvidia/nemotron-3.5-lightning:free"))
     parser.add_argument("--delay", type=float, default=2.0)
     parser.add_argument("--retries", type=int, default=3)
-    parser.add_argument("--batch-size", type=int, default=8)
+    parser.add_argument("--batch-size", type=int, default=4)
     args = parser.parse_args()
 
     api_key = os.getenv("OPENROUTER_API_KEY")
@@ -134,49 +134,108 @@ def main() -> None:
         "model": args.model,
         "pool_file": str(args.pool),
         "queries": [],
+        "partial_queries": {},
     }
+
     done = {q["query_id"]: q for q in existing.get("queries", [])}
+    partial = existing.setdefault("partial_queries", {})
     if done and existing.get("model") != args.model:
         raise SystemExit(
-            f"Checkpoint model mismatch: existing={existing.get("model")!r}, requested={args.model!r}. "
+            f"Checkpoint model mismatch: existing={existing.get('model')!r}, requested={args.model!r}. "
             "Do not mix silver labels from different judge models in one checkpoint."
         )
     if not done:
         existing["model"] = args.model
+
     existing["total_queries"] = len(pool["queries"])
+    existing["completed_queries"] = len(done)
+    existing["completed_judgments"] = sum(
+        len(q.get("judgments", [])) for q in done.values()
+    ) + sum(
+        len(q.get("judgments", [])) for q in partial.values()
+    )
     existing["status"] = "running"
     save_json(args.output, existing)
 
     for qi, query in enumerate(pool["queries"], start=1):
-        if query["query_id"] in done:
+        query_id = query["query_id"]
+        if query_id in done:
             continue
-        judgments = []
-        candidates = query["candidates"]
-        for start in range(0, len(candidates), args.batch_size):
-            batch = candidates[start:start + args.batch_size]
-            for attempt in range(args.retries + 1):
-                try:
-                    batch_judgments = label_batch_resilient(api_key, args.model, query["query"], batch, args.retries)
-                    judgments.extend([{**j, "candidate_index": j["candidate_index"] + start} for j in batch_judgments])
-                    break
-                except RateLimitError:
-                    existing["status"] = "rate_limited"
-                    existing["last_stop_reason"] = "OpenRouter HTTP 429 Too Many Requests"
-                    existing["completed_queries"] = len(done)
-                    save_json(args.output, existing)
-                    print(f"Rate limit reached at {query['query_id']} batch {start}:{start + len(batch)}. Checkpoint saved; rerun later to resume.")
-                    return
-                except Exception as exc:
-                    if attempt >= args.retries:
-                        raise
-                    wait = min(30.0, 2.0 ** attempt)
-                    print(f"Retrying {query['query_id']} batch {start}:{start + len(batch)} after error: {exc}; waiting {wait:.1f}s")
-                    time.sleep(wait)
+
+        judgments = list(partial.get(query_id, {}).get("judgments", []))
+        completed_indices = {j["candidate_index"] for j in judgments}
+
+        for start in range(0, len(query["candidates"]), args.batch_size):
+            batch = query["candidates"][start:start + args.batch_size]
+            pending_batch = [
+                c for offset, c in enumerate(batch)
+                if start + offset not in completed_indices
+            ]
+            if not pending_batch:
+                continue
+
+            try:
+                batch_judgments = label_batch_resilient(
+                    api_key, args.model, query["query"], pending_batch, args.retries
+                )
+                # The resilient helper indexes relative to pending_batch, so map back
+                # to the original query-level candidate indices.
+                pending_indices = [
+                    i for i in range(start, start + len(batch))
+                    if i not in completed_indices
+                ]
+                judgments.extend([
+                    {**j, "candidate_index": pending_indices[j["candidate_index"]]}
+                    for j in batch_judgments
+                ])
+                completed_indices = {j["candidate_index"] for j in judgments}
+                partial[query_id] = {
+                    "query_id": query_id,
+                    "candidate_count": query["candidate_count"],
+                    "judgments": sorted(judgments, key=lambda x: x["candidate_index"]),
+                }
+                existing["partial_queries"] = partial
+                existing["completed_queries"] = len(done)
+                existing["completed_judgments"] = (
+                    sum(len(q.get("judgments", [])) for q in done.values())
+                    + sum(len(q.get("judgments", [])) for q in partial.values())
+                )
+                existing["status"] = "running"
+                save_json(args.output, existing)
+                print(
+                    f"[{qi}/{len(pool['queries'])}] {query_id} "
+                    f"checkpointed {len(judgments)}/{len(query['candidates'])} judgments"
+                )
+            except RateLimitError:
+                partial[query_id] = {
+                    "query_id": query_id,
+                    "candidate_count": query["candidate_count"],
+                    "judgments": sorted(judgments, key=lambda x: x["candidate_index"]),
+                }
+                existing["partial_queries"] = partial
+                existing["status"] = "rate_limited"
+                existing["last_stop_reason"] = "OpenRouter HTTP 429 Too Many Requests"
+                existing["completed_queries"] = len(done)
+                existing["completed_judgments"] = (
+                    sum(len(q.get("judgments", [])) for q in done.values())
+                    + sum(len(q.get("judgments", [])) for q in partial.values())
+                )
+                save_json(args.output, existing)
+                print(
+                    f"Rate limit reached at {query_id} batch {start}:{start + len(batch)}. "
+                    "Batch-level checkpoint saved; rerun later to resume."
+                )
+                return
+
             time.sleep(args.delay)
-        if len(judgments) != len(candidates):
-            raise ValueError(f"Expected {len(candidates)} total judgments, got {len(judgments)}")
+
+        if len(judgments) != len(query["candidates"]):
+            raise ValueError(
+                f"Expected {len(query['candidates'])} total judgments, got {len(judgments)}"
+            )
+
         records = []
-        for judgment in judgments:
+        for judgment in sorted(judgments, key=lambda x: x["candidate_index"]):
             candidate = query["candidates"][judgment["candidate_index"]]
             records.append({
                 "candidate_index": judgment["candidate_index"],
@@ -185,24 +244,36 @@ def main() -> None:
                 "confidence": judgment["confidence"],
                 "label_source": "silver_ai",
             })
-        done[query["query_id"]] = {
-            "query_id": query["query_id"],
+
+        done[query_id] = {
+            "query_id": query_id,
             "category": query["category"],
             "query": query["query"],
             "candidate_count": query["candidate_count"],
             "judgments": records,
         }
+        partial.pop(query_id, None)
         existing["queries"] = [done[key] for key in sorted(done)]
+        existing["partial_queries"] = partial
         existing["completed_queries"] = len(done)
+        existing["completed_judgments"] = sum(
+            len(q.get("judgments", [])) for q in done.values()
+        ) + sum(
+            len(q.get("judgments", [])) for q in partial.values()
+        )
         existing["total_queries"] = len(pool["queries"])
         existing["status"] = "running"
         save_json(args.output, existing)
-        print("[{}/{}] {} labeled".format(qi, len(pool["queries"]), query["query_id"]))
+        print("[{}/{}] {} labeled".format(qi, len(pool["queries"]), query_id))
         time.sleep(args.delay)
 
     existing["status"] = "complete"
     existing["completed_queries"] = len(done)
+    existing["completed_judgments"] = sum(
+        len(q.get("judgments", [])) for q in done.values()
+    )
     existing["total_queries"] = len(pool["queries"])
+    existing["partial_queries"] = {}
     save_json(args.output, existing)
     print(f"Completed {len(done)}/{len(pool['queries'])} queries.")
 
