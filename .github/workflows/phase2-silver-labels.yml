@@ -6,7 +6,7 @@ on:
       model:
         description: OpenRouter model
         required: false
-        default: qwen/qwen3.8-27b:free
+        default: nvidia/nemotron-3.5-lightning:free
 
 permissions:
   contents: write
