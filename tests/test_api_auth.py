@@ -23,3 +23,30 @@ def test_auth_me_accepts_verified_principal(monkeypatch):
         response = client.get("/auth/me", headers={"Authorization": "Bearer test-token"})
     assert response.status_code == 200
     assert response.json() == {"user_id": "user-a", "role": "authenticated"}
+
+
+def test_document_upload_rejects_non_pdf_before_storage(monkeypatch):
+    import app.api.main as main
+
+    principal = AuthenticatedPrincipal(
+        user_id="user-a",
+        role="authenticated",
+        claims={},
+    )
+
+    class UnusedClient:
+        pass
+
+    monkeypatch.setattr(
+        main,
+        "current_user_client",
+        lambda: (principal, UnusedClient()),
+    )
+
+    with TestClient(app) as client:
+        response = client.post(
+            "/documents",
+            files={"file": ("notes.txt", b"not a pdf", "text/plain")},
+        )
+
+    assert response.status_code == 415
