@@ -39,8 +39,8 @@ There are two parallel tracks:
 | Faithfulness human validation | NOT DONE |
 | Supabase schema + pgvector | DONE |
 | Tenant-scoped vector RPC | DONE |
-| RLS policies | IMPLEMENTED; live two-user proof pending |
-| Real Auth users | NOT DONE |
+| RLS policies | IMPLEMENTED; live two-user document isolation verified |
+| Real Auth users | DONE: 2 Auth users created |
 | Authenticated upload | NOT DONE as final production API flow |
 | Live ingestion execution | NOT VERIFIED |
 | Chunk replacement idempotency | NOT DONE |
@@ -125,19 +125,33 @@ Implemented/live architecture includes:
 
 The previous unscoped vector-search overload was removed.
 
-### Security verification still required
+### Security verification update
 
-- [ ] Create real Auth User A
-- [ ] Create real Auth User B
-- [ ] Create organizations/memberships
-- [ ] Test cross-tenant document denial
-- [ ] Test cross-tenant chunk/retrieval denial
-- [ ] Test Storage isolation
-- [ ] Test conversation isolation
-- [ ] Test forged organization IDs
-- [ ] Test RLS through actual authenticated clients
+Verified against the live Enterprise-RAG Supabase project on 2026-10-02:
 
-Until these are demonstrated, do not call the system fully multi-tenant or RLS-verified.
+- [x] Real Auth User A exists.
+- [x] Real Auth User B exists.
+- [x] Separate test organizations/memberships created.
+- [x] User A sees only Organization A.
+- [x] User B sees only Organization B.
+- [x] User A sees only Organization A documents.
+- [x] User B sees only Organization B documents.
+- [x] User A can insert a document into Organization A.
+- [x] User A is denied when attempting to insert into Organization B.
+- [x] RLS was exercised as the `authenticated` database role with simulated JWT `sub` claims.
+- [x] Storage policies inspected and confirmed to scope access through organization membership and the expected `organizations/{org_id}/documents/{document_id}/...` path.
+
+The temporary RLS test documents were removed after verification.
+
+Still required before claiming full production multi-tenancy:
+
+- [ ] Actual authenticated-client integration test through the application API.
+- [ ] Storage upload/read denial test using real Storage API clients.
+- [ ] Cross-tenant chunk/retrieval integration test.
+- [ ] Conversation/answer/citation isolation integration test.
+- [ ] Forged organization-ID tests through the production API.
+
+Therefore: **RLS policy enforcement is now live-tested at the database role level, but the application is not yet fully end-to-end authenticated/multi-tenant.**
 
 ## 5. Production ingestion
 
@@ -218,6 +232,8 @@ Do not claim Hybrid retrieval has been experimentally proven superior until thos
 Compared with the 2026-10-01 audit point, the meaningful changes are concentrated in Phase 2:
 
 - Nemotron free-model switch;
+- live creation of two Supabase Auth users and separate test organization memberships;
+- database-level two-user RLS isolation verification;
 - judge-model provenance enforcement;
 - malformed-response resilience;
 - batch-level silver checkpointing;
@@ -262,23 +278,22 @@ Do not claim:
 
 ### Track B — production
 
-1. Create two real Auth test users.
-2. Verify RLS and Storage isolation.
-3. Finish authenticated document upload.
-4. Execute live ingestion.
-5. Fix atomic chunk replacement.
-6. Benchmark FAISS vs pgvector.
-7. Implement tenant BM25 lifecycle.
-8. Switch QueryPipeline to production retrieval.
-9. Persist answers/citations/retrieval telemetry end-to-end.
-10. Deploy and harden security/observability.
-11. Complete frontend product flow.
+1. Complete application-level authenticated RLS/Storage integration tests.
+2. Finish authenticated document upload.
+3. Execute live ingestion.
+4. Fix atomic chunk replacement.
+5. Benchmark FAISS vs pgvector.
+6. Implement tenant BM25 lifecycle.
+7. Switch QueryPipeline to production retrieval.
+8. Persist answers/citations/retrieval telemetry end-to-end.
+9. Deploy and harden security/observability.
+10. Complete frontend product flow.
 
 ## 12. Current resume point
 
 **Phase 2:** 168 / 780 silver judgments; CHA-011 partial checkpoint.
 
-**Production security gate:** real two-user RLS isolation test.
+**Production security gate:** database-level two-user RLS isolation test is now PASSED. The remaining security gate is application-level authenticated integration testing.
 
 **Immediate rule:** do not redesign the silver-label architecture again unless a new failure demonstrates a real defect. The current checkpoint architecture is working.
 
