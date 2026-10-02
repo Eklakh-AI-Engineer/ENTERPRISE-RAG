@@ -37,16 +37,16 @@ def test_document_upload_rejects_non_pdf_before_storage(monkeypatch):
     class UnusedClient:
         pass
 
-    monkeypatch.setattr(
-        main,
-        "current_user_client",
-        lambda: (principal, UnusedClient()),
+    app.dependency_overrides[main.current_user_client] = (
+        lambda: (principal, UnusedClient())
     )
-
-    with TestClient(app) as client:
-        response = client.post(
-            "/documents",
-            files={"file": ("notes.txt", b"not a pdf", "text/plain")},
-        )
+    try:
+        with TestClient(app) as client:
+            response = client.post(
+                "/documents",
+                files={"file": ("notes.txt", b"not a pdf", "text/plain")},
+            )
+    finally:
+        app.dependency_overrides.clear()
 
     assert response.status_code == 415
