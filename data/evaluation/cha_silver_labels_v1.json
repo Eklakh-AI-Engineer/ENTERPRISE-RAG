@@ -1263,7 +1263,15 @@
     }
   ],
   "total_queries": 50,
-  "status": "running",
+  "status": "rate_limited",
   "last_stop_reason": "OpenRouter HTTP 429 Too Many Requests",
-  "completed_queries": 10
+  "completed_queries": 10,
+  "partial_queries": {
+    "CHA-011": {
+      "query_id": "CHA-011",
+      "candidate_count": 17,
+      "judgments": []
+    }
+  },
+  "completed_judgments": 168
 }
