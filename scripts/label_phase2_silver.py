@@ -65,25 +65,52 @@ Confidence must be between 0 and 1."""
     if response.status_code == 429:
         raise RateLimitError("OpenRouter HTTP 429 Too Many Requests")
     response.raise_for_status()
-    content = response.json()["choices"][0]["message"]["content"].strip()
+    content = response.json().get("choices", [{}])[0].get("message", {}).get("content")
+    if not isinstance(content, str) or not content.strip():
+        raise ValueError("OpenRouter returned an empty or non-text message content")
+    content = content.strip()
     if content.startswith("```"):
         content = content.removeprefix("```json").removeprefix("```").removesuffix("```").strip()
     judgments = json.loads(content).get("judgments", [])
     if len(judgments) != len(candidates):
         raise ValueError(f"Expected {len(candidates)} judgments, got {len(judgments)}")
     out = []
+    seen = set()
     for judgment in judgments:
         idx = int(judgment["candidate_index"])
         relevance = int(judgment["relevance"])
         confidence = float(judgment.get("confidence", 0.0))
-        if idx < 0 or idx >= len(candidates) or relevance not in LABELS:
-            raise ValueError(f"Invalid judgment: {judgment}")
+        if idx < 0 or idx >= len(candidates) or relevance not in LABELS or idx in seen:
+            raise ValueError(f"Invalid or duplicate judgment: {judgment}")
+        seen.add(idx)
         out.append({
             "candidate_index": idx,
             "relevance": relevance,
             "confidence": max(0.0, min(1.0, confidence)),
         })
+    if seen != set(range(len(candidates))):
+        raise ValueError(f"Missing candidate indices: expected {len(candidates)}, got {len(seen)}")
     return sorted(out, key=lambda x: x["candidate_index"])
+
+def label_batch_resilient(api_key: str, model: str, query: str, candidates: list[dict[str, Any]], retries: int) -> list[dict[str, Any]]:
+    """Retry incomplete batches and split them when the model omits candidates."""
+    for attempt in range(retries + 1):
+        try:
+            return call_model(api_key, model, query, candidates)
+        except RateLimitError:
+            raise
+        except Exception as exc:
+            if attempt >= retries:
+                break
+            wait = min(30.0, 2.0 ** attempt)
+            print(f"Retrying batch of {len(candidates)} after error: {exc}; waiting {wait:.1f}s")
+            time.sleep(wait)
+    if len(candidates) == 1:
+        raise ValueError("Single-candidate batch could not be labeled after retries")
+    midpoint = max(1, len(candidates) // 2)
+    left = label_batch_resilient(api_key, model, query, candidates[:midpoint], retries)
+    right = label_batch_resilient(api_key, model, query, candidates[midpoint:], retries)
+    return left + [{**j, "candidate_index": j["candidate_index"] + midpoint} for j in right]
 
 def main() -> None:
     parser = argparse.ArgumentParser()
@@ -129,7 +156,7 @@ def main() -> None:
             batch = candidates[start:start + args.batch_size]
             for attempt in range(args.retries + 1):
                 try:
-                    batch_judgments = call_model(api_key, args.model, query["query"], batch)
+                    batch_judgments = label_batch_resilient(api_key, args.model, query["query"], batch, args.retries)
                     judgments.extend([{**j, "candidate_index": j["candidate_index"] + start} for j in batch_judgments])
                     break
                 except RateLimitError:
