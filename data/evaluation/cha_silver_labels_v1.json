@@ -371,10 +371,899 @@
           "label_source": "silver_ai"
         }
       ]
+    },
+    {
+      "query_id": "CHA-004",
+      "category": "Employee Relations & Conduct",
+      "query": "What does the handbook require employees to do when they become aware of waste, fraud, or abuse?",
+      "candidate_count": 18,
+      "judgments": [
+        {
+          "candidate_index": 0,
+          "chunk_id": "CHA Employee Handbook 2025-p005-c003",
+          "relevance": 0,
+          "confidence": 0.99,
+          "label_source": "silver_ai"
+        },
+        {
+          "candidate_index": 1,
+          "chunk_id": "CHA Procurement Policy-p004-c001",
+          "relevance": 0,
+          "confidence": 0.98,
+          "label_source": "silver_ai"
+        },
+        {
+          "candidate_index": 2,
+          "chunk_id": "CHA Information Security Policy-p007-c003",
+          "relevance": 0,
+          "confidence": 0.97,
+          "label_source": "silver_ai"
+        },
+        {
+          "candidate_index": 3,
+          "chunk_id": "CHA Employee Handbook 2025-p013-c001",
+          "relevance": 1,
+          "confidence": 0.8,
+          "label_source": "silver_ai"
+        },
+        {
+          "candidate_index": 4,
+          "chunk_id": "CHA Employee Handbook 2025-p012-c001",
+          "relevance": 3,
+          "confidence": 0.97,
+          "label_source": "silver_ai"
+        },
+        {
+          "candidate_index": 5,
+          "chunk_id": "CHA Employee Handbook 2025-p035-c003",
+          "relevance": 0,
+          "confidence": 0.99,
+          "label_source": "silver_ai"
+        },
+        {
+          "candidate_index": 6,
+          "chunk_id": "CHA Employee Handbook 2025-p012-c002",
+          "relevance": 1,
+          "confidence": 0.8,
+          "label_source": "silver_ai"
+        },
+        {
+          "candidate_index": 7,
+          "chunk_id": "CHA Employee Handbook 2025-p011-c003",
+          "relevance": 2,
+          "confidence": 0.85,
+          "label_source": "silver_ai"
+        },
+        {
+          "candidate_index": 8,
+          "chunk_id": "CHA Information Security Policy-p004-c002",
+          "relevance": 1,
+          "confidence": 0.4,
+          "label_source": "silver_ai"
+        },
+        {
+          "candidate_index": 9,
+          "chunk_id": "CHA Employee Handbook 2025-p013-c002",
+          "relevance": 1,
+          "confidence": 0.35,
+          "label_source": "silver_ai"
+        },
+        {
+          "candidate_index": 10,
+          "chunk_id": "CHA Employee Handbook 2025-p005-c002",
+          "relevance": 2,
+          "confidence": 0.55,
+          "label_source": "silver_ai"
+        },
+        {
+          "candidate_index": 11,
+          "chunk_id": "CHA Employee Handbook 2025-p033-c002",
+          "relevance": 0,
+          "confidence": 0.0,
+          "label_source": "silver_ai"
+        },
+        {
+          "candidate_index": 12,
+          "chunk_id": "CHA Employee Handbook 2025-p035-c002",
+          "relevance": 0,
+          "confidence": 0.0,
+          "label_source": "silver_ai"
+        },
+        {
+          "candidate_index": 13,
+          "chunk_id": "CHA Information Security Policy-p005-c002",
+          "relevance": 0,
+          "confidence": 0.0,
+          "label_source": "silver_ai"
+        },
+        {
+          "candidate_index": 14,
+          "chunk_id": "CHA Employee Handbook 2025-p014-c001",
+          "relevance": 0,
+          "confidence": 0.0,
+          "label_source": "silver_ai"
+        },
+        {
+          "candidate_index": 15,
+          "chunk_id": "CHA Procurement Policy-p002-c001",
+          "relevance": 1,
+          "confidence": 0.3,
+          "label_source": "silver_ai"
+        },
+        {
+          "candidate_index": 16,
+          "chunk_id": "CHA Employee Handbook 2025-p020-c002",
+          "relevance": 0,
+          "confidence": 0.95,
+          "label_source": "silver_ai"
+        },
+        {
+          "candidate_index": 17,
+          "chunk_id": "CHA Information Security Policy-p001-c003",
+          "relevance": 0,
+          "confidence": 0.99,
+          "label_source": "silver_ai"
+        }
+      ]
+    },
+    {
+      "query_id": "CHA-005",
+      "category": "Employee Relations & Conduct",
+      "query": "What happens when an employee resigns or separates from CHA?",
+      "candidate_count": 18,
+      "judgments": [
+        {
+          "candidate_index": 0,
+          "chunk_id": "CHA Employee Handbook 2025-p018-c004",
+          "relevance": 3,
+          "confidence": 0.97,
+          "label_source": "silver_ai"
+        },
+        {
+          "candidate_index": 1,
+          "chunk_id": "CHA Employee Handbook 2025-p006-c002",
+          "relevance": 1,
+          "confidence": 0.7,
+          "label_source": "silver_ai"
+        },
+        {
+          "candidate_index": 2,
+          "chunk_id": "CHA Employee Handbook 2025-p012-c002",
+          "relevance": 0,
+          "confidence": 0.92,
+          "label_source": "silver_ai"
+        },
+        {
+          "candidate_index": 3,
+          "chunk_id": "CHA Employee Handbook 2025-p018-c003",
+          "relevance": 3,
+          "confidence": 0.98,
+          "label_source": "silver_ai"
+        },
+        {
+          "candidate_index": 4,
+          "chunk_id": "CHA Employee Handbook 2025-p012-c003",
+          "relevance": 0,
+          "confidence": 0.89,
+          "label_source": "silver_ai"
+        },
+        {
+          "candidate_index": 5,
+          "chunk_id": "CHA Employee Handbook 2025-p005-c002",
+          "relevance": 1,
+          "confidence": 0.68,
+          "label_source": "silver_ai"
+        },
+        {
+          "candidate_index": 6,
+          "chunk_id": "CHA Employee Handbook 2025-p033-c004",
+          "relevance": 0,
+          "confidence": 0.91,
+          "label_source": "silver_ai"
+        },
+        {
+          "candidate_index": 7,
+          "chunk_id": "CHA Employee Handbook 2025-p028-c001",
+          "relevance": 0,
+          "confidence": 0.88,
+          "label_source": "silver_ai"
+        },
+        {
+          "candidate_index": 8,
+          "chunk_id": "CHA Employee Handbook 2025-p010-c003",
+          "relevance": 0,
+          "confidence": 0.95,
+          "label_source": "silver_ai"
+        },
+        {
+          "candidate_index": 9,
+          "chunk_id": "CHA Employee Handbook 2025-p020-c003",
+          "relevance": 0,
+          "confidence": 0.98,
+          "label_source": "silver_ai"
+        },
+        {
+          "candidate_index": 10,
+          "chunk_id": "CHA Information Security Policy-p005-c002",
+          "relevance": 0,
+          "confidence": 0.97,
+          "label_source": "silver_ai"
+        },
+        {
+          "candidate_index": 11,
+          "chunk_id": "CHA Employee Handbook 2025-p010-c004",
+          "relevance": 0,
+          "confidence": 0.96,
+          "label_source": "silver_ai"
+        },
+        {
+          "candidate_index": 12,
+          "chunk_id": "CHA Employee Handbook 2025-p029-c004",
+          "relevance": 0,
+          "confidence": 0.95,
+          "label_source": "silver_ai"
+        },
+        {
+          "candidate_index": 13,
+          "chunk_id": "CHA Employee Handbook 2025-p014-c004",
+          "relevance": 0,
+          "confidence": 0.94,
+          "label_source": "silver_ai"
+        },
+        {
+          "candidate_index": 14,
+          "chunk_id": "CHA Procurement Policy-p002-c004",
+          "relevance": 0,
+          "confidence": 0.99,
+          "label_source": "silver_ai"
+        },
+        {
+          "candidate_index": 15,
+          "chunk_id": "CHA Employee Handbook 2025-p024-c002",
+          "relevance": 0,
+          "confidence": 0.95,
+          "label_source": "silver_ai"
+        },
+        {
+          "candidate_index": 16,
+          "chunk_id": "CHA Employee Handbook 2025-p015-c001",
+          "relevance": 0,
+          "confidence": 0.95,
+          "label_source": "silver_ai"
+        },
+        {
+          "candidate_index": 17,
+          "chunk_id": "CHA Employee Handbook 2025-p010-c002",
+          "relevance": 0,
+          "confidence": 0.95,
+          "label_source": "silver_ai"
+        }
+      ]
+    },
+    {
+      "query_id": "CHA-006",
+      "category": "Equal Employment & Accommodation",
+      "query": "What is CHA’s policy on harassment and sexual harassment?",
+      "candidate_count": 14,
+      "judgments": [
+        {
+          "candidate_index": 0,
+          "chunk_id": "CHA Employee Handbook 2025-p007-c001",
+          "relevance": 3,
+          "confidence": 0.95,
+          "label_source": "silver_ai"
+        },
+        {
+          "candidate_index": 1,
+          "chunk_id": "CHA Employee Handbook 2025-p010-c003",
+          "relevance": 3,
+          "confidence": 0.92,
+          "label_source": "silver_ai"
+        },
+        {
+          "candidate_index": 2,
+          "chunk_id": "CHA Employee Handbook 2025-p008-c002",
+          "relevance": 1,
+          "confidence": 0.9,
+          "label_source": "silver_ai"
+        },
+        {
+          "candidate_index": 3,
+          "chunk_id": "CHA Employee Handbook 2025-p007-c004",
+          "relevance": 3,
+          "confidence": 0.96,
+          "label_source": "silver_ai"
+        },
+        {
+          "candidate_index": 4,
+          "chunk_id": "CHA Employee Handbook 2025-p012-c002",
+          "relevance": 1,
+          "confidence": 0.85,
+          "label_source": "silver_ai"
+        },
+        {
+          "candidate_index": 5,
+          "chunk_id": "CHA Employee Handbook 2025-p008-c003",
+          "relevance": 1,
+          "confidence": 0.8,
+          "label_source": "silver_ai"
+        },
+        {
+          "candidate_index": 6,
+          "chunk_id": "CHA Employee Handbook 2025-p008-c001",
+          "relevance": 2,
+          "confidence": 0.75,
+          "label_source": "silver_ai"
+        },
+        {
+          "candidate_index": 7,
+          "chunk_id": "CHA Employee Handbook 2025-p002-c002",
+          "relevance": 1,
+          "confidence": 0.7,
+          "label_source": "silver_ai"
+        },
+        {
+          "candidate_index": 8,
+          "chunk_id": "CHA Employee Handbook 2025-p010-c002",
+          "relevance": 0,
+          "confidence": 0.0,
+          "label_source": "silver_ai"
+        },
+        {
+          "candidate_index": 9,
+          "chunk_id": "CHA Employee Handbook 2025-p034-c003",
+          "relevance": 0,
+          "confidence": 0.0,
+          "label_source": "silver_ai"
+        },
+        {
+          "candidate_index": 10,
+          "chunk_id": "CHA Employee Handbook 2025-p007-c002",
+          "relevance": 3,
+          "confidence": 0.98,
+          "label_source": "silver_ai"
+        },
+        {
+          "candidate_index": 11,
+          "chunk_id": "CHA Employee Handbook 2025-p010-c001",
+          "relevance": 1,
+          "confidence": 0.25,
+          "label_source": "silver_ai"
+        },
+        {
+          "candidate_index": 12,
+          "chunk_id": "CHA Employee Handbook 2025-p031-c002",
+          "relevance": 1,
+          "confidence": 0.35,
+          "label_source": "silver_ai"
+        },
+        {
+          "candidate_index": 13,
+          "chunk_id": "CHA Employee Handbook 2025-p031-c003",
+          "relevance": 2,
+          "confidence": 0.7,
+          "label_source": "silver_ai"
+        }
+      ]
+    },
+    {
+      "query_id": "CHA-007",
+      "category": "Equal Employment & Accommodation",
+      "query": "What reasonable accommodations does CHA provide for qualified employees with disabilities?",
+      "candidate_count": 16,
+      "judgments": [
+        {
+          "candidate_index": 0,
+          "chunk_id": "CHA Employee Handbook 2025-p009-c001",
+          "relevance": 3,
+          "confidence": 0.95,
+          "label_source": "silver_ai"
+        },
+        {
+          "candidate_index": 1,
+          "chunk_id": "CHA Employee Handbook 2025-p009-c003",
+          "relevance": 2,
+          "confidence": 0.81,
+          "label_source": "silver_ai"
+        },
+        {
+          "candidate_index": 2,
+          "chunk_id": "CHA Employee Handbook 2025-p009-c002",
+          "relevance": 2,
+          "confidence": 0.75,
+          "label_source": "silver_ai"
+        },
+        {
+          "candidate_index": 3,
+          "chunk_id": "CHA Employee Handbook 2025-p033-c003",
+          "relevance": 0,
+          "confidence": 0.88,
+          "label_source": "silver_ai"
+        },
+        {
+          "candidate_index": 4,
+          "chunk_id": "CHA Employee Handbook 2025-p007-c001",
+          "relevance": 0,
+          "confidence": 0.91,
+          "label_source": "silver_ai"
+        },
+        {
+          "candidate_index": 5,
+          "chunk_id": "CHA Employee Handbook 2025-p012-c002",
+          "relevance": 0,
+          "confidence": 0.9,
+          "label_source": "silver_ai"
+        },
+        {
+          "candidate_index": 6,
+          "chunk_id": "CHA Employee Handbook 2025-p032-c001",
+          "relevance": 1,
+          "confidence": 0.58,
+          "label_source": "silver_ai"
+        },
+        {
+          "candidate_index": 7,
+          "chunk_id": "CHA Employee Handbook 2025-p033-c002",
+          "relevance": 0,
+          "confidence": 0.89,
+          "label_source": "silver_ai"
+        },
+        {
+          "candidate_index": 8,
+          "chunk_id": "CHA Employee Handbook 2025-p032-c002",
+          "relevance": 0,
+          "confidence": 0.95,
+          "label_source": "silver_ai"
+        },
+        {
+          "candidate_index": 9,
+          "chunk_id": "CHA Employee Handbook 2025-p034-c001",
+          "relevance": 0,
+          "confidence": 0.95,
+          "label_source": "silver_ai"
+        },
+        {
+          "candidate_index": 10,
+          "chunk_id": "CHA Employee Handbook 2025-p005-c002",
+          "relevance": 0,
+          "confidence": 0.95,
+          "label_source": "silver_ai"
+        },
+        {
+          "candidate_index": 11,
+          "chunk_id": "CHA Employee Handbook 2025-p031-c001",
+          "relevance": 0,
+          "confidence": 0.95,
+          "label_source": "silver_ai"
+        },
+        {
+          "candidate_index": 12,
+          "chunk_id": "CHA Information Security Policy-p007-c001",
+          "relevance": 0,
+          "confidence": 0.95,
+          "label_source": "silver_ai"
+        },
+        {
+          "candidate_index": 13,
+          "chunk_id": "CHA Employee Handbook 2025-p022-c001",
+          "relevance": 0,
+          "confidence": 0.95,
+          "label_source": "silver_ai"
+        },
+        {
+          "candidate_index": 14,
+          "chunk_id": "CHA Employee Handbook 2025-p015-c004",
+          "relevance": 0,
+          "confidence": 0.95,
+          "label_source": "silver_ai"
+        },
+        {
+          "candidate_index": 15,
+          "chunk_id": "CHA Employee Handbook 2025-p029-c002",
+          "relevance": 0,
+          "confidence": 0.95,
+          "label_source": "silver_ai"
+        }
+      ]
+    },
+    {
+      "query_id": "CHA-008",
+      "category": "Equal Employment & Accommodation",
+      "query": "What protections apply to pregnancy and childbirth accommodations?",
+      "candidate_count": 18,
+      "judgments": [
+        {
+          "candidate_index": 0,
+          "chunk_id": "CHA Employee Handbook 2025-p009-c001",
+          "relevance": 3,
+          "confidence": 0.98,
+          "label_source": "silver_ai"
+        },
+        {
+          "candidate_index": 1,
+          "chunk_id": "CHA Employee Handbook 2025-p009-c002",
+          "relevance": 3,
+          "confidence": 0.92,
+          "label_source": "silver_ai"
+        },
+        {
+          "candidate_index": 2,
+          "chunk_id": "CHA Employee Handbook 2025-p021-c004",
+          "relevance": 1,
+          "confidence": 0.42,
+          "label_source": "silver_ai"
+        },
+        {
+          "candidate_index": 3,
+          "chunk_id": "CHA Employee Handbook 2025-p030-c004",
+          "relevance": 0,
+          "confidence": 0.08,
+          "label_source": "silver_ai"
+        },
+        {
+          "candidate_index": 4,
+          "chunk_id": "CHA Employee Handbook 2025-p009-c003",
+          "relevance": 1,
+          "confidence": 0.47,
+          "label_source": "silver_ai"
+        },
+        {
+          "candidate_index": 5,
+          "chunk_id": "CHA Employee Handbook 2025-p026-c003",
+          "relevance": 2,
+          "confidence": 0.71,
+          "label_source": "silver_ai"
+        },
+        {
+          "candidate_index": 6,
+          "chunk_id": "CHA Employee Handbook 2025-p021-c002",
+          "relevance": 0,
+          "confidence": 0.12,
+          "label_source": "silver_ai"
+        },
+        {
+          "candidate_index": 7,
+          "chunk_id": "CHA Employee Handbook 2025-p021-c001",
+          "relevance": 0,
+          "confidence": 0.1,
+          "label_source": "silver_ai"
+        },
+        {
+          "candidate_index": 8,
+          "chunk_id": "CHA Employee Handbook 2025-p029-c004",
+          "relevance": 0,
+          "confidence": 0.95,
+          "label_source": "silver_ai"
+        },
+        {
+          "candidate_index": 9,
+          "chunk_id": "CHA Employee Handbook 2025-p026-c002",
+          "relevance": 3,
+          "confidence": 0.98,
+          "label_source": "silver_ai"
+        },
+        {
+          "candidate_index": 10,
+          "chunk_id": "CHA Information Security Policy-p005-c002",
+          "relevance": 0,
+          "confidence": 0.99,
+          "label_source": "silver_ai"
+        },
+        {
+          "candidate_index": 11,
+          "chunk_id": "CHA Employee Handbook 2025-p005-c002",
+          "relevance": 0,
+          "confidence": 0.97,
+          "label_source": "silver_ai"
+        },
+        {
+          "candidate_index": 12,
+          "chunk_id": "CHA Employee Handbook 2025-p031-c001",
+          "relevance": 0,
+          "confidence": 0.95,
+          "label_source": "silver_ai"
+        },
+        {
+          "candidate_index": 13,
+          "chunk_id": "CHA Employee Handbook 2025-p034-c001",
+          "relevance": 0,
+          "confidence": 0.99,
+          "label_source": "silver_ai"
+        },
+        {
+          "candidate_index": 14,
+          "chunk_id": "CHA Employee Handbook 2025-p006-c003",
+          "relevance": 2,
+          "confidence": 0.85,
+          "label_source": "silver_ai"
+        },
+        {
+          "candidate_index": 15,
+          "chunk_id": "CHA Procurement Policy-p004-c003",
+          "relevance": 0,
+          "confidence": 0.99,
+          "label_source": "silver_ai"
+        },
+        {
+          "candidate_index": 16,
+          "chunk_id": "CHA Employee Handbook 2025-p014-c004",
+          "relevance": 0,
+          "confidence": 1.0,
+          "label_source": "silver_ai"
+        },
+        {
+          "candidate_index": 17,
+          "chunk_id": "CHA Employee Handbook 2025-p022-c001",
+          "relevance": 0,
+          "confidence": 1.0,
+          "label_source": "silver_ai"
+        }
+      ]
+    },
+    {
+      "query_id": "CHA-009",
+      "category": "Equal Employment & Accommodation",
+      "query": "How should an employee report discrimination or harassment?",
+      "candidate_count": 16,
+      "judgments": [
+        {
+          "candidate_index": 0,
+          "chunk_id": "CHA Employee Handbook 2025-p008-c003",
+          "relevance": 3,
+          "confidence": 0.95,
+          "label_source": "silver_ai"
+        },
+        {
+          "candidate_index": 1,
+          "chunk_id": "CHA Employee Handbook 2025-p007-c004",
+          "relevance": 3,
+          "confidence": 0.98,
+          "label_source": "silver_ai"
+        },
+        {
+          "candidate_index": 2,
+          "chunk_id": "CHA Employee Handbook 2025-p002-c002",
+          "relevance": 1,
+          "confidence": 0.8,
+          "label_source": "silver_ai"
+        },
+        {
+          "candidate_index": 3,
+          "chunk_id": "CHA Employee Handbook 2025-p008-c001",
+          "relevance": 2,
+          "confidence": 0.8,
+          "label_source": "silver_ai"
+        },
+        {
+          "candidate_index": 4,
+          "chunk_id": "CHA Employee Handbook 2025-p008-c002",
+          "relevance": 1,
+          "confidence": 0.8,
+          "label_source": "silver_ai"
+        },
+        {
+          "candidate_index": 5,
+          "chunk_id": "CHA Employee Handbook 2025-p011-c003",
+          "relevance": 3,
+          "confidence": 0.97,
+          "label_source": "silver_ai"
+        },
+        {
+          "candidate_index": 6,
+          "chunk_id": "CHA Employee Handbook 2025-p006-c003",
+          "relevance": 0,
+          "confidence": 0.96,
+          "label_source": "silver_ai"
+        },
+        {
+          "candidate_index": 7,
+          "chunk_id": "CHA Employee Handbook 2025-p033-c004",
+          "relevance": 1,
+          "confidence": 0.82,
+          "label_source": "silver_ai"
+        },
+        {
+          "candidate_index": 8,
+          "chunk_id": "CHA Employee Handbook 2025-p007-c001",
+          "relevance": 1,
+          "confidence": 0.45,
+          "label_source": "silver_ai"
+        },
+        {
+          "candidate_index": 9,
+          "chunk_id": "CHA Employee Handbook 2025-p007-c002",
+          "relevance": 1,
+          "confidence": 0.4,
+          "label_source": "silver_ai"
+        },
+        {
+          "candidate_index": 10,
+          "chunk_id": "CHA Employee Handbook 2025-p031-c003",
+          "relevance": 3,
+          "confidence": 0.97,
+          "label_source": "silver_ai"
+        },
+        {
+          "candidate_index": 11,
+          "chunk_id": "CHA Employee Handbook 2025-p010-c003",
+          "relevance": 1,
+          "confidence": 0.35,
+          "label_source": "silver_ai"
+        },
+        {
+          "candidate_index": 12,
+          "chunk_id": "CHA Employee Handbook 2025-p033-c003",
+          "relevance": 0,
+          "confidence": 0.99,
+          "label_source": "silver_ai"
+        },
+        {
+          "candidate_index": 13,
+          "chunk_id": "CHA Employee Handbook 2025-p031-c002",
+          "relevance": 1,
+          "confidence": 0.3,
+          "label_source": "silver_ai"
+        },
+        {
+          "candidate_index": 14,
+          "chunk_id": "CHA Employee Handbook 2025-p013-c001",
+          "relevance": 1,
+          "confidence": 0.3,
+          "label_source": "silver_ai"
+        },
+        {
+          "candidate_index": 15,
+          "chunk_id": "CHA Employee Handbook 2025-p006-c002",
+          "relevance": 1,
+          "confidence": 0.35,
+          "label_source": "silver_ai"
+        }
+      ]
+    },
+    {
+      "query_id": "CHA-010",
+      "category": "Equal Employment & Accommodation",
+      "query": "What does CHA say about inclusion and belonging in the workplace?",
+      "candidate_count": 19,
+      "judgments": [
+        {
+          "candidate_index": 0,
+          "chunk_id": "CHA Employee Handbook 2025-p007-c001",
+          "relevance": 3,
+          "confidence": 0.95,
+          "label_source": "silver_ai"
+        },
+        {
+          "candidate_index": 1,
+          "chunk_id": "CHA Employee Handbook 2025-p006-c002",
+          "relevance": 2,
+          "confidence": 0.85,
+          "label_source": "silver_ai"
+        },
+        {
+          "candidate_index": 2,
+          "chunk_id": "CHA Employee Handbook 2025-p035-c002",
+          "relevance": 0,
+          "confidence": 0.99,
+          "label_source": "silver_ai"
+        },
+        {
+          "candidate_index": 3,
+          "chunk_id": "CHA Employee Handbook 2025-p033-c002",
+          "relevance": 0,
+          "confidence": 0.99,
+          "label_source": "silver_ai"
+        },
+        {
+          "candidate_index": 4,
+          "chunk_id": "CHA Employee Handbook 2025-p034-c003",
+          "relevance": 0,
+          "confidence": 0.99,
+          "label_source": "silver_ai"
+        },
+        {
+          "candidate_index": 5,
+          "chunk_id": "CHA Employee Handbook 2025-p012-c002",
+          "relevance": 1,
+          "confidence": 0.7,
+          "label_source": "silver_ai"
+        },
+        {
+          "candidate_index": 6,
+          "chunk_id": "CHA Employee Handbook 2025-p010-c003",
+          "relevance": 1,
+          "confidence": 0.7,
+          "label_source": "silver_ai"
+        },
+        {
+          "candidate_index": 7,
+          "chunk_id": "CHA Employee Handbook 2025-p005-c003",
+          "relevance": 0,
+          "confidence": 0.98,
+          "label_source": "silver_ai"
+        },
+        {
+          "candidate_index": 8,
+          "chunk_id": "CHA Information Security Policy-p004-c003",
+          "relevance": 0,
+          "confidence": 1.0,
+          "label_source": "silver_ai"
+        },
+        {
+          "candidate_index": 9,
+          "chunk_id": "CHA Employee Handbook 2025-p009-c001",
+          "relevance": 0,
+          "confidence": 1.0,
+          "label_source": "silver_ai"
+        },
+        {
+          "candidate_index": 10,
+          "chunk_id": "CHA Employee Handbook 2025-p002-c001",
+          "relevance": 3,
+          "confidence": 1.0,
+          "label_source": "silver_ai"
+        },
+        {
+          "candidate_index": 11,
+          "chunk_id": "CHA Employee Handbook 2025-p005-c002",
+          "relevance": 0,
+          "confidence": 1.0,
+          "label_source": "silver_ai"
+        },
+        {
+          "candidate_index": 12,
+          "chunk_id": "CHA Employee Handbook 2025-p015-c004",
+          "relevance": 0,
+          "confidence": 0.96,
+          "label_source": "silver_ai"
+        },
+        {
+          "candidate_index": 13,
+          "chunk_id": "CHA Information Security Policy-p005-c002",
+          "relevance": 0,
+          "confidence": 0.94,
+          "label_source": "silver_ai"
+        },
+        {
+          "candidate_index": 14,
+          "chunk_id": "CHA Employee Handbook 2025-p010-c001",
+          "relevance": 2,
+          "confidence": 0.83,
+          "label_source": "silver_ai"
+        },
+        {
+          "candidate_index": 15,
+          "chunk_id": "CHA Employee Handbook 2025-p032-c002",
+          "relevance": 1,
+          "confidence": 0.71,
+          "label_source": "silver_ai"
+        },
+        {
+          "candidate_index": 16,
+          "chunk_id": "CHA Procurement Policy-p002-c001",
+          "relevance": 0,
+          "confidence": 0.0,
+          "label_source": "silver_ai"
+        },
+        {
+          "candidate_index": 17,
+          "chunk_id": "CHA Employee Handbook 2025-p014-c001",
+          "relevance": 0,
+          "confidence": 0.0,
+          "label_source": "silver_ai"
+        },
+        {
+          "candidate_index": 18,
+          "chunk_id": "CHA Employee Handbook 2025-p014-c002",
+          "relevance": 0,
+          "confidence": 0.0,
+          "label_source": "silver_ai"
+        }
+      ]
     }
   ],
   "total_queries": 50,
   "status": "running",
   "last_stop_reason": "OpenRouter HTTP 429 Too Many Requests",
-  "completed_queries": 3
+  "completed_queries": 10
 }
