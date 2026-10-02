@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
-      OPENROUTER_MODEL: ${{ inputs.model || 'qwen/qwen3.8-27b:free' }}
+      OPENROUTER_MODEL: ${{ inputs.model || 'nvidia/nemotron-3.5-lightning:free' }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
