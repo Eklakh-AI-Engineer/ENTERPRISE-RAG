@@ -25,6 +25,12 @@ def create_user_client(*, access_token: str | None = None) -> Any:
     )
     if access_token:
         client.postgrest.auth(access_token)
+        # Keep the caller JWT on the client-level headers so Storage RLS
+        # evaluates the same authenticated identity as PostgREST.
+        try:
+            client.options.headers["Authorization"] = f"Bearer {access_token}"
+        except Exception:
+            pass
     return client
 
 
