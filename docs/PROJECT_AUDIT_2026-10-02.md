@@ -3,7 +3,7 @@
 **Audit date:** 2026-10-02  
 **Repository:** Eklakh-AI-Engineer/ENTERPRISE-RAG  
 **Branch:** main  
-**Audited HEAD:** b0c92a84a252cbf7b6cec74d4b8547a1ece23086  
+**Audited HEAD:** 091b15ee8b6535a71c085a8310fd20563922ef77  
 **Status:** PAUSED AT A VALID RESUME POINT
 
 > This audit supersedes the 2026-10-01 pause-point snapshot for execution status. It distinguishes implemented engineering work from work that is actually verified in production.
@@ -41,8 +41,8 @@ There are two parallel tracks:
 | Tenant-scoped vector RPC | DONE |
 | RLS policies | IMPLEMENTED; live two-user document isolation verified |
 | Real Auth users | DONE: 2 Auth users created |
-| Authenticated upload | NOT DONE as final production API flow |
-| Live ingestion execution | NOT VERIFIED |
+| Authenticated upload | IMPLEMENTED in API; live execution pending |
+| Live ingestion execution | NOT VERIFIED; one-shot worker runner added |
 | Chunk replacement idempotency | NOT DONE |
 | Production BM25 lifecycle | NOT DONE |
 | Production query path | NOT DONE |
@@ -171,6 +171,24 @@ Still required:
 - operational monitoring;
 - production BM25 integration.
 
+### Phase B implementation update
+
+The authenticated document upload path is now implemented at `POST /documents`.
+
+It:
+
+- verifies the Supabase bearer token;
+- resolves the caller's organization from `organization_members` rather than trusting a client-supplied organization ID;
+- accepts PDF uploads with a configured size limit;
+- creates the tenant-scoped document and ingestion job;
+- uploads the PDF to the private Storage bucket using the caller-scoped client;
+- preserves deduplication by organization/content hash/pipeline version;
+- performs best-effort cleanup if Storage upload fails.
+
+A one-shot trusted worker runner is also available at `scripts/run_ingestion_worker.py`. It uses the service-role client only for background ingestion and processes one eligible job for a supplied organization.
+
+Live API upload and live worker execution still require an actual runtime with the Supabase environment variables and a valid user access token. They have not been claimed as verified.
+
 ### Critical indexing caveat
 
 Current Supabase chunk persistence is an **upsert**, not an atomic replacement.
@@ -279,8 +297,8 @@ Do not claim:
 ### Track B — production
 
 1. Complete application-level authenticated RLS/Storage integration tests.
-2. Finish authenticated document upload.
-3. Execute live ingestion.
+2. Execute live authenticated document upload.
+3. Execute the one-shot ingestion worker against the uploaded document.
 4. Fix atomic chunk replacement.
 5. Benchmark FAISS vs pgvector.
 6. Implement tenant BM25 lifecycle.
