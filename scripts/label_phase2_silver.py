@@ -109,6 +109,13 @@ def main() -> None:
         "queries": [],
     }
     done = {q["query_id"]: q for q in existing.get("queries", [])}
+    if done and existing.get("model") != args.model:
+        raise SystemExit(
+            f"Checkpoint model mismatch: existing={existing.get("model")!r}, requested={args.model!r}. "
+            "Do not mix silver labels from different judge models in one checkpoint."
+        )
+    if not done:
+        existing["model"] = args.model
     existing["total_queries"] = len(pool["queries"])
     existing["status"] = "running"
     save_json(args.output, existing)
