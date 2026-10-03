@@ -20,11 +20,7 @@ class TokenVerifier(Protocol):
 
 
 class SupabaseTokenVerifier:
-    """Adapter around Supabase's verified-claims API.
-
-    The Supabase Python client verifies the access-token JWT before returning
-    claims. This class deliberately does not decode JWTs itself.
-    """
+    """Verify Supabase Auth access tokens through the supported Auth API."""
 
     def __init__(self, client: Any) -> None:
         self.client = client
@@ -32,28 +28,46 @@ class SupabaseTokenVerifier:
     def verify(self, token: str) -> AuthenticatedPrincipal:
         if not token.strip():
             raise InvalidTokenError("Missing access token")
+
         try:
-            response = self.client.auth.get_claims(token)
+            response = self.client.auth.get_user(token.strip())
         except Exception as exc:
             raise InvalidTokenError("Invalid access token") from exc
+
+        if response is None:
+            raise InvalidTokenError("Authenticated user was not returned")
 
         error = getattr(response, "error", None)
         if error:
             raise InvalidTokenError("Invalid access token")
-        data = getattr(response, "data", None)
-        claims = getattr(data, "claims", None)
-        if claims is None and isinstance(data, dict):
-            claims = data.get("claims")
-        if not isinstance(claims, dict):
-            raise InvalidTokenError("Verified token claims are unavailable")
 
-        user_id = claims.get("sub")
-        role = claims.get("role")
+        user = getattr(response, "user", None)
+        user_id = getattr(user, "id", None)
+        role = getattr(user, "role", None) or "authenticated"
+
         if not isinstance(user_id, str) or not user_id:
-            raise InvalidTokenError("Token does not contain a user subject")
-        if not isinstance(role, str) or role != "authenticated":
+            raise InvalidTokenError("Authenticated user does not contain an id")
+
+        if role != "authenticated":
             raise InvalidTokenError("Token does not have the authenticated role")
-        return AuthenticatedPrincipal(user_id=user_id, role=role, claims=dict(claims))
+
+        claims = {
+            "sub": user_id,
+            "role": role,
+        }
+
+        user_metadata = getattr(user, "user_metadata", None)
+        app_metadata = getattr(user, "app_metadata", None)
+        if isinstance(user_metadata, dict):
+            claims["user_metadata"] = user_metadata
+        if isinstance(app_metadata, dict):
+            claims["app_metadata"] = app_metadata
+
+        return AuthenticatedPrincipal(
+            user_id=user_id,
+            role="authenticated",
+            claims=claims,
+        )
 
 
 class AuthService:

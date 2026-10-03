@@ -1,25 +1,43 @@
-import { getAccessToken } from "./auth";
+import { getSession, refreshSession, getValidSession } from "./auth";
 
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
 
-function authHeaders() {
-  const token = getAccessToken();
-  if (!token) {
+async function authorizedFetch(path, options = {}) {
+  let session = await getValidSession();
+  if (!session?.access_token) {
     throw new Error("Please sign in before using Enterprise RAG.");
   }
-  return {
-    Authorization: `Bearer ${token}`,
-  };
+
+  const headers = new Headers(options.headers || {});
+  headers.set("Authorization", `Bearer ${session.access_token}`);
+
+  let response = await fetch(`${API_BASE_URL}${path}`, {
+    ...options,
+    headers,
+  });
+
+  // Access tokens are short-lived. Refresh once and retry a failed auth
+  // request so an otherwise-valid browser session does not surface a 401.
+  if (response.status === 401 && session.refresh_token) {
+    const refreshed = await refreshSession(session);
+    if (refreshed?.access_token) {
+      headers.set("Authorization", `Bearer ${refreshed.access_token}`);
+      response = await fetch(`${API_BASE_URL}${path}`, {
+        ...options,
+        headers,
+      });
+    }
+  }
+
+  return response;
 }
 
 export async function checkHealth() {
   const response = await fetch(`${API_BASE_URL}/health`);
-
   if (!response.ok) {
     throw new Error("Backend unavailable");
   }
-
   return response.json();
 }
 
@@ -35,9 +53,8 @@ export async function uploadDocument(file) {
   const formData = new FormData();
   formData.append("file", file);
 
-  const response = await fetch(`${API_BASE_URL}/documents`, {
+  const response = await authorizedFetch("/documents", {
     method: "POST",
-    headers: authHeaders(),
     body: formData,
   });
 
@@ -53,11 +70,10 @@ export async function uploadDocument(file) {
 }
 
 export async function queryRAG(query) {
-  const response = await fetch(`${API_BASE_URL}/query`, {
+  const response = await authorizedFetch("/query", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      ...authHeaders(),
     },
     body: JSON.stringify({ query }),
   });

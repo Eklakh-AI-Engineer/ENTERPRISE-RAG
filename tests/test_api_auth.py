@@ -18,7 +18,7 @@ def test_auth_me_accepts_verified_principal(monkeypatch):
             assert authorization == "Bearer test-token"
             return AuthenticatedPrincipal(user_id="user-a", role="authenticated", claims={})
 
-    monkeypatch.setattr(main, "_auth_service", lambda: FakeAuth())
+    monkeypatch.setattr(main, "_auth_service", lambda token: FakeAuth())
     with TestClient(app) as client:
         response = client.get("/auth/me", headers={"Authorization": "Bearer test-token"})
     assert response.status_code == 200

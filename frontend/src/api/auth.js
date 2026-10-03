@@ -18,7 +18,7 @@ export function getSession() {
 }
 
 function saveSession(session) {
-  if (session) {
+  if (session?.access_token) {
     sessionStorage.setItem(SESSION_KEY, JSON.stringify(session));
   } else {
     sessionStorage.removeItem(SESSION_KEY);
@@ -42,8 +42,10 @@ export async function signIn(email, password) {
 
   const data = await response.json().catch(() => ({}));
 
-  if (!response.ok) {
-    throw new Error(data.error_description || data.msg || data.message || "Sign-in failed.");
+  if (!response.ok || !data.access_token) {
+    throw new Error(
+      data.error_description || data.msg || data.message || "Sign-in failed."
+    );
   }
 
   saveSession(data);
@@ -54,7 +56,7 @@ export function signOut() {
   saveSession(null);
 }
 
-export async function refreshSession(session) {
+export async function refreshSession(session = getSession()) {
   if (!session?.refresh_token) return null;
   requireConfig();
 
@@ -76,8 +78,30 @@ export async function refreshSession(session) {
   }
 
   const data = await response.json();
+  if (!data.access_token) {
+    saveSession(null);
+    return null;
+  }
+
   saveSession(data);
   return data;
+}
+
+export async function getValidSession() {
+  const current = getSession();
+  if (!current?.access_token) return null;
+
+  const expiresAtMs = Number(current.expires_at || 0) * 1000;
+  const expiresInMs = Number(current.expires_in || 0) * 1000;
+  const now = Date.now();
+
+  // Refresh when the token is expired or within the next 60 seconds.
+  const effectiveExpiry = expiresAtMs || (expiresInMs ? now + expiresInMs : 0);
+  if (effectiveExpiry && effectiveExpiry <= now + 60_000) {
+    return refreshSession(current);
+  }
+
+  return current;
 }
 
 export function getAccessToken() {

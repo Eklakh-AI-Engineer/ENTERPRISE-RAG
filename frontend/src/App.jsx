@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   getSession,
-  refreshSession,
+  getValidSession,
   signIn,
   signOut,
 } from "./api/auth";
-import { uploadDocument } from "./api/rag";
+import { queryRAG, uploadDocument } from "./api/rag";
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
 
@@ -120,22 +120,10 @@ function App() {
     let active = true;
 
     const restoreSession = async () => {
-      const current = getSession();
-
-      if (!current) {
-        if (active) setSession(null);
-        return;
-      }
-
-      if (!current.refresh_token) {
-        if (active) setSession(current);
-        return;
-      }
-
-      const refreshed = await refreshSession(current);
+      const current = await getValidSession();
 
       if (active) {
-        setSession(refreshed);
+        setSession(current);
       }
     };
 
@@ -257,31 +245,14 @@ function App() {
     setExpandedChunk(null);
 
     try {
-      const response = await fetch(`${API_BASE}/query`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${session.access_token}`,
-        },
-        body: JSON.stringify({
-          query: cleanQuery,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`API request failed: ${response.status}`);
-      }
-
-      const data = await response.json();
+      const data = await queryRAG(cleanQuery);
 
       setResult(data);
       setApiOnline(true);
     } catch (err) {
       console.error(err);
       setApiOnline(false);
-      setError(
-        "Unable to connect to the Enterprise RAG API. Make sure the backend is running on port 8000."
-      );
+      setError(err.message || "Unable to process the request.");
     } finally {
       setLoading(false);
     }
