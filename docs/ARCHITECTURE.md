@@ -1,7 +1,7 @@
 # Enterprise RAG — Architecture
 
-**Phase 1 architecture decision record**  
-**Date:** 2026-10-01
+**Current architecture direction:** local-first retrieval engineering  
+**Date:** 2026-10-03
 
 ## 1. Current local architecture
 
@@ -25,16 +25,16 @@ Observability / evaluation
 
 The implementation keeps retrieval, ranking, generation, citation verification, and evaluation as separate modules.
 
-## 2. Phase 1 production topology decision
+## 2. Later production topology
 
-The current FastAPI application initializes SentenceTransformers, FAISS, BM25, and a CrossEncoder during application startup. Therefore the full inference path is not assumed to belong inside Vercel Functions.
+Production is intentionally deferred until the local retrieval benchmark and product are frozen.
 
-Selected topology:
+Target topology:
 
 Browser
   ↓
 Vercel — React/Vite frontend
-  ↓ HTTPS + user JWT
+  ↓ HTTPS + authenticated user context
 Long-running API / inference service
   ├── retrieval orchestration
   ├── embedding inference
@@ -46,33 +46,24 @@ Long-running API / inference service
   ↓
 Long-running ingestion worker
 
-Candidate API/inference hosts are Fly.io, Railway, Cloud Run, or an equivalent long-running container platform.
+The production host is not fixed yet. The deployment choice will be made after a target-runtime feasibility measurement.
 
-**Decision:** Vercel owns the web UI first. Heavy Python inference is moved to a long-running service unless the Phase 1 resource benchmark proves a Vercel-compatible deployment is practical.
+## 3. Production feasibility gate
 
-## 3. Quantitative feasibility gate
+Before production deployment, measure the actual target runtime for:
 
-Run:
+- Python/package footprint;
+- model initialization;
+- embedding inference;
+- reranking;
+- concurrent-request behavior;
+- memory and startup characteristics.
 
-    python scripts/phase1_feasibility.py
+Local measurements are evidence for development, not guarantees about a target hosting platform.
 
-For cached-model measurements:
+## 4. Async ingestion target
 
-    python scripts/phase1_feasibility.py --load-models
-
-For concurrency:
-
-    python scripts/phase1_feasibility.py --load-models --concurrency 4
-
-The benchmark records source/package footprint, Python/platform information, model initialization, inference duration, reranking duration, and optional concurrent-request behavior.
-
-The benchmark must be run on the target deployment environment before production deployment. Local measurements are evidence, not Vercel guarantees.
-
-## 4. Async ingestion decision
-
-**Selected mechanism: Supabase Postgres-backed job table + long-running worker with row leasing.**
-
-The worker owns PDF parsing, OCR fallback, chunking, embedding, dense-index updates, tenant-scoped lexical-index updates, and READY/FAILED transitions.
+The intended production mechanism is a Supabase Postgres-backed job table plus a long-running worker with row leasing.
 
 Upload
   ↓
@@ -86,84 +77,49 @@ parse → OCR → chunk → embed → index
   ↓
 READY / FAILED
 
-Job states:
-- PENDING
-- PROCESSING
-- READY
-- FAILED
+The worker must support multi-tenant job claiming, lease recovery, idempotency,
+and tenant-safe index updates before production release.
 
-A lease expiry makes PROCESSING jobs eligible for retry.
+## 5. Tenant-safe lexical retrieval target
 
-Idempotency key:
-document_id + content_hash + pipeline_version
+The intended production lexical strategy is per-tenant BM25 indexes.
 
-The worker must never depend on an HTTP request remaining open.
+The index must contain only chunks belonging to the tenant. Query execution
+receives an explicit tenant ID and never falls back to a global corpus.
 
-## 5. Tenant-safe lexical retrieval decision
+## 6. Supabase request-path security target
 
-**Selected mechanism: per-tenant BM25 indexes.**
+User JWTs are passed through to Supabase-backed operations wherever RLS should
+enforce ownership.
 
-Rationale:
-- preserves BM25 semantics used by the current retrieval system;
-- prevents a global lexical index from mixing tenants;
-- keeps Dense-vs-Hybrid benchmarking comparable;
-- supports tenant-scoped rebuild and deletion.
+The Supabase service-role key is not part of the ordinary user query path. It is
+reserved for explicitly trusted operations such as migrations/admin provisioning
+or isolated worker operations.
 
-Lifecycle:
-
-tenant document changes
-  ↓
-tenant lexical corpus marked stale
-  ↓
-worker rebuilds tenant BM25 index
-  ↓
-index version activated atomically
-
-The index must contain only chunks belonging to the tenant. Query execution receives an explicit tenant ID and never falls back to a global corpus.
-
-Trade-off: very large tenants may eventually require sharding or a different lexical service. PostgreSQL full-text search remains a possible scale-oriented alternative, but it is not the selected Phase 1 production lexical strategy because it changes the lexical algorithm.
-
-## 6. Supabase request-path security decision
-
-User JWTs are passed through to Supabase-backed operations wherever RLS should enforce ownership.
-
-Browser JWT
-  ↓
-API authentication
-  ↓
-tenant/user context
-  ↓
-Supabase request with user authorization context
-  ↓
-RLS
-
-The Supabase service-role key is not part of the ordinary user query path.
-
-It may be used only for explicitly trusted operations such as migrations/admin provisioning or isolated worker operations that require privileged writes.
-
-Every service-role operation must still enforce tenant/document ownership in application code.
-
-RLS tests must be performed independently through an actual user-authorized request path.
+RLS tests must be performed independently through an actual user-authorized
+request path.
 
 ## 7. Configuration boundary
 
 Runtime configuration is centralized in app/config/settings.py.
 
 Environment-controlled values include:
-- local index paths
-- embedding model
-- reranker model
-- retrieval top-k values
-- API host/port
-- CORS origins
-- environment
-- application version
+
+- local index paths;
+- embedding model;
+- reranker model;
+- retrieval top-k values;
+- API host/port;
+- CORS origins;
+- environment;
+- application version.
 
 No local Windows/WSL absolute paths are required.
 
-## 8. Later-phase constraints
+## 8. Architectural constraints
 
-Phase 3–6 must preserve:
+The system should preserve:
+
 1. tenant isolation before retrieval;
 2. explicit retrieval stages;
 3. versioned embedding/index configuration;
@@ -172,4 +128,5 @@ Phase 3–6 must preserve:
 6. provider-independent generation;
 7. stage-level observability.
 
-The architecture should not be rewritten around a framework unless benchmark or operational evidence justifies it.
+The architecture should not be rewritten around a framework unless benchmark or
+operational evidence justifies it.
