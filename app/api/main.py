@@ -146,11 +146,24 @@ app.add_middleware(
 
 @app.get("/health")
 def health():
+    """Liveness endpoint: the process is running."""
     return {
         "status": "ok",
         "service": "enterprise-rag",
         "environment": settings.ENVIRONMENT,
         "pipeline_loaded": pipeline is not None,
+    }
+
+
+@app.get("/ready")
+def readiness():
+    """Readiness endpoint used by the deployment platform."""
+    if pipeline is None:
+        raise HTTPException(status_code=503, detail="RAG pipeline is not loaded.")
+    return {
+        "status": "ready",
+        "service": "enterprise-rag",
+        "environment": settings.ENVIRONMENT,
     }
 
 
