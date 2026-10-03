@@ -13,6 +13,16 @@ from app.persistence.entities import (
 
 class DocumentRepository(Protocol):
     def get(self, document_id: str, organization_id: str) -> DocumentRecord | None: ...
+    def submit_with_job(
+        self,
+        *,
+        organization_id: str,
+        owner_user_id: str,
+        filename: str,
+        storage_path: str,
+        content_hash: str,
+        pipeline_version: str,
+    ) -> tuple[DocumentRecord, IngestionJobRecord, bool]: ...
     def get_by_content(
         self,
         organization_id: str,
