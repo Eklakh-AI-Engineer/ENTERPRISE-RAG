@@ -930,4 +930,4 @@ Enterprise RAG is considered **production-ready** only when:
 - [ ] Browser end-to-end flow passes.
 - [ ] Production documentation is complete.
 
-**Current position: Phase 2 empirical benchmark is active. The real 50-query CHA Dense ∪ BM25 pool is frozen, while silver labeling is quota-limited and human review remains pending. Phase 3 database design and the application persistence/service boundary are being prepared in parallel without applying production schema changes.**
+**Current position: Phase 2 empirical benchmark is blocked on human relevance labeling. Phase 3 database/Auth/Storage foundations are live and migration-synchronized; the remaining gate is a real authenticated upload → Storage → worker → chunk/embedding → pgvector retrieval test.**
