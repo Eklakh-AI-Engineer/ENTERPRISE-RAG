@@ -183,7 +183,11 @@ class SupabaseIngestionJobRepository:
         ).execute()
         _raise_on_error(response)
         row = _one(response)
-        if not row:
+        # A PostgreSQL function returning a composite row can be represented
+        # by PostgREST as an object whose fields are all null when the
+        # function returns NULL. Treat that as "no eligible job" rather than
+        # attempting to re-read a null UUID.
+        if not row or row.get("id") is None:
             return None
 
         claimed = _job(row)
