@@ -17,6 +17,10 @@ import {
   ShieldCheck,
   Sparkles,
   Upload,
+  UserRound,
+  Activity,
+  FileStack,
+  SlidersHorizontal,
   X,
   Zap,
 } from "lucide-react";
@@ -106,6 +110,10 @@ function App() {
       const nextSession = await signIn(email.trim(), password);
       setSession(nextSession);
       setPassword("");
+      window.history.replaceState(null, "", "#profile");
+      window.requestAnimationFrame(() => {
+        document.getElementById("profile")?.scrollIntoView({ behavior: "smooth", block: "start" });
+      });
     } catch (err) {
       setAuthError(err.message || "Sign-in failed.");
     } finally {
@@ -117,6 +125,7 @@ function App() {
     signOut();
     setSession(null);
     setResult(null);
+    window.history.replaceState(null, "", "#workspace");
     setSelectedFile(null);
     setUploadMessage("");
     setUploadError("");
@@ -249,9 +258,19 @@ function App() {
         </a>
 
         <nav className={`main-nav ${mobileNav ? "open" : ""}`} aria-label="Primary">
-          <a href="#workspace" onClick={() => setMobileNav(false)}>Workspace</a>
-          <a href="#results" onClick={() => setMobileNav(false)}>Evidence</a>
-          <a href="#system" onClick={() => setMobileNav(false)}>System</a>
+          {session ? (
+            <>
+              <a href="#profile" onClick={() => setMobileNav(false)}>Profile</a>
+              <a href="#ask" onClick={() => setMobileNav(false)}>RAG Workbench</a>
+              <a href="#results" onClick={() => setMobileNav(false)}>Evidence</a>
+            </>
+          ) : (
+            <>
+              <a href="#workspace" onClick={() => setMobileNav(false)}>Platform</a>
+              <a href="#system" onClick={() => setMobileNav(false)}>How it works</a>
+              <a href="#auth" onClick={() => setMobileNav(false)}>Sign in</a>
+            </>
+          )}
         </nav>
 
         <div className="topbar-actions">
@@ -261,10 +280,15 @@ function App() {
           </div>
 
           {session ? (
-            <button className="account-button" type="button" onClick={handleLogout} title="Sign out">
-              <span>{session.user?.email?.slice(0, 1).toUpperCase() || "U"}</span>
-              <LogOut size={15} />
-            </button>
+            <div className="profile-actions">
+              <a className="profile-trigger" href="#profile" title="Open profile">
+                <span>{session.user?.email?.slice(0, 1).toUpperCase() || "U"}</span>
+                <UserRound size={14} />
+              </a>
+              <button className="logout-button" type="button" onClick={handleLogout} title="Sign out">
+                <LogOut size={14} />
+              </button>
+            </div>
           ) : (
             <a className="topbar-signin" href="#auth">Sign in <ArrowUpRight size={14} /></a>
           )}
@@ -281,7 +305,9 @@ function App() {
       </header>
 
       <main id="top" className="main-content">
-        <section className="hero" id="workspace">
+        {!session ? (
+          <section className="public-layout">
+            <div className="public-landing">        <section className="hero" id="workspace">
           <div className="hero-copy-block">
             <div className="overline">
               <span className="overline-dot" />
@@ -325,48 +351,43 @@ function App() {
           </aside>
         </section>
 
-        {!session ? (
+
+            </div>
+            <div className="public-auth">
           <section className="auth-section" id="auth">
             <div className="auth-intro">
               <span className="eyebrow">PRIVATE WORKSPACE</span>
               <h2>Sign in to query your knowledge base.</h2>
               <p>Your session is used to enforce tenant-scoped access.</p>
             </div>
-
             <form className="auth-card" onSubmit={handleLogin}>
               <label>
                 Email
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(event) => setEmail(event.target.value)}
-                  placeholder="you@company.com"
-                  autoComplete="email"
-                  required
-                />
+                <input type="email" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="you@company.com" autoComplete="email" required />
               </label>
               <label>
                 Password
-                <input
-                  type="password"
-                  value={password}
-                  onChange={(event) => setPassword(event.target.value)}
-                  placeholder="••••••••"
-                  autoComplete="current-password"
-                  required
-                />
+                <input type="password" value={password} onChange={(event) => setPassword(event.target.value)} placeholder="••••••••" autoComplete="current-password" required />
               </label>
-              {authError && (
-                <div className="inline-error"><CircleAlert size={15} /> {authError}</div>
-              )}
+              {authError && <div className="inline-error"><CircleAlert size={15} /> {authError}</div>}
               <button className="primary-button" type="submit" disabled={authLoading}>
-                {authLoading ? "Authenticating…" : "Enter workspace"}
-                <ArrowUpRight size={16} />
+                {authLoading ? "Authenticating…" : "Enter workspace"} <ArrowUpRight size={16} />
               </button>
+              <div className="auth-footnote"><ShieldCheck size={13} /> Tenant-scoped authentication</div>
             </form>
           </section>
+            </div>
+          </section>
         ) : (
+          <ProfileHeader session={session} onLogout={handleLogout} />
+        )}
+
+        {session && (
           <section className="workspace-panel" id="ask">
+            <div className="workbench-label">
+              <span><Activity size={13} /> RAG WORKBENCH</span>
+              <span>Private tenant workspace</span>
+            </div>
             <div className="workspace-head">
               <div>
                 <span className="eyebrow">QUERY WORKSPACE</span>
@@ -421,7 +442,7 @@ function App() {
               </button>
             </div>
 
-            <div className="ingest-card">
+            <div className="ingest-card" id="knowledge-base">
               <div className="ingest-icon"><Upload size={18} /></div>
               <div className="ingest-copy">
                 <span className="eyebrow">KNOWLEDGE BASE</span>
@@ -620,6 +641,47 @@ function App() {
         <span><span className="status-dot" /> pgvector · reranking · grounded generation</span>
       </footer>
     </div>
+  );
+}
+
+function ProfileHeader({ session, onLogout }) {
+  const email = session.user?.email || "authenticated user";
+
+  return (
+    <section className="profile-shell" id="profile">
+      <div className="profile-main">
+        <div className="profile-avatar"><UserRound size={28} /></div>
+        <div className="profile-copy">
+          <span className="eyebrow">PERSONAL WORKSPACE</span>
+          <h1>Welcome back.</h1>
+          <p>{email}</p>
+        </div>
+        <div className="profile-status"><span className="status-dot online-dot" /> Workspace active</div>
+      </div>
+
+      <div className="profile-actions-grid">
+        <a className="profile-card active" href="#ask">
+          <span className="profile-card-icon"><Search size={17} /></span>
+          <span><strong>RAG Workbench</strong><small>Ask, retrieve, rerank, inspect</small></span>
+          <ChevronRight size={15} />
+        </a>
+        <a className="profile-card" href="#knowledge-base">
+          <span className="profile-card-icon"><FileStack size={17} /></span>
+          <span><strong>Knowledge Base</strong><small>Upload and index PDF sources</small></span>
+          <ChevronRight size={15} />
+        </a>
+        <a className="profile-card" href="#results">
+          <span className="profile-card-icon"><Activity size={17} /></span>
+          <span><strong>Evidence & Metrics</strong><small>Review citations and latency</small></span>
+          <ChevronRight size={15} />
+        </a>
+        <button className="profile-card" type="button" onClick={onLogout}>
+          <span className="profile-card-icon"><SlidersHorizontal size={17} /></span>
+          <span><strong>Session</strong><small>Sign out of this workspace</small></span>
+          <LogOut size={15} />
+        </button>
+      </div>
+    </section>
   );
 }
 
