@@ -72,15 +72,35 @@ class DocumentService:
             )
 
         document_id = str(uuid4())
+        storage_path = (
+            f"organizations/{organization_id}/documents/"
+            f"{document_id}/{filename}"
+        )
+
+        atomic_submit = getattr(self.documents, "submit_with_job", None)
+        if callable(atomic_submit):
+            document, job, deduplicated = atomic_submit(
+                organization_id=organization_id,
+                owner_user_id=owner_user_id,
+                filename=filename,
+                storage_path=storage_path,
+                content_hash=content_hash,
+                pipeline_version=pipeline_version,
+            )
+            return DocumentSubmission(
+                document=document,
+                ingestion_job=job,
+                deduplicated=deduplicated,
+            )
+
+        # Local/in-memory fallback. Production Supabase uses the atomic RPC
+        # above so document + job creation cannot partially commit.
         document = DocumentRecord(
             id=document_id,
             organization_id=organization_id,
             owner_user_id=owner_user_id,
             filename=filename,
-            storage_path=(
-                f"organizations/{organization_id}/documents/"
-                f"{document_id}/{filename}"
-            ),
+            storage_path=storage_path,
             content_hash=content_hash,
             pipeline_version=pipeline_version,
         )
