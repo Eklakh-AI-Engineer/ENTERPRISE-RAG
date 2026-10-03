@@ -47,6 +47,24 @@ class ProductionQueryPipeline:
         metrics.retrieval_ms = metrics.elapsed_ms(retrieval_start)
         metrics.retrieved_count = len(chunks)
 
+        document_ids = sorted({chunk.document_id for chunk in chunks})
+        document_names: dict[str, str] = {}
+        if document_ids:
+            response = (
+                client.table("documents")
+                .select("id,filename")
+                .in_("id", document_ids)
+                .execute()
+            )
+            error = getattr(response, "error", None)
+            if error:
+                raise RuntimeError(f"Failed to resolve retrieved document metadata: {error}")
+            document_names = {
+                row["id"]: row["filename"]
+                for row in (getattr(response, "data", None) or [])
+                if row.get("id") and row.get("filename")
+            }
+
         retrieved = [
             {
                 "id": chunk.id,
@@ -58,7 +76,7 @@ class ProductionQueryPipeline:
                 "start_char": chunk.start_char,
                 "end_char": chunk.end_char,
                 "score": chunk.similarity,
-                "document": "unknown",
+                "document": document_names.get(chunk.document_id, "unknown"),
             }
             for chunk in chunks
         ]
