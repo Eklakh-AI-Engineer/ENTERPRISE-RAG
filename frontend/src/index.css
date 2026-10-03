@@ -108,8 +108,8 @@ a { color: inherit; text-decoration: none; }
 .main-content { position: relative; z-index: 1; width: min(1180px, calc(100% - 48px)); margin: 0 auto; }
 
 .hero {
-  display: grid; grid-template-columns: minmax(0, 1.08fr) minmax(390px, .92fr);
-  gap: 56px; align-items: center; padding: 70px 0 46px;
+  display: grid; grid-template-columns: 1fr;
+  gap: 38px; align-items: stretch; padding: 64px 0 44px;
 }
 .overline, .hero-points, .answer-meta span, .hero-points span {
   display: flex; align-items: center; gap: 7px;
@@ -122,8 +122,8 @@ a { color: inherit; text-decoration: none; }
   line-height: .92; font-weight: 500; letter-spacing: -.045em;
 }
 .hero h1 em { color: var(--burgundy); font-style: italic; }
-.hero-copy { max-width: 610px; margin: 0; color: #6f635c; font-size: 15px; line-height: 1.8; }
-.hero-points { flex-wrap: wrap; margin-top: 28px; gap: 10px; }
+.hero-copy { max-width: 760px; margin: 0; color: #6f635c; font-size: 15px; line-height: 1.8; }
+.hero-points { flex-wrap: wrap; margin-top: 24px; gap: 10px; }
 .hero-points span {
   padding: 8px 10px; border: 1px solid var(--line); border-radius: 999px;
   color: #6a5c55; background: rgba(255,250,242,.52); font-size: 9px; font-weight: 700;
@@ -131,7 +131,7 @@ a { color: inherit; text-decoration: none; }
 .hero-points svg { color: var(--burgundy); }
 
 .pipeline-card {
-  position: relative; overflow: hidden; padding: 23px;
+  position: relative; overflow: hidden; width: 100%; padding: 23px;
   border: 1px solid rgba(255,250,242,.22); border-radius: 24px;
   color: #f9f1e7; background:
     radial-gradient(circle at 100% 0%, rgba(232,220,198,.16), transparent 35%),
@@ -147,12 +147,12 @@ a { color: inherit; text-decoration: none; }
 .pipeline-card .eyebrow { color: #e4cfc0; }
 .pipeline-head h2 { margin: 7px 0 0; font-family: "Playfair Display", Georgia, serif; font-size: 24px; font-weight: 500; }
 .pipeline-index { color: #e1c9bb; font-family: ui-monospace, monospace; font-size: 9px; }
-.pipeline-steps { padding-top: 10px; }
+.pipeline-steps { display: grid; grid-template-columns: repeat(4, 1fr); padding-top: 10px; }
 .pipeline-step {
   display: grid; grid-template-columns: 31px 33px 1fr; gap: 10px; align-items: start;
-  padding: 13px 0; border-bottom: 1px solid rgba(255,255,255,.10);
+  padding: 17px 16px; border-bottom: 0; border-right: 1px solid rgba(255,255,255,.10);
 }
-.pipeline-step.last { border-bottom: 0; padding-bottom: 3px; }
+.pipeline-step.last { border-right: 0; padding-bottom: 17px; }
 .step-number { padding-top: 3px; color: #d7b8aa; font-family: ui-monospace, monospace; font-size: 8px; }
 .step-icon { width: 29px; height: 29px; display: grid; place-items: center; border: 1px solid rgba(255,255,255,.16); border-radius: 9px; background: rgba(255,255,255,.07); }
 .pipeline-step strong { font-size: 12px; font-weight: 700; }
@@ -305,7 +305,12 @@ a { color: inherit; text-decoration: none; }
 @keyframes spin { to { transform: rotate(360deg); } }
 
 @media (max-width: 960px) {
-  .hero { grid-template-columns: 1fr; gap: 34px; padding-top: 54px; }
+  .hero { grid-template-columns: 1fr; gap: 30px; padding-top: 54px; }
+  .pipeline-steps { grid-template-columns: 1fr 1fr; }
+  .pipeline-step { border-right: 1px solid rgba(255,255,255,.10); border-bottom: 1px solid rgba(255,255,255,.10); }
+  .pipeline-step:nth-child(2n) { border-right: 0; }
+  .pipeline-step:nth-last-child(-n+2) { border-bottom: 0; }
+  .pipeline-step.last { padding-bottom: 17px; }
   .pipeline-card { max-width: 680px; }
   .auth-section { grid-template-columns: 1fr; gap: 30px; }
   .result-layout, .result-grid { grid-template-columns: 1fr; }
@@ -324,6 +329,11 @@ a { color: inherit; text-decoration: none; }
   .hero h1 { font-size: clamp(53px, 17vw, 78px); }
   .hero-copy { font-size: 13px; }
   .pipeline-card, .workspace-panel, .auth-section { padding: 20px; border-radius: 19px; }
+  .pipeline-steps { grid-template-columns: 1fr; }
+  .pipeline-step, .pipeline-step:nth-child(2n), .pipeline-step:nth-last-child(-n+2) {
+    border-right: 0; border-bottom: 1px solid rgba(255,255,255,.10);
+  }
+  .pipeline-step.last { border-bottom: 0; }
   .workspace-head, .result-heading { align-items: flex-start; flex-direction: column; }
   .query-card { grid-template-columns: 30px 1fr 40px; min-height: 105px; padding: 12px; }
   .query-card textarea { min-height: 74px; font-size: 13px; }
