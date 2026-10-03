@@ -308,7 +308,7 @@ function App() {
           <div className="eyebrow">
             <span>
               <Icon name="database" size={12} />
-              HYBRID RETRIEVAL
+              TENANT-SCOPED PGVECTOR
             </span>
 
             <span>
@@ -825,7 +825,7 @@ function App() {
 
         <span>
           <span className="status-dot" />
-          Hybrid search · Reranking · Grounded generation
+          pgvector retrieval · Reranking · Grounded generation
         </span>
       </footer>
     </div>
