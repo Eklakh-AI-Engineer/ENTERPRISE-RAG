@@ -128,3 +128,22 @@ def test_document_status_returns_authenticated_document(monkeypatch):
     assert response.json()["document_id"] == "doc-a"
     assert response.json()["ingestion_job_id"] == "job-a"
     assert response.json()["status"] == "UPLOADED"
+
+
+def test_readiness_rejects_unloaded_pipeline(monkeypatch):
+    import app.api.main as main
+
+    monkeypatch.setattr(main, "pipeline", None)
+    with TestClient(app) as client:
+        response = client.get("/ready")
+    assert response.status_code == 503
+
+
+def test_readiness_accepts_loaded_pipeline(monkeypatch):
+    import app.api.main as main
+
+    monkeypatch.setattr(main, "pipeline", object())
+    with TestClient(app) as client:
+        response = client.get("/ready")
+    assert response.status_code == 200
+    assert response.json()["status"] == "ready"
