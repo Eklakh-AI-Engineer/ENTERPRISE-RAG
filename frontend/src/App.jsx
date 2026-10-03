@@ -1,4 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
+import {
+  getSession,
+  signIn,
+  signOut,
+} from "./api/auth";
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
 
@@ -93,6 +98,43 @@ function App() {
   const [result, setResult] = useState(null);
   const [apiOnline, setApiOnline] = useState(false);
   const [expandedChunk, setExpandedChunk] = useState(null);
+  const [session, setSession] = useState(() => getSession());
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [authError, setAuthError] = useState("");
+  const [authLoading, setAuthLoading] = useState(false);
+
+  // ---------------------------------------------------------
+  // Auth session
+  // ---------------------------------------------------------
+
+  useEffect(() => {
+    setSession(getSession());
+  }, []);
+
+  const handleLogin = async (event) => {
+    event.preventDefault();
+    if (authLoading) return;
+
+    setAuthLoading(true);
+    setAuthError("");
+
+    try {
+      const nextSession = await signIn(email.trim(), password);
+      setSession(nextSession);
+      setPassword("");
+    } catch (err) {
+      setAuthError(err.message || "Sign-in failed.");
+    } finally {
+      setAuthLoading(false);
+    }
+  };
+
+  const handleLogout = () => {
+    signOut();
+    setSession(null);
+    setResult(null);
+  };
 
   // ---------------------------------------------------------
   // API health check
@@ -133,6 +175,10 @@ function App() {
     const cleanQuery = query.trim();
 
     if (!cleanQuery || loading) return;
+    if (!session?.access_token) {
+      setError("Sign in before querying the enterprise knowledge base.");
+      return;
+    }
 
     setLoading(true);
     setError("");
@@ -144,6 +190,7 @@ function App() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${session.access_token}`,
         },
         body: JSON.stringify({
           query: cleanQuery,
@@ -285,6 +332,45 @@ function App() {
             generated, and evaluated.
           </p>
 
+          {!session ? (
+            <form className="auth-panel" onSubmit={handleLogin}>
+              <div>
+                <div className="section-kicker">AUTHENTICATION</div>
+                <h3>Sign in to Enterprise RAG</h3>
+                <p>Use your Supabase account to access tenant-scoped retrieval.</p>
+              </div>
+
+              <input
+                type="email"
+                value={email}
+                onChange={(event) => setEmail(event.target.value)}
+                placeholder="Email"
+                autoComplete="email"
+                required
+              />
+
+              <input
+                type="password"
+                value={password}
+                onChange={(event) => setPassword(event.target.value)}
+                placeholder="Password"
+                autoComplete="current-password"
+                required
+              />
+
+              {authError && <div className="auth-error">{authError}</div>}
+
+              <button className="auth-button" type="submit" disabled={authLoading}>
+                {authLoading ? "Signing in..." : "Sign in"}
+              </button>
+            </form>
+          ) : (
+            <div className="session-bar">
+              <span>Signed in as {session.user?.email || "authenticated user"}</span>
+              <button type="button" onClick={handleLogout}>Sign out</button>
+            </div>
+          )}
+
           {/* =================================================
               QUERY BOX
           ================================================= */}
@@ -300,7 +386,7 @@ function App() {
               onChange={(event) => setQuery(event.target.value)}
               onKeyDown={handleKeyDown}
               placeholder="Ask your enterprise knowledge..."
-              disabled={loading}
+              disabled={loading || !session}
             />
 
             <button
