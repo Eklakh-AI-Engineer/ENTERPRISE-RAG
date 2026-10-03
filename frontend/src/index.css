@@ -1157,3 +1157,139 @@ button:disabled {
   padding: 6px 9px;
   background: rgba(126, 143, 255, 0.15);
 }
+
+
+/* =========================================================
+   DOCUMENT UPLOAD
+========================================================= */
+
+.upload-panel {
+  width: min(760px, 100%);
+  margin: 20px auto 0;
+  padding: 18px;
+  text-align: left;
+
+  border: 1px solid rgba(126, 143, 255, 0.16);
+  border-radius: 16px;
+  background: rgba(12, 16, 24, 0.72);
+
+  box-shadow:
+    0 18px 55px rgba(0, 0, 0, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.025);
+}
+
+.upload-copy h3 {
+  margin: 4px 0 5px;
+  font-size: 15px;
+}
+
+.upload-copy p {
+  margin: 0;
+  color: #69758a;
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+.upload-controls {
+  display: flex;
+  gap: 9px;
+  align-items: center;
+  margin-top: 14px;
+}
+
+.file-input {
+  flex: 1;
+  min-width: 0;
+  color: #9ba6ba;
+  font-size: 12px;
+}
+
+.file-input::file-selector-button {
+  margin-right: 9px;
+  padding: 8px 11px;
+
+  border: 1px solid rgba(126, 143, 255, 0.2);
+  border-radius: 9px;
+
+  color: #dfe5f2;
+  background: rgba(126, 143, 255, 0.07);
+
+  cursor: pointer;
+}
+
+.upload-button {
+  flex: 0 0 auto;
+  padding: 9px 13px;
+
+  border: 1px solid rgba(126, 143, 255, 0.28);
+  border-radius: 9px;
+
+  color: #f1f4ff;
+  background: #5968d8;
+
+  font-size: 11px;
+  font-weight: 700;
+
+  transition: 0.18s;
+}
+
+.upload-button:hover:not(:disabled) {
+  background: #6877e6;
+  transform: translateY(-1px);
+}
+
+.upload-button:disabled {
+  opacity: 0.38;
+}
+
+.upload-file,
+.upload-success,
+.upload-error {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+
+  margin-top: 11px;
+  padding: 9px 10px;
+
+  border-radius: 9px;
+  font-size: 11px;
+}
+
+.upload-file {
+  color: #aab4c7;
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.upload-success {
+  color: #7ce2a9;
+  border: 1px solid rgba(58, 190, 111, 0.16);
+  background: rgba(58, 190, 111, 0.05);
+}
+
+.upload-error {
+  color: #ff9b9b;
+  border: 1px solid rgba(255, 80, 80, 0.16);
+  background: rgba(255, 80, 80, 0.05);
+}
+
+.upload-note {
+  margin-top: 9px;
+  color: #59657a;
+  font-size: 10px;
+}
+
+@media (max-width: 640px) {
+  .upload-controls {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .file-input {
+    width: 100%;
+  }
+
+  .upload-button {
+    width: 100%;
+  }
+}
