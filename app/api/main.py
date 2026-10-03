@@ -10,10 +10,10 @@ from app.integrations.supabase import create_user_client
 from app.persistence.supabase import SupabaseDocumentRepository, SupabaseIngestionJobRepository
 from app.services.documents import DocumentService, DocumentValidationError
 from app.storage.supabase import SupabaseDocumentStorage, SupabaseStorageError
-from app.query.pipeline import QueryPipeline
+from app.query.production import ProductionQueryPipeline
 
 
-pipeline: QueryPipeline | None = None
+pipeline: ProductionQueryPipeline | None = None
 
 
 class QueryRequest(BaseModel):
@@ -106,10 +106,11 @@ async def lifespan(app: FastAPI):
     print("=" * 80)
     print("Loading QueryPipeline...")
 
-    pipeline = QueryPipeline(
+    pipeline = ProductionQueryPipeline(
+        embedding_model=settings.DENSE_MODEL,
+        reranker_model=settings.RERANKER_MODEL,
         retrieval_top_k=settings.RETRIEVAL_TOP_K,
         rerank_top_k=settings.RERANK_TOP_K,
-        candidate_k=settings.CANDIDATE_K,
     )
 
     print("QueryPipeline loaded successfully.")
@@ -221,16 +222,24 @@ async def upload_document(
 
 
 @app.post("/query")
-def query(request: QueryRequest):
+def query(request: QueryRequest, auth=Depends(current_user_client)):
     if pipeline is None:
         raise HTTPException(status_code=503, detail="RAG pipeline is not loaded.")
 
+    principal, client = auth
     query_text = request.query.strip()
     if not query_text:
         raise HTTPException(status_code=400, detail="Query cannot be empty.")
 
     try:
-        return pipeline.run(query_text)
+        organization_id = _current_organization(client, principal.user_id)
+        return pipeline.run(
+            query=query_text,
+            organization_id=organization_id,
+            client=client,
+        )
+    except HTTPException:
+        raise
     except Exception as exc:
         print("QUERY ERROR")
         print(exc)
