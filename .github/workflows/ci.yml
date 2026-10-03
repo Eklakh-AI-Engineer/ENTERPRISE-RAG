@@ -9,6 +9,9 @@ jobs:
   backend:
     name: Backend smoke tests
     runs-on: ubuntu-latest
+    env:
+      OPENROUTER_API_KEY: ci-test-key
+      OPENROUTER_MODEL: ci-test-model
 
     steps:
       - name: Checkout
