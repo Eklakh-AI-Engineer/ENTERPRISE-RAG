@@ -2,7 +2,7 @@
 
 **Phase 3 canonical schema contract — synchronized with the dedicated Enterprise-RAG Supabase project**
 
-This document defines the production persistence model that will replace the current local-only persistence while preserving the existing retrieval architecture.
+This document defines the production persistence model and records the verified dedicated Supabase implementation. Versioned migrations remain the source of truth for live changes; this document and `supabase/schema.sql` mirror the verified contract.
 
 ## 1. Design principles
 
