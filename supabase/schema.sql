@@ -1,9 +1,10 @@
--- Enterprise RAG Phase 3 reference schema
--- STATUS: design artifact only; NOT applied to a Supabase project.
+-- Enterprise RAG canonical database schema
+-- STATUS: mirrors the dedicated Enterprise-RAG Supabase project plus the
+-- repository migration history. New production changes must be added as
+-- versioned migrations and reflected here after verification.
 --
--- This file is intentionally kept separate from supabase/migrations/.
--- A real migration must be generated with the Supabase CLI after the
--- dedicated Enterprise RAG Supabase project is selected.
+-- This file is a canonical schema contract for review and CI. It is not a
+-- substitute for applying versioned migrations to the live project.
 --
 -- Current retrieval baseline:
 --   embedding model: sentence-transformers/all-MiniLM-L6-v2
@@ -114,6 +115,35 @@ create index ingestion_jobs_worker_idx
 
 create index ingestion_jobs_org_idx
   on public.ingestion_jobs (organization_id);
+
+create policy "members can create ingestion jobs"
+on public.ingestion_jobs
+for insert
+to authenticated
+with check (
+  exists (
+    select 1
+    from public.organization_members om
+    join public.documents d
+      on d.id = ingestion_jobs.document_id
+     and d.organization_id = ingestion_jobs.organization_id
+    where om.organization_id = ingestion_jobs.organization_id
+      and om.user_id = (select auth.uid())
+  )
+);
+
+create policy "members can delete ingestion jobs"
+on public.ingestion_jobs
+for delete
+to authenticated
+using (
+  exists (
+    select 1
+    from public.organization_members om
+    where om.organization_id = ingestion_jobs.organization_id
+      and om.user_id = (select auth.uid())
+  )
+);
 
 create table public.conversations (
   id uuid primary key default gen_random_uuid(),
@@ -468,7 +498,7 @@ using (
   and exists (
     select 1
     from public.organization_members om
-    where om.organization_id::text = split_part(name, '/', 2)
+    where om.organization_id = split_part(name, '/', 2)::uuid
       and om.user_id = (select auth.uid())
   )
 );
@@ -482,7 +512,7 @@ with check (
   and exists (
     select 1
     from public.organization_members om
-    where om.organization_id::text = split_part(name, '/', 2)
+    where om.organization_id = split_part(name, '/', 2)::uuid
       and om.user_id = (select auth.uid())
   )
   and split_part(name, '/', 1) = 'organizations'
@@ -498,7 +528,7 @@ using (
   and exists (
     select 1
     from public.organization_members om
-    where om.organization_id::text = split_part(name, '/', 2)
+    where om.organization_id = split_part(name, '/', 2)::uuid
       and om.user_id = (select auth.uid())
   )
 );
