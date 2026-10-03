@@ -4,6 +4,7 @@ import {
   signIn,
   signOut,
 } from "./api/auth";
+import { uploadDocument } from "./api/rag";
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
 
@@ -108,6 +109,11 @@ function App() {
   const [uploadMessage, setUploadMessage] = useState("");
   const [uploadError, setUploadError] = useState("");
   const fileInputRef = useRef(null);
+  const [uploading, setUploading] = useState(false);
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [uploadMessage, setUploadMessage] = useState("");
+  const [uploadError, setUploadError] = useState("");
+  const fileInputRef = useRef(null);
 
   // ---------------------------------------------------------
   // Auth session
@@ -139,6 +145,41 @@ function App() {
     signOut();
     setSession(null);
     setResult(null);
+    setSelectedFile(null);
+    setUploadMessage("");
+    setUploadError("");
+  };
+
+  const handleFileChange = (event) => {
+    const file = event.target.files?.[0] || null;
+    setSelectedFile(file);
+    setUploadMessage("");
+    setUploadError("");
+  };
+
+  const handleUpload = async () => {
+    if (!selectedFile || uploading) return;
+
+    setUploading(true);
+    setUploadMessage("");
+    setUploadError("");
+
+    try {
+      const data = await uploadDocument(selectedFile);
+      setUploadMessage(
+        data.deduplicated
+          ? `${data.filename} is already registered for this pipeline.`
+          : `${data.filename} uploaded and queued for ingestion.`
+      );
+      setSelectedFile(null);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+    } catch (err) {
+      setUploadError(err.message || "Document upload failed.");
+    } finally {
+      setUploading(false);
+    }
   };
 
   // ---------------------------------------------------------
