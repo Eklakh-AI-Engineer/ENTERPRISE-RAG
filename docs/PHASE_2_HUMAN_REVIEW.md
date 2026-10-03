@@ -1,12 +1,10 @@
-# Phase 2 — Silver Labels → Human Review
+# Phase 2 — Human Relevance Review
 
 ## Purpose
 
-The CHA Phase 2 pool is the real Dense(query) UNION BM25(query) candidate set.
-This workflow creates silver AI relevance judgments first, then lets a human
-review and correct them.
-
-Silver labels are never represented as human ground truth.
+The CHA Phase 2 pool is the Dense(query) UNION BM25(query) candidate set.
+The next evaluation gate is **human relevance labeling**. AI-generated silver
+labels are not part of the active benchmark workflow.
 
 ## Relevance scale
 
@@ -17,64 +15,41 @@ Silver labels are never represented as human ground truth.
 
 Judge each candidate independently. Keyword overlap alone is not sufficient.
 
-## Generate silver labels
+## Human review procedure
 
-The GitHub Actions workflow defaults to the OpenRouter free routing model:
+For each query:
 
-    openrouter/free
+1. Review every pooled candidate.
+2. Assign a 0–3 relevance judgment.
+3. Record the human judgment and reviewer metadata in the frozen evaluation artifact.
+4. Preserve the candidate's document, page, section, and chunk identifiers.
+5. Record disagreements or uncertainty for later adjudication.
 
-You can override it when manually dispatching the workflow. For local runs,
-set `OPENROUTER_MODEL=openrouter/free` or another available model.
+Prioritize careful review of:
 
-Set the OpenRouter credentials in the environment:
-
-    export OPENROUTER_API_KEY=...
-    export OPENROUTER_MODEL=...
-
-Then run:
-
-    python scripts/label_phase2_silver.py \
-      --pool data/evaluation/cha_pool_v1.json \
-      --output data/evaluation/cha_silver_labels_v1.json
-
-The script is resumable and writes after every completed query.
-
-## Human review
-
-Review the generated labels before treating the dataset as a human-reviewed
-benchmark. Change labels where the evidence does not match the 0–3 definitions.
-
-Prioritize:
-
-1. low-confidence judgments;
-2. labels 1 vs 2 and 2 vs 3;
-3. candidates where Dense and BM25 disagree;
-4. obvious topic/keyword false positives.
-
-Keep the original silver label and record the human final label separately.
-
-Example:
-
-    {
-      "relevance_silver": 2,
-      "relevance_final": 1,
-      "final_source": "human_corrected"
-    }
-
-A confirmed label:
-
-    {
-      "relevance_silver": 3,
-      "relevance_final": 3,
-      "final_source": "human_confirmed"
-    }
+1. labels near the 1/2 and 2/3 boundaries;
+2. candidates where Dense and BM25 disagree;
+3. acronym-heavy and identifier queries;
+4. negation- and modifier-sensitive queries;
+5. cross-reference and metadata-filtered queries;
+6. obvious topic/keyword false positives.
 
 ## Integrity rule
 
-Do not rename silver_ai labels to human.
+Do not describe an AI-generated or heuristic label as human ground truth.
 
-The final benchmark can only be described as human-reviewed to the extent that
-a person actually reviewed or confirmed those judgments.
+The retrieval benchmark can only be described as **human-verified** to the extent
+that a person actually reviewed or confirmed the relevance judgments.
 
-After review, run the normal Phase 2 benchmark validator and Dense-vs-Hybrid
-experiment using the final relevance field.
+## Completion gate
+
+The Phase 2 benchmark is ready only when the frozen query set has human-verified
+relevance judgments sufficient to support Recall@5, MRR, and nDCG.
+
+After review:
+
+- validate the final relevance artifact;
+- run Dense, BM25, and Hybrid/RRF retrieval evaluation;
+- run the controlled Dense-vs-Hybrid experiment;
+- retain the fixed corpus, query set, relevance judgments, and evaluation procedure
+  so the results are reproducible.
