@@ -60,7 +60,7 @@ VITE_API_BASE_URL can point the frontend at another API host.
 ## Tests
 
     pytest -q
-    python -m compileall app scripts tests
+    python -m compileall app tests
 
 Frontend:
 
@@ -81,6 +81,6 @@ Frontend:
 - Do not treat development-run metrics as benchmark results.
 - Keep retrieval components independently testable.
 - Record model/configuration changes when running evaluation experiments.
-- Preserve the Phase 0 baseline when changing retrieval behavior.
+- Preserve benchmark versions when changing retrieval behavior.
 
 A retrieval change should include a corresponding evaluation artifact once Phase 2 is active.
