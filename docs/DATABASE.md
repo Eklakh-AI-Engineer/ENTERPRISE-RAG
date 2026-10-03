@@ -1,6 +1,6 @@
 # Enterprise RAG — Production Data Model
 
-**Phase 3 reference schema — not applied to Supabase**
+**Phase 3 canonical schema contract — synchronized with the dedicated Enterprise-RAG Supabase project**
 
 This document defines the production persistence model that will replace the current local-only persistence while preserving the existing retrieval architecture.
 
