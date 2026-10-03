@@ -69,6 +69,12 @@ Backend:
 - ENVIRONMENT
 - LOG_LEVEL
 - APP_VERSION
+- SUPABASE_URL
+- SUPABASE_PUBLISHABLE_KEY
+- SUPABASE_SERVICE_ROLE_KEY
+- SUPABASE_DOCUMENTS_BUCKET
+- MAX_UPLOAD_BYTES
+- INGESTION_PIPELINE_VERSION
 
 Frontend:
 - VITE_API_BASE_URL
@@ -82,7 +88,7 @@ Never expose provider API keys through VITE_* variables.
 3. Run the Phase 1 feasibility benchmark.
 4. Select the long-running inference host.
 5. Configure HTTPS between frontend and API.
-6. Configure JWT propagation.
+6. Configure JWT propagation and ensure Vercel and the API use the same Supabase project URL and publishable key.
 7. Add Supabase data plane in Phase 3.
 8. Add async worker in Phase 5.
 9. Add production smoke tests in Phase 7.
