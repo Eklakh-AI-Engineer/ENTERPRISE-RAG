@@ -33,6 +33,36 @@ class InMemoryDocumentRepository:
         self._items[document.id] = document
         return document
 
+    def submit_with_job(
+        self,
+        *,
+        organization_id: str,
+        owner_user_id: str,
+        filename: str,
+        storage_path: str,
+        content_hash: str,
+        pipeline_version: str,
+    ):
+        existing = next(
+            (
+                item for item in self._items.values()
+                if item.organization_id == organization_id
+                and item.content_hash == content_hash
+                and item.pipeline_version == pipeline_version
+            ),
+            None,
+        )
+        if existing is not None:
+            raise NotImplementedError(
+                "Atomic document submission is only implemented by the "
+                "production Supabase adapter."
+            )
+
+        raise NotImplementedError(
+            "Use the Supabase atomic submission path for persisted uploads."
+        )
+
+
 
 class InMemoryIngestionJobRepository:
     def __init__(self) -> None:
