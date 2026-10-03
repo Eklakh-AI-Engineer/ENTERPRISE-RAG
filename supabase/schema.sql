@@ -675,7 +675,7 @@ grant execute on function public.submit_document_with_job(uuid, text, text, text
   to authenticated;
 
 revoke execute on function public.submit_document_with_job(uuid, text, text, text, text)
-  from anon;
+  from public, anon, service_role;
 
 -- Atomic worker claim. This is intentionally a trusted-worker operation:
 -- the function locks one eligible row before updating its lease, preventing two
