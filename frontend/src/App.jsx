@@ -110,6 +110,10 @@ function App() {
       const nextSession = await signIn(email.trim(), password);
       setSession(nextSession);
       setPassword("");
+      window.history.replaceState(null, "", "#profile");
+      window.requestAnimationFrame(() => {
+        document.getElementById("profile")?.scrollIntoView({ behavior: "smooth", block: "start" });
+      });
     } catch (err) {
       setAuthError(err.message || "Sign-in failed.");
     } finally {
@@ -121,6 +125,7 @@ function App() {
     signOut();
     setSession(null);
     setResult(null);
+    window.history.replaceState(null, "", "#workspace");
     setSelectedFile(null);
     setUploadMessage("");
     setUploadError("");
