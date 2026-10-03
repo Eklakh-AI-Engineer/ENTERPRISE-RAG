@@ -183,7 +183,30 @@ class SupabaseIngestionJobRepository:
         ).execute()
         _raise_on_error(response)
         row = _one(response)
-        return _job(row) if row else None
+        if not row:
+            return None
+
+        claimed = _job(row)
+
+        # The RPC atomically changes the row to PROCESSING. Re-read the row
+        # when the RPC response does not expose the updated composite value
+        # (for example, a stale/partial PostgREST representation). The worker
+        # must never process a job using an unverified lifecycle state.
+        if claimed.status != "PROCESSING":
+            refreshed = self.get(claimed.id, organization_id)
+            if refreshed is None:
+                raise SupabasePersistenceError(
+                    "Atomic claim returned a job that could not be re-read."
+                )
+            claimed = refreshed
+
+        if claimed.status != "PROCESSING":
+            raise SupabasePersistenceError(
+                f"Atomic claim returned job {claimed.id} in unexpected state "
+                f"{claimed.status!r}."
+            )
+
+        return claimed
 
 
 def _document(row: dict[str, Any]) -> DocumentRecord:
@@ -427,3 +450,5 @@ def _retrieval_run_payload(item: RetrievalRunRecord) -> dict[str, Any]:
         "output_tokens": item.output_tokens, "estimated_cost": item.estimated_cost,
         "created_at": item.created_at.isoformat(),
     }
+
+
