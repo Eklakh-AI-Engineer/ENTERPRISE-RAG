@@ -234,6 +234,48 @@ async def upload_document(
     )
 
 
+@app.get("/documents/{document_id}", response_model=DocumentUploadResponse)
+def get_document(
+    document_id: str,
+    auth=Depends(current_user_client),
+):
+    principal, client = auth
+    try:
+        organization_id = _current_organization(client, principal.user_id)
+        documents = SupabaseDocumentRepository(client)
+        jobs = SupabaseIngestionJobRepository(client)
+        document = documents.get(document_id, organization_id)
+        if document is None:
+            raise HTTPException(status_code=404, detail="Document not found.")
+        job = jobs.get_by_document(document.id, organization_id)
+        if job is None:
+            raise HTTPException(status_code=409, detail="Document ingestion job not found.")
+        return DocumentUploadResponse(
+            document_id=document.id,
+            ingestion_job_id=job.id,
+            organization_id=organization_id,
+            filename=document.filename,
+            storage_path=document.storage_path,
+            status=document.status,
+            deduplicated=False,
+        )
+    except HTTPException:
+        raise
+    except Exception as exc:
+        request_id = uuid4().hex[:12]
+        logger.exception(
+            "document_status_failed request_id=%s user_id=%s organization_id=%s document_id=%s",
+            request_id,
+            principal.user_id,
+            organization_id,
+            document_id,
+        )
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to read document status. Reference: {request_id}",
+        ) from exc
+
+
 @app.post("/query")
 def query(request: QueryRequest, auth=Depends(current_user_client)):
     if pipeline is None:
