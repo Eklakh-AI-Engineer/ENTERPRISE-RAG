@@ -111,7 +111,7 @@ Do not claim Hybrid is better until this experiment is complete.
 
 Validate the final benchmark before running the experiment:
 
-    python scripts/validate_phase2_benchmark.py data/evaluation/phase2_benchmark.json
+    python scripts/validate_phase2_benchmark.py <frozen-benchmark.json>
 
 Build the unbiased annotation pool from the frozen corpus:
 
@@ -144,7 +144,7 @@ human subset; they do not turn the judge into ground truth.
 
 ## CHA corpus v1
 
-The first real Phase 2 corpus is the four-document CHA policy set registered in
+The first real benchmark corpus is the four-document CHA policy set registered in
 `data/evaluation/cha_corpus_manifest.json`.
 
 Build the span-aware corpus locally:
