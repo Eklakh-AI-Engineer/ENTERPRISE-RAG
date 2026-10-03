@@ -2,6 +2,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import {
   ArrowUpRight,
   Check,
+  CheckCheck,
+  Copy,
   ChevronDown,
   ChevronRight,
   CircleAlert,
@@ -56,6 +58,7 @@ function App() {
   const [uploadMessage, setUploadMessage] = useState("");
   const [uploadError, setUploadError] = useState("");
   const [mobileNav, setMobileNav] = useState(false);
+  const [copied, setCopied] = useState(false);
   const fileInputRef = useRef(null);
 
   useEffect(() => {
@@ -162,6 +165,7 @@ function App() {
     setError("");
     setResult(null);
     setExpandedChunk(null);
+    setCopied(false);
 
     try {
       const data = await queryRAG(cleanQuery);
@@ -178,6 +182,19 @@ function App() {
       setError(err.message || "Unable to process the request.");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleCopyAnswer = async () => {
+    const answer = result?.answer?.trim();
+    if (!answer || !navigator.clipboard) return;
+
+    try {
+      await navigator.clipboard.writeText(answer);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 1800);
+    } catch {
+      setCopied(false);
     }
   };
 
@@ -386,6 +403,10 @@ function App() {
                 {loading ? <Gauge className="spin" size={19} /> : <ArrowUpRight size={19} />}
               </button>
             </div>
+            <div className="query-hint">
+              <span>Enter to run · Shift + Enter for a new line</span>
+              <span>{query.length}/500</span>
+            </div>
 
             <div className="suggestions">
               <span>Explore</span>
@@ -490,7 +511,13 @@ function App() {
               <article className="answer-panel">
                 <div className="answer-meta">
                   <span><Sparkles size={14} /> GENERATED ANSWER</span>
-                  <span>{citations.length} cited sources</span>
+                  <div className="answer-actions">
+                    <span>{citations.length} cited sources</span>
+                    <button className="copy-button" type="button" onClick={handleCopyAnswer}>
+                      {copied ? <CheckCheck size={13} /> : <Copy size={13} />}
+                      {copied ? "Copied" : "Copy answer"}
+                    </button>
+                  </div>
                 </div>
                 <p className="answer-text">{result.answer || "No answer generated."}</p>
               </article>
