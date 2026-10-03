@@ -189,7 +189,13 @@ async def upload_document(
     except DocumentValidationError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
     except Exception as exc:
-        raise HTTPException(status_code=500, detail="Failed to create document ingestion job.") from exc
+        # Keep the API failure actionable while avoiding credential/token leakage.
+        print("DOCUMENT SUBMISSION ERROR")
+        print(f"{type(exc).__name__}: {exc}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to create document ingestion job: {type(exc).__name__}: {exc}",
+        ) from exc
 
     if not submission.deduplicated:
         try:
