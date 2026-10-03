@@ -60,8 +60,8 @@ The project should **not** be treated as production-ready yet.
 | Semantic chunking | [ ] | Not implemented |
 | Token/cost accounting | [~] | Partial observability; systematic accounting required |
 | Reproducible dependencies | [x] | Bounded requirements, Docker, env template implemented |
-| Production database | [~] | Phase 3 reference schema implemented; live project not selected |
-| Supabase/pgvector | [~] | Reference DDL and similarity contract implemented; live verification pending |
+| Production database | [~] | Dedicated Enterprise-RAG Supabase project selected; migrations and RLS/Storage contract verified |
+| Supabase/pgvector | [~] | Live PostgreSQL 17.11 + pgvector 0.8.2 verified; parity benchmark remains |
 | Supabase Storage | [ ] | Not implemented |
 | Authentication | [ ] | Not implemented |
 | RLS / tenant isolation | [ ] | Not implemented |
