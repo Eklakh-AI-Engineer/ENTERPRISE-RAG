@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   getSession,
   signIn,
@@ -103,6 +103,11 @@ function App() {
   const [password, setPassword] = useState("");
   const [authError, setAuthError] = useState("");
   const [authLoading, setAuthLoading] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [uploadMessage, setUploadMessage] = useState("");
+  const [uploadError, setUploadError] = useState("");
+  const fileInputRef = useRef(null);
 
   // ---------------------------------------------------------
   // Auth session
@@ -368,6 +373,68 @@ function App() {
             <div className="session-bar">
               <span>Signed in as {session.user?.email || "authenticated user"}</span>
               <button type="button" onClick={handleLogout}>Sign out</button>
+            </div>
+          )}
+
+          {/* =================================================
+              DOCUMENT INGESTION
+          ================================================= */}
+
+          {session && (
+            <div className="upload-panel">
+              <div className="upload-copy">
+                <div className="section-kicker">KNOWLEDGE BASE</div>
+                <h3>Upload a PDF</h3>
+                <p>
+                  Documents are stored in your tenant, queued for the Railway
+                  ingestion worker, then indexed for pgvector retrieval.
+                </p>
+              </div>
+
+              <div className="upload-controls">
+                <input
+                  ref={fileInputRef}
+                  className="file-input"
+                  type="file"
+                  accept="application/pdf,.pdf"
+                  onChange={handleFileChange}
+                  disabled={uploading}
+                />
+
+                <button
+                  className="upload-button"
+                  type="button"
+                  onClick={handleUpload}
+                  disabled={!selectedFile || uploading}
+                >
+                  {uploading ? "Uploading..." : "Upload document"}
+                </button>
+              </div>
+
+              {selectedFile && (
+                <div className="upload-file">
+                  <Icon name="file" size={15} />
+                  <span>{selectedFile.name}</span>
+                </div>
+              )}
+
+              {uploadMessage && (
+                <div className="upload-success">
+                  <Icon name="check" size={15} />
+                  <span>{uploadMessage}</span>
+                </div>
+              )}
+
+              {uploadError && (
+                <div className="upload-error">
+                  <Icon name="alert" size={15} />
+                  <span>{uploadError}</span>
+                </div>
+              )}
+
+              <div className="upload-note">
+                PDF only · up to 20 MB · ingestion runs asynchronously
+              </div>
             </div>
           )}
 
