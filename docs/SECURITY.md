@@ -35,14 +35,7 @@ Later production generation must:
 
 The current API validates query length and rejects empty queries.
 
-Later production hardening must add:
-- file-type validation
-- file-size limits
-- request-size limits
-- rate limits
-- quota enforcement
-- safe error responses
-- secret-safe logging
+Current API controls include PDF type validation, upload-size limits, query-size limits, and safe error responses with server-side exception logging. Remaining production hardening includes request-size limits, rate limits, quota enforcement, and structured secret-safe logging.
 
 ## Security testing gate
 

@@ -224,7 +224,7 @@ def paired_bootstrap_delta_ci(
     )
 
     return {
-        "mean_delta": float(deltas.mean()),
+        "mean_delta": round(float(deltas.mean()), 12),
         "lower": float(lower),
         "upper": float(upper),
         "confidence": confidence,

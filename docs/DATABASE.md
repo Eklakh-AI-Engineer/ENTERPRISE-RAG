@@ -1,8 +1,8 @@
 # Enterprise RAG — Production Data Model
 
-**Phase 3 reference schema — not applied to Supabase**
+**Phase 3 canonical schema contract — synchronized with the dedicated Enterprise-RAG Supabase project**
 
-This document defines the production persistence model that will replace the current local-only persistence while preserving the existing retrieval architecture.
+This document defines the production persistence model and records the verified dedicated Supabase implementation. Versioned migrations remain the source of truth for live changes; this document and `supabase/schema.sql` mirror the verified contract.
 
 ## 1. Design principles
 
@@ -197,12 +197,12 @@ Deletion must be idempotent and must invalidate both dense and tenant-scoped BM2
 
 ## 7. Repository implementation status
 
-The reviewed reference DDL is stored in `supabase/schema.sql`. It includes the core entities, explicit authenticated-role grants, RLS policies, and an invoker-scoped pgvector similarity function. It is intentionally **not** a live migration because the connected Supabase account currently exposes only an unrelated project (`Tackboard`).
+The canonical DDL is stored in `supabase/schema.sql`, and versioned migrations under `supabase/migrations/` mirror the dedicated Enterprise-RAG Supabase project. The live project has verified tables, RLS policies, private document Storage, pgvector, and the atomic document-submission function.
 
-The repository does not claim that pgvector parity, RLS isolation, or Storage behavior has been verified against a live Enterprise RAG database.
+The remaining production gates are end-to-end PDF ingestion/retrieval, FAISS-vs-pgvector parity, and real multi-user API isolation tests.
 
 ## 8. Deliberately not implemented yet
 
-This is a schema/design artifact only. It does not create or modify a Supabase project, apply production DDL, choose a live embedding dimension, claim pgvector parity, implement RLS policies, implement Storage policies, or migrate local data.
+This document is the reviewed data-model contract. It does not itself apply migrations or migrate local data; production changes must go through versioned migrations and live verification.
 
 Those steps require the actual Enterprise RAG Supabase project to be identified and the Phase 2 benchmark to be frozen before production retrieval migration.

@@ -1,9 +1,10 @@
--- Enterprise RAG Phase 3 reference schema
--- STATUS: design artifact only; NOT applied to a Supabase project.
+-- Enterprise RAG canonical database schema
+-- STATUS: mirrors the dedicated Enterprise-RAG Supabase project plus the
+-- repository migration history. New production changes must be added as
+-- versioned migrations and reflected here after verification.
 --
--- This file is intentionally kept separate from supabase/migrations/.
--- A real migration must be generated with the Supabase CLI after the
--- dedicated Enterprise RAG Supabase project is selected.
+-- This file is a canonical schema contract for review and CI. It is not a
+-- substitute for applying versioned migrations to the live project.
 --
 -- Current retrieval baseline:
 --   embedding model: sentence-transformers/all-MiniLM-L6-v2
@@ -53,6 +54,9 @@ create table public.documents (
 
 create index documents_org_idx
   on public.documents (organization_id);
+
+alter table public.documents
+  add constraint documents_organization_id_id_key unique (organization_id, id);
 
 create index documents_owner_idx
   on public.documents (owner_user_id);
@@ -109,11 +113,46 @@ create table public.ingestion_jobs (
   unique (document_id, content_hash, pipeline_version)
 );
 
+alter table public.ingestion_jobs
+  add constraint ingestion_jobs_document_org_fkey
+  foreign key (organization_id, document_id)
+  references public.documents (organization_id, id)
+  on delete cascade;
+
 create index ingestion_jobs_worker_idx
   on public.ingestion_jobs (status, lease_until, created_at);
 
 create index ingestion_jobs_org_idx
   on public.ingestion_jobs (organization_id);
+
+create policy "members can create ingestion jobs"
+on public.ingestion_jobs
+for insert
+to authenticated
+with check (
+  exists (
+    select 1
+    from public.organization_members om
+    join public.documents d
+      on d.id = ingestion_jobs.document_id
+     and d.organization_id = ingestion_jobs.organization_id
+    where om.organization_id = ingestion_jobs.organization_id
+      and om.user_id = (select auth.uid())
+  )
+);
+
+create policy "members can delete ingestion jobs"
+on public.ingestion_jobs
+for delete
+to authenticated
+using (
+  exists (
+    select 1
+    from public.organization_members om
+    where om.organization_id = ingestion_jobs.organization_id
+      and om.user_id = (select auth.uid())
+  )
+);
 
 create table public.conversations (
   id uuid primary key default gen_random_uuid(),
@@ -468,7 +507,7 @@ using (
   and exists (
     select 1
     from public.organization_members om
-    where om.organization_id::text = split_part(name, '/', 2)
+    where om.organization_id = split_part(name, '/', 2)::uuid
       and om.user_id = (select auth.uid())
   )
 );
@@ -482,7 +521,7 @@ with check (
   and exists (
     select 1
     from public.organization_members om
-    where om.organization_id::text = split_part(name, '/', 2)
+    where om.organization_id = split_part(name, '/', 2)::uuid
       and om.user_id = (select auth.uid())
   )
   and split_part(name, '/', 1) = 'organizations'
@@ -498,10 +537,137 @@ using (
   and exists (
     select 1
     from public.organization_members om
-    where om.organization_id::text = split_part(name, '/', 2)
+    where om.organization_id = split_part(name, '/', 2)::uuid
       and om.user_id = (select auth.uid())
   )
 );
+
+create policy "ingestion jobs must match document tenant"
+on public.ingestion_jobs
+as restrictive
+for insert
+to authenticated
+with check (
+  exists (
+    select 1
+    from public.documents d
+    where d.id = ingestion_jobs.document_id
+      and d.organization_id = ingestion_jobs.organization_id
+  )
+);
+
+create policy "storage objects must match document row"
+on storage.objects
+as restrictive
+for all
+to authenticated
+using (
+  bucket_id = 'documents'
+  and split_part(name, '/', 1) = 'organizations'
+  and split_part(name, '/', 3) = 'documents'
+  and exists (
+    select 1
+    from public.documents d
+    where d.organization_id = split_part(objects.name, '/', 2)::uuid
+      and d.id = split_part(objects.name, '/', 4)::uuid
+      and d.storage_path = objects.name
+  )
+)
+with check (
+  bucket_id = 'documents'
+  and split_part(name, '/', 1) = 'organizations'
+  and split_part(name, '/', 3) = 'documents'
+  and exists (
+    select 1
+    from public.documents d
+    where d.organization_id = split_part(name, '/', 2)::uuid
+      and d.id = split_part(name, '/', 4)::uuid
+      and d.storage_path = name
+  )
+);
+
+-- Atomic authenticated document submission. This keeps the document row and
+-- ingestion job in one transaction under the caller's RLS context.
+create or replace function public.submit_document_with_job(
+  p_organization_id uuid,
+  p_filename text,
+  p_storage_path text,
+  p_content_hash text,
+  p_pipeline_version text
+)
+returns table(document_id uuid, ingestion_job_id uuid, deduplicated boolean, document_status text)
+language plpgsql
+security invoker
+set search_path = public
+as $$
+declare
+  v_document public.documents;
+  v_job public.ingestion_jobs;
+begin
+  if auth.uid() is null then
+    raise exception 'authenticated user required';
+  end if;
+
+  if not exists (
+    select 1 from public.organization_members om
+    where om.organization_id = p_organization_id
+      and om.user_id = (select auth.uid())
+  ) then
+    raise exception 'organization membership required';
+  end if;
+
+  insert into public.documents (
+    organization_id, owner_user_id, filename, storage_path,
+    content_hash, pipeline_version
+  )
+  values (
+    p_organization_id, (select auth.uid()), p_filename, p_storage_path,
+    p_content_hash, p_pipeline_version
+  )
+  on conflict (organization_id, content_hash, pipeline_version)
+  do nothing
+  returning * into v_document;
+
+  if v_document.id is null then
+    select d.* into v_document
+    from public.documents d
+    where d.organization_id = p_organization_id
+      and d.content_hash = p_content_hash
+      and d.pipeline_version = p_pipeline_version
+    limit 1;
+  end if;
+
+  select j.* into v_job
+  from public.ingestion_jobs j
+  where j.organization_id = p_organization_id
+    and j.document_id = v_document.id
+    and j.content_hash = p_content_hash
+    and j.pipeline_version = p_pipeline_version
+  order by j.created_at desc
+  limit 1;
+
+  if v_job.id is not null then
+    return query select v_document.id, v_job.id, true, v_document.status;
+    return;
+  end if;
+
+  insert into public.ingestion_jobs (
+    organization_id, document_id, pipeline_version, content_hash
+  )
+  values (
+    p_organization_id, v_document.id, p_pipeline_version, p_content_hash
+  )
+  returning * into v_job;
+
+  return query select v_document.id, v_job.id, false, v_document.status;
+end;
+$$;
+
+grant execute on function public.submit_document_with_job(uuid, text, text, text, text)
+  to authenticated;
+
+revoke execute on function public.submit_document_with_job(uuid, text, text, text, text)
+  from public, anon, service_role;
 
 -- Atomic worker claim. This is intentionally a trusted-worker operation:
 -- the function locks one eligible row before updating its lease, preventing two

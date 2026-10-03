@@ -4,7 +4,7 @@
 
 **Last updated:** 2026-10-01  
 **Architecture decision gate:** Phase 1 must resolve Vercel inference feasibility, async worker placement, BM25 tenant isolation, and Supabase auth/RLS request-path strategy before Phases 3–6 begin.  
-**Current phase:** Phase 2 empirical benchmark in progress → Phase 3 production data layer preparation in parallel  
+**Current phase:** Phase 2 empirical benchmark is blocked on human relevance labeling; Phase 3 data layer is provisioned and undergoing end-to-end verification  
 **Baseline commit:** `f91ecff3a1a2d430e83ba2fafa3b40d72b2f3a8f`  
 **Phase 0 freeze commit:** `298a8e5aa886793d56a18dc0426a8952c681f1d6`
 
@@ -60,8 +60,8 @@ The project should **not** be treated as production-ready yet.
 | Semantic chunking | [ ] | Not implemented |
 | Token/cost accounting | [~] | Partial observability; systematic accounting required |
 | Reproducible dependencies | [x] | Bounded requirements, Docker, env template implemented |
-| Production database | [~] | Phase 3 reference schema implemented; live project not selected |
-| Supabase/pgvector | [~] | Reference DDL and similarity contract implemented; live verification pending |
+| Production database | [~] | Dedicated Enterprise-RAG Supabase project selected; migrations and RLS/Storage contract verified |
+| Supabase/pgvector | [~] | Live PostgreSQL 17.11 + pgvector 0.8.2 verified; parity benchmark remains |
 | Supabase Storage | [ ] | Not implemented |
 | Authentication | [ ] | Not implemented |
 | RLS / tenant isolation | [ ] | Not implemented |
@@ -98,7 +98,7 @@ No Phase 0 functional work remains.
 
 # 4. Phase 1 — Repository Cleanup + Reproducibility
 
-**Status: [~] IMPLEMENTED — ARCHITECTURE SPIKES COMPLETE; TARGET-RUNTIME RESOURCE MEASUREMENT REMAINS**
+**Status: [~] GATE PARTIALLY CLOSED — CI / TARGET-RUNTIME VERIFICATION REMAINS**
 
 ## Objective
 
@@ -118,7 +118,7 @@ Make the existing system deterministic, installable, understandable, and safe to
 - [x] Added Dockerfile with a pinned Python 3.12 runtime line.
 - [x] Added .dockerignore.
 - [x] Added .env.example.
-- [ ] Full clean-checkout installation has not been executed in this tool environment because external package installation is unavailable.
+- [x] CI performs clean-checkout dependency installation; local reproduction in this tool environment remains unavailable because external package installation is unavailable.
 - [x] Frontend retains its checked-in package-lock.json.
 - [x] No real secrets are committed by the Phase 1 changes.
 
@@ -136,7 +136,7 @@ Make the existing system deterministic, installable, understandable, and safe to
 - [x] Added GitHub Actions for push to main and pull requests.
 - [x] Backend job installs requirements, compiles Python, and runs pytest.
 - [x] Frontend job runs npm ci, lint, and production build.
-- [ ] First workflow execution still needs to complete successfully on GitHub.
+- [ ] A current GitHub Actions run must pass end-to-end. The last verified run failed in backend smoke tests and frontend lint.
 
 ### 1.5 Vercel / inference feasibility spike — **MUST COMPLETE BEFORE PRODUCTION DEPLOYMENT**
 
@@ -207,7 +207,7 @@ Still required before declaring the Phase 1 gate fully closed:
 
 # 5. Phase 2 — Evaluation Completion + Retrieval Experiment
 
-**Status: 🟡 IMPLEMENTED HARNESS + PROTOCOL; LABELED DATASET AND EXPERIMENT RUN REMAIN**
+**Status: 🟡 HARNESS + FROZEN QUERY/CORPUS SET COMPLETE; HUMAN JUDGMENTS REMAIN**
 
 ## Objective
 
@@ -233,6 +233,8 @@ Turn the existing retrieval implementation into a reproducible, statistically de
 - [x] Run pooling against the frozen CHA corpus.
 - [ ] Human-judge the pooled candidates.
 - [ ] Freeze the resulting relevance judgments.
+
+The repository intentionally does not fabricate these labels. This is the remaining human-in-the-loop benchmark gate.
 
 ### 2.3 Retrieval metrics
 
@@ -300,7 +302,7 @@ Still required before declaring Phase 2 closed:
 
 # 6. Phase 3 — Production Data Layer: Supabase + pgvector
 
-**Status: [~] REFERENCE SCHEMA IMPLEMENTED; LIVE PROJECT + VERIFICATION PENDING**
+**Status: [~] LIVE PROJECT PROVISIONED; END-TO-END INGESTION / RETRIEVAL VERIFICATION REMAINS**
 
 ## Objective
 
@@ -311,8 +313,8 @@ Replace local-only persistence/index assumptions with production-managed storage
 - [x] Production data model designed in `docs/DATABASE.md`.
 - [x] Reviewed the connected Supabase account without modifying any project.
 - [x] Confirmed the only currently visible project is unrelated `Tackboard`; it is explicitly excluded.
-- [ ] Identify/create the dedicated Enterprise RAG Supabase project.
-- [ ] Configure environment variables.
+- [x] Dedicated Enterprise RAG Supabase project identified: `Enterprise-RAG`.
+- [x] Live project URL/key contract is documented through environment variables; deployment environment values still require production verification.
 - [ ] Establish development/staging separation where practical.
 
 ## 3.2 Database schema
@@ -324,9 +326,9 @@ Replace local-only persistence/index assumptions with production-managed storage
 - [x] `ingestion_jobs` with worker leasing fields.
 - [x] `conversations`, `messages`, `answers`, `citations`.
 - [x] `retrieval_runs` telemetry model.
-- [ ] Generate the real migration filename with the installed Supabase CLI once the target project is selected.
-- [ ] Apply migration to the dedicated project.
-- [ ] Verify schema against the live database.
+- [x] Versioned migration history is synchronized with the live project through `20261003065755`, `20261003071104`, `20261003071114`, and `20261003071202`.
+- [x] Applied the live migrations to the dedicated project.
+- [x] Verified live tables, RLS policies, and pgvector extension against the production data model.
 - [x] Added application persistence entities and repository interfaces decoupled from Supabase/Postgres.
 - [x] Added in-memory repository adapters for deterministic unit tests and local boundary validation.
 - [x] Added document submission service with SHA-256 identity, tenant-scoped deduplication, deterministic storage paths, and ingestion-job creation.
@@ -337,7 +339,7 @@ Replace local-only persistence/index assumptions with production-managed storage
 - [x] Domain persistence records defined in `app/persistence/entities.py`.
 - [x] Repository contracts defined in `app/persistence/repositories.py`.
 - [x] In-memory adapters added for tests without requiring a live database.
-- [x] Implemented the first Postgres/Supabase repository adapter boundary (`app/persistence/supabase.py`) with injected-client semantics; live-project wiring remains pending.
+- [x] Implemented the Postgres/Supabase repository adapter boundary (`app/persistence/supabase.py`) with injected-client semantics and wired production document submission to the live atomic RPC.
 - [x] Wire initial document/ingestion lifecycle logic through repository interfaces rather than direct database calls.
 - [x] Wire the remaining query/conversation services through repository interfaces.
 - [x] Added Supabase conversation/answer/citation/retrieval telemetry adapters.
@@ -348,7 +350,7 @@ Replace local-only persistence/index assumptions with production-managed storage
 - [x] Current baseline target is 384-dimensional `all-MiniLM-L6-v2`.
 - [x] Reference HNSW index uses `vector_cosine_ops`.
 - [x] Reference similarity function uses cosine distance and `security invoker`.
-- [ ] Verify the live project's pgvector/Postgres versions.
+- [x] Verified live PostgreSQL 17.11 and pgvector 0.8.2.
 - [x] Added an embedding-provider boundary matching the normalized 384-d FAISS baseline.
 - [x] Added a document indexing pipeline from durable chunks to embeddings.
 - [x] Added a Supabase/pgvector chunk persistence adapter boundary.
@@ -363,9 +365,9 @@ Replace local-only persistence/index assumptions with production-managed storage
 - [x] Added tenant-scoped private Storage bucket/policy reference DDL.
 - [x] Added Storage contract tests.
 - [x] Connected the worker architecture to the durable indexing boundary.
-- [ ] Configure/apply Storage on the dedicated project.
-- [ ] Store uploaded PDFs through the live Storage adapter.
-- [ ] Define file lifecycle/deletion behavior on the live project.
+- [x] Configured a private `documents` bucket and tenant-scoped Storage policies on the dedicated project.
+- [x] Verified an allowed document-bound object path and a denied mismatched document path under simulated authenticated RLS.
+- [ ] Verify real PDF upload/read/delete through the production API path.
 
 ## 3.6 BM25 strategy
 
@@ -384,7 +386,8 @@ Do not assume that a global BM25 index plus post-filtering is safe for multi-ten
 ### Phase 3 gate
 
 - [x] Application persistence boundary is defined and unit-tested without a live database.
-- [ ] Upload → DB → chunk → embedding flow works on the dedicated project.
+- [x] Atomic document + ingestion-job submission is implemented and verified under simulated authenticated RLS.
+- [ ] Upload → Storage → chunk → embedding flow works end-to-end on the dedicated project.
 - [ ] pgvector retrieval matches the expected FAISS baseline.
 - [ ] Source PDFs persist correctly.
 - [ ] Data model supports tested multi-user isolation.
@@ -394,7 +397,7 @@ Do not assume that a global BM25 index plus post-filtering is safe for multi-ten
 
 # 7. Phase 4 — Authentication + Authorization + RLS
 
-**Status: [~] AUTHENTICATION CONTRACT PREPARED; LIVE PROJECT WIRING PENDING**
+**Status: [x] AUTHENTICATION CONTRACT + LIVE PROJECT WIRING VERIFIED**
 
 ## Objective
 
@@ -526,7 +529,7 @@ Use the mechanism selected during Phase 1.
 - [x] Failed jobs can be reclaimed after a valid retry transition.
 - [x] Document submission is idempotent for identical tenant-scoped content/pipeline identity.
 - [x] Job ownership/tenant context is carried by the service contract.
-- [x] Added the atomic `claim_ingestion_job` database contract using row locking + `SKIP LOCKED`; live migration/application remains pending.
+- [x] Added the atomic `claim_ingestion_job` database contract using row locking + `SKIP LOCKED` and verified the live migration history.
 - [x] Added the ingestion worker orchestration boundary.
 - [x] Worker execution starts only from an atomically claimed PROCESSING job.
 - [x] Added PDF → OCR → recursive chunk pipeline boundary.
@@ -927,4 +930,4 @@ Enterprise RAG is considered **production-ready** only when:
 - [ ] Browser end-to-end flow passes.
 - [ ] Production documentation is complete.
 
-**Current position: Phase 2 empirical benchmark is active. The real 50-query CHA Dense ∪ BM25 pool is frozen, while silver labeling is quota-limited and human review remains pending. Phase 3 database design and the application persistence/service boundary are being prepared in parallel without applying production schema changes.**
+**Current position: Phase 2 empirical benchmark is blocked on human relevance labeling. Phase 3 database/Auth/Storage foundations are live and migration-synchronized; the remaining gate is a real authenticated upload → Storage → worker → chunk/embedding → pgvector retrieval test.**
