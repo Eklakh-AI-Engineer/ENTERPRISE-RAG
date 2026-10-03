@@ -103,4 +103,4 @@ grant execute on function public.submit_document_with_job(uuid, text, text, text
   to authenticated;
 
 revoke execute on function public.submit_document_with_job(uuid, text, text, text, text)
-  from anon;
+  from public, anon, service_role;
