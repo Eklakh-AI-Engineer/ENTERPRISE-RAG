@@ -92,7 +92,11 @@ def judgment_matches_chunk(chunk: dict, judgment: dict) -> bool:
     )
 
 
-def evaluate_ranked(\n    results: list[dict],\n    judgments: list[dict],\n    all_chunks: list[dict],\n) -> dict:
+def evaluate_ranked(
+    results: list[dict],
+    judgments: list[dict],
+    all_chunks: list[dict],
+) -> dict:
     ranked = [
         item for item in results
         if item.get("chunk_id")
