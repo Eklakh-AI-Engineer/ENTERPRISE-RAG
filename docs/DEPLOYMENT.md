@@ -1,111 +1,50 @@
-# Enterprise RAG — Deployment
+# Enterprise RAG — Production Deployment (Later Stage)
 
-## Phase 1 deployment decision
+Production deployment is intentionally **not the current development gate**. The active milestone is the local retrieval-engineering product described in [PROJECT_PLAN.md](PROJECT_PLAN.md).
 
-| Component | Initial target | Reason |
-|---|---|---|
-| React/Vite frontend | Vercel | Static/edge-friendly UI deployment |
-| FastAPI + ML inference | Long-running container service | SentenceTransformer + CrossEncoder startup/runtime cost |
-| Ingestion worker | Long-running worker service | Long-running OCR/embed/index jobs |
-| Auth / database / vectors / storage | Supabase | Managed application data plane |
+When the local benchmark and product are frozen, the production topology is:
 
-The exact long-running host remains provider-agnostic until the resource benchmark is executed.
+```
+React/Vite
+   ↓
+Vercel
+   ↓ HTTPS + authenticated user context
+FastAPI + ML inference
+   ↓
+Supabase Auth / Postgres / pgvector / Storage
+   ↑
+Long-running ingestion worker
+```
 
-## Vercel feasibility benchmark
+## Production prerequisites
 
-Run:
+Before deployment begins:
 
-    python scripts/phase1_feasibility.py
+- [ ] Local PDF → chunk → retrieval → reranking → generation → citation → faithfulness flow is frozen.
+- [ ] 50–100 human-verified evaluation queries are frozen.
+- [ ] Dense/BM25/Hybrid/RRF benchmark is reproducible.
+- [ ] Reranking and query-rewriting experiments are documented.
+- [ ] Latency and token/cost measurements are recorded.
+- [ ] Production persistence has a verified migration plan.
+- [ ] Auth/RLS cross-tenant tests pass.
+- [ ] Ingestion worker reliability is verified.
 
-For cached-model measurements:
+## Production sequence
 
-    python scripts/phase1_feasibility.py --load-models
+1. Reconcile the production Supabase schema with the frozen local data model.
+2. Verify pgvector retrieval parity against the local Dense baseline.
+3. Verify private Storage upload/read/delete behavior.
+4. Verify authenticated API request propagation and RLS.
+5. Harden the ingestion worker for multi-tenant operation and lease recovery.
+6. Deploy FastAPI to a long-running container service.
+7. Deploy the React/Vite frontend.
+8. Configure CORS and HTTPS.
+9. Run an authenticated upload → ingestion → query E2E test.
+10. Run negative cross-tenant authorization tests.
+11. Add production rate limits, quotas, structured logs, and monitoring.
 
-For concurrency:
+## Important
 
-    python scripts/phase1_feasibility.py --load-models --concurrency 4
+The previous Railway-specific deployment files and production smoke script were removed from the active repository during the local-first cleanup. Their implementation history remains in Git. Production deployment should be rebuilt from the frozen local contract rather than becoming a second moving target during research.
 
-Required measurements before a Vercel inference decision:
-- bundle/package size
-- cold start
-- model initialization
-- peak memory
-- request duration
-- concurrent behavior
-- execution-time compatibility
-
-The current architecture has a safe fallback: keep the UI on Vercel and run Python inference on a long-running container.
-
-## Backend container
-
-The repository includes Dockerfile and .dockerignore.
-
-Build:
-
-    docker build -t enterprise-rag-api .
-
-Run:
-
-    docker run --rm -p 8000:8000 --env-file .env enterprise-rag-api
-
-Local retrieval indexes are intentionally excluded from the image. Production persistence and indexing move to Supabase in later phases.
-
-## Environment
-
-Backend:
-- OPENROUTER_API_KEY
-- OPENROUTER_MODEL
-- DENSE_INDEX_PATH
-- DENSE_METADATA_PATH
-- BM25_METADATA_PATH
-- DENSE_MODEL
-- RERANKER_MODEL
-- RETRIEVAL_TOP_K
-- RERANK_TOP_K
-- CANDIDATE_K
-- API_HOST
-- API_PORT
-- CORS_ORIGINS
-- ENVIRONMENT
-- LOG_LEVEL
-- APP_VERSION
-- SUPABASE_URL
-- SUPABASE_PUBLISHABLE_KEY
-- SUPABASE_SERVICE_ROLE_KEY
-- SUPABASE_DOCUMENTS_BUCKET
-- MAX_UPLOAD_BYTES
-- INGESTION_PIPELINE_VERSION
-
-Frontend:
-- VITE_API_BASE_URL
-
-Never expose provider API keys through VITE_* variables.
-
-## Deployment sequence
-
-1. Build and test the frontend.
-2. Build the backend container.
-3. Run the Phase 1 feasibility benchmark.
-4. Select the long-running inference host.
-5. Configure HTTPS between frontend and API.
-6. Configure JWT propagation and ensure Vercel and the API use the same Supabase project URL and publishable key.
-7. Supabase data plane is provisioned and migration-synchronized.
-8. Deploy the API with `/ready` as the Railway readiness check.
-9. Deploy the ingestion worker with the target organization ID.
-10. Run `scripts/smoke_production_e2e.py` against the deployed API using a dedicated test account and PDF.
-11. Add production smoke tests to CI/deployment after the live environment is stable.
-
-## Production verification gate
-
-Before declaring the upload/retrieval path production-ready, the following must pass against the deployed environment:
-- `GET /ready` returns HTTP 200 after model initialization.
-- authenticated `POST /documents` returns HTTP 202.
-- `GET /documents/{document_id}` transitions to `READY`.
-- authenticated `POST /query` returns a non-empty answer with citations.
-- the same test is denied for an unrelated organization/user.
-
-The repository includes `scripts/smoke_production_e2e.py` for the positive-path test. It requires a dedicated test account and deployed API URL; it never uses a service-role key.
-
-## Current limitation
-
-The quantitative Vercel resource benchmark has not been executed in this environment because the environment cannot access the repository's full model/runtime stack. The benchmark harness is committed so it can be executed on the actual development, CI, or deployment host.
+Never commit provider secrets or expose server-side keys through `VITE_*` variables.

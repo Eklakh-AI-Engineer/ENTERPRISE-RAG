@@ -6,6 +6,8 @@ Enterprise RAG is an AI Search project built to go beyond the typical **"upload 
 
 The system treats retrieval as an engineering problem: documents are represented as searchable chunks, multiple retrieval signals are combined, candidates are reranked, answers are generated from retrieved evidence, citations are mapped back to source metadata, and generated claims are evaluated for faithfulness.
 
+> **Current direction (October 2026): local-first.** The active milestone is to finish and measure the retrieval-engineering system locally. Supabase/Railway/Vercel production work is intentionally deferred until the local benchmark and product gates are complete. See [docs/PROJECT_PLAN.md](docs/PROJECT_PLAN.md).
+
 ---
 
 ## Why this project?
@@ -292,31 +294,37 @@ The modular design makes it possible to change one retrieval component without r
 
 ```text
 enterprise-rag/
-│
 ├── app/
 │   ├── api/
+│   ├── parsing/
+│   ├── chunking/
+│   ├── indexing/
 │   ├── retrieval/
 │   │   ├── dense/
 │   │   ├── bm25/
 │   │   └── hybrid/
 │   ├── reranking/
-│   ├── query/
 │   ├── generation/
 │   ├── citations/
 │   ├── evaluation/
+│   ├── faithfulness/
+│   ├── ingestion/
+│   ├── query/
 │   └── observability/
-│
 ├── data/
-├── experiments/
-├── tests/
-├── scripts/
-├── configs/
+│   ├── evaluation/
+│   └── processed/
 ├── frontend/
+├── scripts/
+├── tests/
+├── docs/
+├── Enterprise RAG.docx
 ├── requirements.txt
+├── Dockerfile
 └── README.md
 ```
 
-> The repository structure may evolve as additional ingestion, evaluation, and experiment modules are completed.
+The repository no longer keeps one-off debug scripts or duplicate `scripts/test_*.py` files. `tests/` is the canonical automated test suite.
 
 ---
 
@@ -478,28 +486,19 @@ Latency and quality trade-offs should be measured before changing retrieval para
 
 ---
 
-## Phase 1 Engineering Baseline
+## Development Direction
 
-Phase 1 hardens the repository without changing the retrieval pipeline:
+The repository is intentionally being completed in a local-first sequence:
 
-- reproducible Python runtime dependencies
-- Dockerized backend
-- environment-driven configuration
-- dependency-light backend smoke tests
-- GitHub Actions CI for backend and frontend
-- configurable frontend API endpoint
-- Vercel/inference feasibility benchmark
-- explicit production architecture decisions for async ingestion, tenant-safe BM25, and Supabase RLS
+1. **Local baseline** — clean startup, tests, and end-to-end PDF/query/evidence flow.
+2. **Ingestion** — stable page/section/chunk metadata, offsets, edge cases, and OCR decision.
+3. **Retrieval benchmark** — human-verified 50–100 query gold set and reproducible Recall/MRR/nDCG.
+4. **Controlled experiments** — Dense vs BM25 vs Hybrid/RRF, reranking, chunking, and query rewriting.
+5. **Answer evaluation** — citation validity/accuracy, faithfulness human validation, latency, token/cost accounting.
+6. **Local product freeze** — polished evidence inspection workflow and final results documentation.
+7. **Production release** — Supabase/Railway/Vercel only after the local system is frozen and measured.
 
-Architecture decisions and operational notes:
-
-- docs/ARCHITECTURE.md
-- docs/DEPLOYMENT.md
-- docs/DEVELOPMENT.md
-- docs/EVALUATION.md
-- docs/SECURITY.md
-
-The quantitative inference benchmark must be executed on the target runtime before production deployment. Phase 1 does not claim Vercel compatibility from local measurements alone.
+The detailed checklist is in [docs/PROJECT_PLAN.md](docs/PROJECT_PLAN.md).
 
 ## Development Status
 
@@ -522,16 +521,16 @@ The quantitative inference benchmark must be executed on the target runtime befo
 
 ### Next
 
-- [ ] Freeze a controlled evaluation corpus
-- [ ] Build a labeled evaluation dataset
-- [ ] Automate Recall@5 / MRR / nDCG evaluation
-- [ ] Run Dense vs Hybrid experiments
-- [ ] Analyze retrieval failure cases
-- [ ] Evaluate chunking strategies
-- [ ] Add systematic token/cost measurement
-- [ ] Add query rewriting as a separately evaluated component
-- [ ] Expand document ingestion/OCR coverage
-- [ ] Improve frontend evidence inspection
+- [ ] Verify clean local backend/frontend startup.
+- [ ] Freeze ingestion and chunk metadata behavior.
+- [ ] Human-verify the 50–100 query relevance pool.
+- [ ] Run Dense, BM25, and Hybrid/RRF retrieval benchmarks.
+- [ ] Compare Hybrid vs Hybrid + CrossEncoder.
+- [ ] Perform systematic retrieval failure analysis.
+- [ ] Evaluate query rewriting separately.
+- [ ] Human-validate the faithfulness judge.
+- [ ] Add systematic token/cost accounting.
+- [ ] Freeze the local product and publish controlled results.
 
 ---
 
