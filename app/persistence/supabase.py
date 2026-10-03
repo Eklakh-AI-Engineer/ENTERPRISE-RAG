@@ -91,6 +91,52 @@ class SupabaseDocumentRepository:
         row = _one(response)
         return _document(row) if row else None
 
+    def submit_with_job(
+        self,
+        *,
+        organization_id: str,
+        owner_user_id: str,
+        filename: str,
+        storage_path: str,
+        content_hash: str,
+        pipeline_version: str,
+    ) -> tuple[DocumentRecord, IngestionJobRecord, bool]:
+        # The database function executes document + job creation in one
+        # transaction under the caller's JWT/RLS context.
+        response = self.client.rpc(
+            "submit_document_with_job",
+            {
+                "p_organization_id": organization_id,
+                "p_filename": filename,
+                "p_storage_path": storage_path,
+                "p_content_hash": content_hash,
+                "p_pipeline_version": pipeline_version,
+            },
+        ).execute()
+        _raise_on_error(response)
+        row = _one(response)
+        if row is None:
+            raise SupabasePersistenceError(
+                "Atomic document submission returned no result."
+            )
+
+        document_id = row.get("document_id")
+        ingestion_job_id = row.get("ingestion_job_id")
+        if not document_id or not ingestion_job_id:
+            raise SupabasePersistenceError(
+                "Atomic document submission returned incomplete identifiers."
+            )
+
+        document = self.get(str(document_id), organization_id)
+        job = SupabaseIngestionJobRepository(self.client).get(
+            str(ingestion_job_id), organization_id
+        )
+        if document is None or job is None:
+            raise SupabasePersistenceError(
+                "Atomic document submission returned rows that could not be re-read."
+            )
+        return document, job, bool(row.get("deduplicated", False))
+
     def save(self, document: DocumentRecord) -> DocumentRecord:
         response = (
             self.client.table("documents")
