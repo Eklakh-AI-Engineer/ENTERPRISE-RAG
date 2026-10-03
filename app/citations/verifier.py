@@ -173,39 +173,30 @@ class CitationVerifier:
         self,
         answer: str,
     ) -> list[dict]:
-
-        sentences = re.split(
-            r"(?<=[.!?])\s+",
-            answer.strip(),
-        )
-
         claims = []
 
-        for sentence in sentences:
-
-            source_matches = SOURCE_PATTERN.findall(
-                sentence
-            )
-
-            if not source_matches:
+        for match in SOURCE_PATTERN.finditer(answer):
+            prefix = answer[:match.start()].rstrip()
+            if not prefix:
                 continue
 
-            claim_text = SOURCE_PATTERN.sub(
-                "",
-                sentence,
-            ).strip()
-
+            # Citations commonly appear after sentence-ending punctuation,
+            # e.g. "Claim text. [Source 1]". Use the final sentence before
+            # the marker so punctuation does not discard the cited claim.
+            sentences = re.split(
+                r"(?<=[.!?])\s+",
+                prefix,
+            )
+            claim_text = sentences[-1].strip()
             if not claim_text:
                 continue
 
-            for source_id in source_matches:
-
-                claims.append(
-                    {
-                        "claim": claim_text,
-                        "source": int(source_id),
-                    }
-                )
+            claims.append(
+                {
+                    "claim": claim_text,
+                    "source": int(match.group(1)),
+                }
+            )
 
         return claims
 
