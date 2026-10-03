@@ -40,16 +40,28 @@ class DocumentUploadResponse(BaseModel):
     deduplicated: bool
 
 
-def _auth_service() -> AuthService:
+def _auth_service(token: str) -> AuthService:
     try:
-        return AuthService(SupabaseTokenVerifier(create_user_client()))
+        client = create_user_client(access_token=token)
+        return AuthService(SupabaseTokenVerifier(client))
     except Exception as exc:
-        raise HTTPException(status_code=503, detail="Authentication service is not configured.") from exc
+        raise HTTPException(
+            status_code=503,
+            detail="Authentication service is not configured.",
+        ) from exc
 
 
-def current_principal(authorization: str | None = Header(default=None)):
+def current_principal(
+    authorization: str | None = Header(default=None),
+):
+    if not authorization:
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid or missing access token.",
+        )
+    _, _, token = authorization.partition(" ")
     try:
-        return _auth_service().authenticate_bearer(authorization)
+        return _auth_service(token.strip()).authenticate_bearer(authorization)
     except InvalidTokenError as exc:
         raise HTTPException(status_code=401, detail="Invalid or missing access token.") from exc
 
