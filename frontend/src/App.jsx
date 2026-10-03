@@ -8,6 +8,7 @@ import {
 import { queryRAG, uploadDocument } from "./api/rag";
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
+const EMPTY_CITATIONS = [];
 
 function Icon({ name, size = 18 }) {
   const common = {
@@ -277,7 +278,7 @@ function App() {
   const evaluation = result?.evaluation || {};
 
   const retrieved = result?.retrieved || [];
-  const citations = result?.citations || [];
+  const citations = result?.citations ?? EMPTY_CITATIONS;
 
   const citationMap = useMemo(() => {
     const map = new Map();
