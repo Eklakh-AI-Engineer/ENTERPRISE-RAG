@@ -1,5 +1,24 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
+  ArrowUpRight,
+  Check,
+  ChevronDown,
+  ChevronRight,
+  CircleAlert,
+  Database,
+  FileText,
+  Gauge,
+  Layers3,
+  LogOut,
+  Menu,
+  Search,
+  ShieldCheck,
+  Sparkles,
+  Upload,
+  X,
+  Zap,
+} from "lucide-react";
+import {
   getSession,
   getValidSession,
   signIn,
@@ -9,80 +28,6 @@ import { queryRAG, uploadDocument } from "./api/rag";
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
 const EMPTY_CITATIONS = [];
-
-function Icon({ name, size = 18 }) {
-  const common = {
-    width: size,
-    height: size,
-    viewBox: "0 0 24 24",
-    fill: "none",
-    stroke: "currentColor",
-    strokeWidth: 1.8,
-    strokeLinecap: "round",
-    strokeLinejoin: "round",
-  };
-
-  const paths = {
-    search: (
-      <>
-        <circle cx="11" cy="11" r="6.5" />
-        <path d="m16 16 4 4" />
-      </>
-    ),
-    arrow: (
-      <>
-        <path d="M5 12h14" />
-        <path d="m13 6 6 6-6 6" />
-      </>
-    ),
-    check: <path d="m5 12 4 4L19 6" />,
-    alert: (
-      <>
-        <path d="M12 3 22 20H2L12 3Z" />
-        <path d="M12 9v5" />
-        <path d="M12 17h.01" />
-      </>
-    ),
-    file: (
-      <>
-        <path d="M6 3h8l4 4v14H6z" />
-        <path d="M14 3v5h5" />
-        <path d="M9 13h6" />
-        <path d="M9 17h6" />
-      </>
-    ),
-    database: (
-      <>
-        <ellipse cx="12" cy="5" rx="7" ry="3" />
-        <path d="M5 5v7c0 1.7 3.1 3 7 3s7-1.3 7-3V5" />
-        <path d="M5 12v7c0 1.7 3.1 3 7 3s7-1.3 7-3v-7" />
-      </>
-    ),
-    layers: (
-      <>
-        <path d="m12 3 9 5-9 5-9-5 9-5Z" />
-        <path d="m3 12 9 5 9-5" />
-        <path d="m3 16 9 5 9-5" />
-      </>
-    ),
-    bolt: <path d="m13 2-9 12h7l-1 8 9-12h-7l1-8Z" />,
-    gauge: (
-      <>
-        <path d="M4 18a8 8 0 1 1 16 0" />
-        <path d="M12 14l4-4" />
-      </>
-    ),
-    chevron: <path d="m6 9 6 6 6-6" />,
-    spark: (
-      <>
-        <path d="m12 3 1.5 5.5L19 10l-5.5 1.5L12 17l-1.5-5.5L5 10l5.5-1.5L12 3Z" />
-        <path d="m19 16 .7 2.3L22 19l-2.3.7L19 22l-.7-2.3L16 19l2.3-.7L19 16Z" />
-      </>
-    ),
-  };
-
-  return <svg {...common}>{paths[name] || paths.spark}</svg>;
-}
 
 function formatMs(value) {
   if (value === undefined || value === null) return "—";
@@ -110,30 +55,40 @@ function App() {
   const [selectedFile, setSelectedFile] = useState(null);
   const [uploadMessage, setUploadMessage] = useState("");
   const [uploadError, setUploadError] = useState("");
+  const [mobileNav, setMobileNav] = useState(false);
   const fileInputRef = useRef(null);
-
-
-  // ---------------------------------------------------------
-  // Auth session
-  // ---------------------------------------------------------
 
   useEffect(() => {
     let active = true;
+    getValidSession()
+      .then((current) => {
+        if (active) setSession(current);
+      })
+      .catch(() => {
+        if (active) setSession(null);
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
 
-    const restoreSession = async () => {
-      const current = await getValidSession();
+  useEffect(() => {
+    let mounted = true;
 
-      if (active) {
-        setSession(current);
+    const checkHealth = async () => {
+      try {
+        const response = await fetch(`${API_BASE}/health`);
+        if (mounted) setApiOnline(response.ok);
+      } catch {
+        if (mounted) setApiOnline(false);
       }
     };
 
-    restoreSession().catch(() => {
-      if (active) setSession(null);
-    });
-
+    checkHealth();
+    const interval = setInterval(checkHealth, 10000);
     return () => {
-      active = false;
+      mounted = false;
+      clearInterval(interval);
     };
   }, []);
 
@@ -186,50 +141,13 @@ function App() {
           : `${data.filename} uploaded and queued for ingestion.`
       );
       setSelectedFile(null);
-      if (fileInputRef.current) {
-        fileInputRef.current.value = "";
-      }
+      if (fileInputRef.current) fileInputRef.current.value = "";
     } catch (err) {
       setUploadError(err.message || "Document upload failed.");
     } finally {
       setUploading(false);
     }
   };
-
-  // ---------------------------------------------------------
-  // API health check
-  // ---------------------------------------------------------
-
-  useEffect(() => {
-    let mounted = true;
-
-    const checkHealth = async () => {
-      try {
-        const response = await fetch(`${API_BASE}/health`);
-
-        if (mounted) {
-          setApiOnline(response.ok);
-        }
-      } catch {
-        if (mounted) {
-          setApiOnline(false);
-        }
-      }
-    };
-
-    checkHealth();
-
-    const interval = setInterval(checkHealth, 10000);
-
-    return () => {
-      mounted = false;
-      clearInterval(interval);
-    };
-  }, []);
-
-  // ---------------------------------------------------------
-  // Query execution
-  // ---------------------------------------------------------
 
   const handleAsk = async () => {
     const cleanQuery = query.trim();
@@ -247,11 +165,15 @@ function App() {
 
     try {
       const data = await queryRAG(cleanQuery);
-
       setResult(data);
       setApiOnline(true);
+      window.requestAnimationFrame(() => {
+        document.getElementById("results")?.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
+      });
     } catch (err) {
-      console.error(err);
       setApiOnline(false);
       setError(err.message || "Unable to process the request.");
     } finally {
@@ -268,168 +190,225 @@ function App() {
 
   const setSuggestion = (text) => {
     setQuery(text);
+    document.getElementById("ask")?.scrollIntoView({
+      behavior: "smooth",
+      block: "center",
+    });
   };
-
-  // ---------------------------------------------------------
-  // Result helpers
-  // ---------------------------------------------------------
 
   const metrics = result?.metrics || {};
   const evaluation = result?.evaluation || {};
-
   const retrieved = result?.retrieved || [];
   const citations = result?.citations ?? EMPTY_CITATIONS;
 
   const citationMap = useMemo(() => {
     const map = new Map();
-
     citations.forEach((citation) => {
-      if (citation.chunk_id) {
-        map.set(citation.chunk_id, citation);
-      }
+      if (citation.chunk_id) map.set(citation.chunk_id, citation);
     });
-
     return map;
   }, [citations]);
 
-  const getCitationForChunk = (chunkId) => {
-    return citationMap.get(chunkId);
-  };
-
+  const getCitationForChunk = (chunkId) => citationMap.get(chunkId);
   const toggleChunk = (chunkId) => {
-    setExpandedChunk((current) =>
-      current === chunkId ? null : chunkId
-    );
+    setExpandedChunk((current) => current === chunkId ? null : chunkId);
   };
-
-  // ---------------------------------------------------------
-  // Empty state
-  // ---------------------------------------------------------
 
   const showEmpty = !loading && !result && !error;
 
   return (
     <div className="app-shell">
-      <div className="ambient ambient-one" />
-      <div className="ambient ambient-two" />
-
-      {/* =====================================================
-          TOP BAR
-      ===================================================== */}
+      <div className="grain" aria-hidden="true" />
+      <div className="ambient ambient-one" aria-hidden="true" />
+      <div className="ambient ambient-two" aria-hidden="true" />
 
       <header className="topbar">
-        <div className="brand">
-          <div className="brand-mark">
-            <Icon name="layers" size={17} />
+        <a className="brand" href="#top" aria-label="Enterprise RAG home">
+          <span className="brand-mark"><Layers3 size={18} /></span>
+          <span className="brand-copy">
+            <strong>Enterprise RAG</strong>
+            <small>Retrieval intelligence</small>
+          </span>
+        </a>
+
+        <nav className={`main-nav ${mobileNav ? "open" : ""}`} aria-label="Primary">
+          <a href="#workspace" onClick={() => setMobileNav(false)}>Workspace</a>
+          <a href="#results" onClick={() => setMobileNav(false)}>Evidence</a>
+          <a href="#system" onClick={() => setMobileNav(false)}>System</a>
+        </nav>
+
+        <div className="topbar-actions">
+          <div className={`api-status ${apiOnline ? "online" : "offline"}`}>
+            <span className="status-dot" />
+            {apiOnline ? "System online" : "System offline"}
           </div>
 
-          <div>
-            <div className="brand-name">Enterprise RAG</div>
-            <div className="brand-caption">
-              Retrieval Intelligence Platform
-            </div>
-          </div>
+          {session ? (
+            <button className="account-button" type="button" onClick={handleLogout} title="Sign out">
+              <span>{session.user?.email?.slice(0, 1).toUpperCase() || "U"}</span>
+              <LogOut size={15} />
+            </button>
+          ) : (
+            <a className="topbar-signin" href="#auth">Sign in <ArrowUpRight size={14} /></a>
+          )}
         </div>
 
-        <div
-          className={`status-pill ${
-            apiOnline ? "online" : "offline"
-          }`}
+        <button
+          className="mobile-menu"
+          type="button"
+          aria-label="Toggle navigation"
+          onClick={() => setMobileNav((value) => !value)}
         >
-          <span className="status-dot" />
-
-          {apiOnline ? "API ONLINE" : "API OFFLINE"}
-        </div>
+          {mobileNav ? <X size={20} /> : <Menu size={20} />}
+        </button>
       </header>
 
-      <main className="main-content">
-        {/* =================================================
-            HERO
-        ================================================= */}
+      <main id="top" className="main-content">
+        <section className="hero" id="workspace">
+          <div className="hero-copy-block">
+            <div className="overline">
+              <span className="overline-dot" />
+              Tenant-scoped retrieval · grounded generation
+            </div>
 
-        <section className="hero">
-          <div className="eyebrow">
-            <span>
-              <Icon name="database" size={12} />
-              TENANT-SCOPED PGVECTOR
-            </span>
+            <h1>
+              Knowledge,
+              <br />
+              <em>with evidence.</em>
+            </h1>
 
-            <span>
-              <Icon name="layers" size={12} />
-              CROSS-ENCODER RERANKING
-            </span>
+            <p className="hero-copy">
+              Ask your enterprise knowledge base a question and trace the
+              complete path from retrieval to reranking, generation, citations,
+              and evaluation.
+            </p>
 
-            <span>
-              <Icon name="spark" size={12} />
-              GROUNDED GENERATION
-            </span>
+            <div className="hero-points">
+              <span><ShieldCheck size={15} /> Tenant isolated</span>
+              <span><Database size={15} /> pgvector retrieval</span>
+              <span><Sparkles size={15} /> Citation grounded</span>
+            </div>
           </div>
 
-          <h1>
-            Enterprise <span>RAG</span>
-          </h1>
-
-          <p className="hero-copy">
-            Ask questions across your enterprise knowledge base and
-            inspect exactly how the answer was retrieved, ranked,
-            generated, and evaluated.
-          </p>
-
-          {!session ? (
-            <form className="auth-panel" onSubmit={handleLogin}>
+          <aside className="pipeline-card" id="system">
+            <div className="pipeline-head">
               <div>
-                <div className="section-kicker">AUTHENTICATION</div>
-                <h3>Sign in to Enterprise RAG</h3>
-                <p>Use your Supabase account to access tenant-scoped retrieval.</p>
+                <span className="eyebrow">HOW IT WORKS</span>
+                <h2>From question to evidence</h2>
               </div>
+              <span className="pipeline-index">01—04</span>
+            </div>
 
-              <input
-                type="email"
-                value={email}
-                onChange={(event) => setEmail(event.target.value)}
-                placeholder="Email"
-                autoComplete="email"
-                required
-              />
+            <div className="pipeline-steps">
+              <PipelineStep number="01" icon={<Search size={16} />} title="Retrieve" copy="Search the tenant's indexed knowledge." />
+              <PipelineStep number="02" icon={<Layers3 size={16} />} title="Rerank" copy="Cross-encoder scoring refines the evidence." />
+              <PipelineStep number="03" icon={<Sparkles size={16} />} title="Generate" copy="Produce an answer constrained by context." />
+              <PipelineStep number="04" icon={<Check size={16} />} title="Inspect" copy="Review citations, quality, and latency." last />
+            </div>
+          </aside>
+        </section>
 
-              <input
-                type="password"
-                value={password}
-                onChange={(event) => setPassword(event.target.value)}
-                placeholder="Password"
-                autoComplete="current-password"
-                required
-              />
+        {!session ? (
+          <section className="auth-section" id="auth">
+            <div className="auth-intro">
+              <span className="eyebrow">PRIVATE WORKSPACE</span>
+              <h2>Sign in to query your knowledge base.</h2>
+              <p>Your session is used to enforce tenant-scoped access.</p>
+            </div>
 
-              {authError && <div className="auth-error">{authError}</div>}
-
-              <button className="auth-button" type="submit" disabled={authLoading}>
-                {authLoading ? "Signing in..." : "Sign in"}
+            <form className="auth-card" onSubmit={handleLogin}>
+              <label>
+                Email
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(event) => setEmail(event.target.value)}
+                  placeholder="you@company.com"
+                  autoComplete="email"
+                  required
+                />
+              </label>
+              <label>
+                Password
+                <input
+                  type="password"
+                  value={password}
+                  onChange={(event) => setPassword(event.target.value)}
+                  placeholder="••••••••"
+                  autoComplete="current-password"
+                  required
+                />
+              </label>
+              {authError && (
+                <div className="inline-error"><CircleAlert size={15} /> {authError}</div>
+              )}
+              <button className="primary-button" type="submit" disabled={authLoading}>
+                {authLoading ? "Authenticating…" : "Enter workspace"}
+                <ArrowUpRight size={16} />
               </button>
             </form>
-          ) : (
-            <div className="session-bar">
-              <span>Signed in as {session.user?.email || "authenticated user"}</span>
-              <button type="button" onClick={handleLogout}>Sign out</button>
+          </section>
+        ) : (
+          <section className="workspace-panel" id="ask">
+            <div className="workspace-head">
+              <div>
+                <span className="eyebrow">QUERY WORKSPACE</span>
+                <h2>What do you want to know?</h2>
+              </div>
+              <div className="signed-in">
+                <span className="signed-avatar">
+                  {(session.user?.email || "U").slice(0, 1).toUpperCase()}
+                </span>
+                <span>
+                  <small>Authenticated as</small>
+                  <strong>{session.user?.email || "authenticated user"}</strong>
+                </span>
+              </div>
             </div>
-          )}
 
-          {/* =================================================
-              DOCUMENT INGESTION
-          ================================================= */}
+            <div className="query-card">
+              <div className="query-leading"><Search size={20} /></div>
+              <textarea
+                rows={2}
+                value={query}
+                onChange={(event) => setQuery(event.target.value)}
+                onKeyDown={handleKeyDown}
+                placeholder="Ask a question about your enterprise knowledge…"
+                disabled={loading}
+                aria-label="Enterprise knowledge query"
+              />
+              <button
+                className="ask-button"
+                onClick={handleAsk}
+                disabled={!query.trim() || loading}
+                aria-label="Run query"
+              >
+                {loading ? <Gauge className="spin" size={19} /> : <ArrowUpRight size={19} />}
+              </button>
+            </div>
 
-          {session && (
-            <div className="upload-panel">
-              <div className="upload-copy">
-                <div className="section-kicker">KNOWLEDGE BASE</div>
-                <h3>Upload a PDF</h3>
-                <p>
-                  Documents are stored in your tenant, queued for the Railway
-                  ingestion worker, then indexed for pgvector retrieval.
-                </p>
+            <div className="suggestions">
+              <span>Explore</span>
+              <button onClick={() => setSuggestion("Why is job discovery difficult for candidates?")}>
+                Why is job discovery difficult?
+              </button>
+              <button onClick={() => setSuggestion("Why do candidates spend so much time applying for jobs?")}>
+                Why do candidates spend so much time applying?
+              </button>
+              <button onClick={() => setSuggestion("What repetitive tasks do job applicants perform?")}>
+                What tasks are repetitive?
+              </button>
+            </div>
+
+            <div className="ingest-card">
+              <div className="ingest-icon"><Upload size={18} /></div>
+              <div className="ingest-copy">
+                <span className="eyebrow">KNOWLEDGE BASE</span>
+                <h3>Add a PDF to this tenant</h3>
+                <p>Upload a document and the ingestion worker will queue it for indexing.</p>
               </div>
 
-              <div className="upload-controls">
+              <div className="ingest-actions">
                 <input
                   ref={fileInputRef}
                   className="file-input"
@@ -438,537 +417,226 @@ function App() {
                   onChange={handleFileChange}
                   disabled={uploading}
                 />
-
-                <button
-                  className="upload-button"
-                  type="button"
-                  onClick={handleUpload}
-                  disabled={!selectedFile || uploading}
-                >
-                  {uploading ? "Uploading..." : "Upload document"}
+                <button className="secondary-button" type="button" onClick={handleUpload} disabled={!selectedFile || uploading}>
+                  {uploading ? "Uploading…" : "Upload PDF"}
                 </button>
               </div>
 
               {selectedFile && (
-                <div className="upload-file">
-                  <Icon name="file" size={15} />
+                <div className="file-chip">
+                  <FileText size={15} />
                   <span>{selectedFile.name}</span>
+                  <button type="button" onClick={() => { setSelectedFile(null); if (fileInputRef.current) fileInputRef.current.value = ""; }} aria-label="Remove selected file">
+                    <X size={13} />
+                  </button>
                 </div>
               )}
 
-              {uploadMessage && (
-                <div className="upload-success">
-                  <Icon name="check" size={15} />
-                  <span>{uploadMessage}</span>
-                </div>
-              )}
-
-              {uploadError && (
-                <div className="upload-error">
-                  <Icon name="alert" size={15} />
-                  <span>{uploadError}</span>
-                </div>
-              )}
-
-              <div className="upload-note">
-                PDF only · up to 20 MB · ingestion runs asynchronously
-              </div>
+              {uploadMessage && <div className="inline-success"><Check size={15} /> {uploadMessage}</div>}
+              {uploadError && <div className="inline-error"><CircleAlert size={15} /> {uploadError}</div>}
             </div>
-          )}
-
-          {/* =================================================
-              QUERY BOX
-          ================================================= */}
-
-          <div className="query-box">
-            <div className="query-icon">
-              <Icon name="search" size={19} />
-            </div>
-
-            <textarea
-              rows={1}
-              value={query}
-              onChange={(event) => setQuery(event.target.value)}
-              onKeyDown={handleKeyDown}
-              placeholder="Ask your enterprise knowledge..."
-              disabled={loading || !session}
-            />
-
-            <button
-              className="submit-button"
-              onClick={handleAsk}
-              disabled={!query.trim() || loading}
-              aria-label="Ask"
-            >
-              {loading ? (
-                <span className="spin">
-                  <Icon name="gauge" size={18} />
-                </span>
-              ) : (
-                <Icon name="arrow" size={18} />
-              )}
-            </button>
-          </div>
-
-          <div className="suggestions">
-            <span>Try:</span>
-
-            <button
-              onClick={() =>
-                setSuggestion(
-                  "Why is job discovery difficult for candidates?"
-                )
-              }
-            >
-              Why is job discovery difficult for candidates?
-            </button>
-
-            <button
-              onClick={() =>
-                setSuggestion(
-                  "Why do candidates spend so much time applying for jobs?"
-                )
-              }
-            >
-              Why do candidates spend so much time applying?
-            </button>
-
-            <button
-              onClick={() =>
-                setSuggestion(
-                  "What repetitive tasks do job applicants perform?"
-                )
-              }
-            >
-              What repetitive tasks do applicants perform?
-            </button>
-          </div>
-        </section>
-
-        {/* =================================================
-            ERROR
-        ================================================= */}
+          </section>
+        )}
 
         {error && (
-          <div className="error-panel">
-            <Icon name="alert" size={19} />
-
+          <div className="error-banner">
+            <CircleAlert size={18} />
             <div>
               <strong>Request failed</strong>
-              <p>{error}</p>
+              <span>{error}</span>
             </div>
+            <button type="button" onClick={() => setError("")} aria-label="Dismiss error"><X size={15} /></button>
           </div>
         )}
 
-        {/* =================================================
-            LOADING
-        ================================================= */}
-
         {loading && (
-          <section className="loading-state">
-            <div className="loading-icon spin">
-              <Icon name="layers" size={20} />
+          <section className="state-card loading-card">
+            <div className="state-icon"><Sparkles className="spin" size={19} /></div>
+            <div>
+              <span className="eyebrow">PROCESSING</span>
+              <h3>Tracing the retrieval pipeline…</h3>
+              <p>Searching, reranking evidence, generating a grounded response, and evaluating the result.</p>
             </div>
-
-            <h3>Running retrieval pipeline</h3>
-
-            <p>
-              Searching the knowledge base, reranking evidence,
-              generating a grounded response, and evaluating the
-              result.
-            </p>
           </section>
         )}
 
-        {/* =================================================
-            EMPTY
-        ================================================= */}
-
-        {showEmpty && (
-          <section className="empty-state">
-            <div className="empty-icon">
-              <Icon name="search" size={21} />
+        {showEmpty && session && (
+          <section className="state-card empty-card">
+            <div className="state-icon"><Search size={19} /></div>
+            <div>
+              <span className="eyebrow">READY WHEN YOU ARE</span>
+              <h3>Your evidence workspace is ready.</h3>
+              <p>Run a question above to inspect the answer, sources, quality signals, and pipeline timing.</p>
             </div>
-
-            <h3>Ask your enterprise knowledge base</h3>
-
-            <p>
-              Enter a question above to inspect a complete RAG
-              pipeline with retrieved evidence, citations,
-              evaluation scores, and latency metrics.
-            </p>
+            <div className="empty-stat"><strong>04</strong><span>pipeline stages</span></div>
           </section>
         )}
-
-        {/* =================================================
-            RESULTS
-        ================================================= */}
 
         {result && !loading && (
-          <section className="results">
-            {/* -------------------------------------------------
-                RESULT HEADER
-            ------------------------------------------------- */}
-
-            <div className="section-heading">
+          <section className="results" id="results">
+            <div className="result-heading">
               <div>
-                <div className="section-kicker">RESULT</div>
-
+                <span className="eyebrow">ANSWER + EVIDENCE</span>
                 <h2>Grounded response</h2>
+                <p>Everything below came from the same retrieval run.</p>
               </div>
-
-              <div
-                className={`pass-badge ${
-                  evaluation.passed ? "pass" : "fail"
-                }`}
-              >
-                <Icon
-                  name={evaluation.passed ? "check" : "alert"}
-                  size={13}
-                />
-
-                {evaluation.passed
-                  ? "Evaluation passed"
-                  : "Evaluation failed"}
+              <div className={`evaluation-badge ${evaluation.passed ? "pass" : "fail"}`}>
+                {evaluation.passed ? <Check size={14} /> : <CircleAlert size={14} />}
+                {evaluation.passed ? "Evaluation passed" : "Evaluation failed"}
               </div>
             </div>
 
-            {/* -------------------------------------------------
-                ANSWER
-            ------------------------------------------------- */}
-
-            <div className="answer-card">
-              <div className="answer-label">
-                <Icon name="spark" size={13} />
-                GENERATED ANSWER
-              </div>
-
-              <div className="answer-text">
-                {result.answer || "No answer generated."}
-              </div>
-            </div>
-
-            {/* -------------------------------------------------
-                CITATIONS + QUALITY
-            ------------------------------------------------- */}
-
-            <div className="dashboard-grid">
-              <div className="panel">
-                <div className="panel-header">
-                  <div>
-                    <div className="section-kicker">EVIDENCE</div>
-                    <h3>Citations</h3>
-                  </div>
-
-                  <div className="count-badge">
-                    {citations.length} sources
-                  </div>
+            <div className="result-layout">
+              <article className="answer-panel">
+                <div className="answer-meta">
+                  <span><Sparkles size={14} /> GENERATED ANSWER</span>
+                  <span>{citations.length} cited sources</span>
                 </div>
+                <p className="answer-text">{result.answer || "No answer generated."}</p>
+              </article>
 
+              <aside className="quality-panel">
+                <div className="quality-head">
+                  <div>
+                    <span className="eyebrow">QUALITY</span>
+                    <h3>Evaluation</h3>
+                  </div>
+                  <div className="quality-score">{percentage(evaluation.overall_score)}%</div>
+                </div>
+                <QualityBar label="Citation validity" value={evaluation.citation_score} />
+                <QualityBar label="Answer relevance" value={evaluation.relevance_score} />
+                <QualityBar label="Evidence support" value={evaluation.support_score} />
+              </aside>
+            </div>
+
+            <div className="result-grid">
+              <section className="surface-panel evidence-surface">
+                <PanelHeader eyebrow="EVIDENCE" title="Citations" count={`${citations.length} sources`} />
                 <div className="citation-list">
-                  {citations.length === 0 && (
-                    <div className="empty-state">
-                      <p>No citations returned.</p>
-                    </div>
-                  )}
-
+                  {citations.length === 0 && <div className="panel-empty">No citations returned.</div>}
                   {citations.map((citation, index) => {
-                    const linkedChunk = retrieved.find(
-                      (chunk) =>
-                        chunk.chunk_id === citation.chunk_id
-                    );
-
-                    const isExpanded =
-                      expandedChunk === citation.chunk_id;
+                    const linkedChunk = retrieved.find((chunk) => chunk.chunk_id === citation.chunk_id);
+                    const isExpanded = expandedChunk === citation.chunk_id;
 
                     return (
-                      <div key={`${citation.chunk_id}-${index}`}>
+                      <div className="citation-wrap" key={`${citation.chunk_id}-${index}`}>
                         <button
-                          className="citation-card"
-                          onClick={() =>
-                            linkedChunk &&
-                            toggleChunk(citation.chunk_id)
-                          }
+                          className="citation-row"
+                          type="button"
+                          onClick={() => linkedChunk && toggleChunk(citation.chunk_id)}
                           disabled={!linkedChunk}
                         >
-                          <div className="source-number">
-                            {citation.source || index + 1}
-                          </div>
-
-                          <div className="citation-info">
-                            <strong>
-                              {citation.document ||
-                                "Unknown document"}
-                            </strong>
-
-                            <span>
-                              Page {citation.page ?? "—"} •{" "}
-                              {citation.chunk_id}
-                            </span>
-
-                            {linkedChunk && (
-                              <small>
-                                {isExpanded
-                                  ? "Hide retrieved evidence"
-                                  : "View retrieved evidence →"}
-                              </small>
-                            )}
-                          </div>
-
-                          <Icon
-                            name={
-                              isExpanded
-                                ? "chevron"
-                                : "arrow"
-                            }
-                            size={15}
-                          />
+                          <span className="citation-number">{citation.source || index + 1}</span>
+                          <span className="citation-copy">
+                            <strong>{citation.document || "Unknown document"}</strong>
+                            <small>Page {citation.page ?? "—"} · {citation.chunk_id}</small>
+                          </span>
+                          <span className="citation-action">
+                            {linkedChunk ? (isExpanded ? <ChevronDown size={16} /> : <ChevronRight size={16} />) : null}
+                          </span>
                         </button>
-
                         {isExpanded && linkedChunk && (
-                          <div className="chunk-text">
-                            {linkedChunk.text ||
-                              "No chunk text available."}
-                          </div>
+                          <div className="citation-evidence">{linkedChunk.text || "No chunk text available."}</div>
                         )}
                       </div>
                     );
                   })}
                 </div>
-              </div>
+              </section>
 
-              <div className="panel">
-                <div className="panel-header">
-                  <div>
-                    <div className="section-kicker">QUALITY</div>
-                    <h3>Evaluation</h3>
-                  </div>
-
-                  <div className="score-ring">
-                    {percentage(evaluation.overall_score)}%
-                  </div>
+              <section className="surface-panel metrics-surface">
+                <PanelHeader eyebrow="OBSERVABILITY" title="Pipeline performance" count="LIVE" />
+                <div className="metrics-list">
+                  <MetricRow icon={<Search size={15} />} label="Retrieval" value={formatMs(metrics.retrieval_ms)} sub={`${result.retrieved_count ?? 0} candidates`} />
+                  <MetricRow icon={<Layers3 size={15} />} label="Reranking" value={formatMs(metrics.reranking_ms)} sub={`${result.reranked_count ?? 0} ranked`} />
+                  <MetricRow icon={<Zap size={15} />} label="Generation" value={formatMs(metrics.generation_ms)} sub="Answer generation" />
+                  <MetricRow icon={<Gauge size={15} />} label="Total latency" value={formatMs(metrics.total_ms)} sub="End-to-end" />
                 </div>
-
-                <div className="quality-bars">
-                  <QualityBar
-                    label="Citation validity"
-                    value={evaluation.citation_score}
-                  />
-
-                  <QualityBar
-                    label="Answer relevance"
-                    value={evaluation.relevance_score}
-                  />
-
-                  <QualityBar
-                    label="Evidence support"
-                    value={evaluation.support_score}
-                  />
-                </div>
-              </div>
+              </section>
             </div>
 
-            {/* -------------------------------------------------
-                PIPELINE METRICS
-            ------------------------------------------------- */}
-
-            <div className="panel metrics-panel">
-              <div className="panel-header">
-                <div>
-                  <div className="section-kicker">
-                    OBSERVABILITY
-                  </div>
-
-                  <h3>Pipeline performance</h3>
-                </div>
-
-                <div className="live-label">
-                  <span className="status-dot" />
-                  LIVE RESULT
-                </div>
-              </div>
-
-              <div className="metrics-grid">
-                <MetricCard
-                  icon="search"
-                  label="Retrieval"
-                  value={formatMs(metrics.retrieval_ms)}
-                  sub={`${result.retrieved_count ?? 0} candidates`}
-                />
-
-                <MetricCard
-                  icon="layers"
-                  label="Reranking"
-                  value={formatMs(metrics.reranking_ms)}
-                  sub={`${result.reranked_count ?? 0} documents`}
-                />
-
-                <MetricCard
-                  icon="bolt"
-                  label="Generation"
-                  value={formatMs(metrics.generation_ms)}
-                  sub="Answer generation"
-                />
-
-                <MetricCard
-                  icon="gauge"
-                  label="Total latency"
-                  value={formatMs(metrics.total_ms)}
-                  sub="End-to-end"
-                />
-              </div>
-            </div>
-
-            {/* -------------------------------------------------
-                RETRIEVED EVIDENCE
-            ------------------------------------------------- */}
-
-            <div className="panel evidence-panel">
-              <div className="panel-header">
-                <div>
-                  <div className="section-kicker">
-                    RETRIEVAL
-                  </div>
-
-                  <h3>Retrieved evidence</h3>
-                </div>
-
-                <div className="count-badge">
-                  {retrieved.length} chunks
-                </div>
-              </div>
-
+            <section className="surface-panel retrieved-surface">
+              <PanelHeader eyebrow="RETRIEVAL TRACE" title="Retrieved evidence" count={`${retrieved.length} chunks`} />
               <div className="chunk-list">
                 {retrieved.map((chunk, index) => {
-                  const isExpanded =
-                    expandedChunk === chunk.chunk_id;
-
-                  const citation =
-                    getCitationForChunk(chunk.chunk_id);
-
-                  const score =
-                    chunk.rerank_score ??
-                    chunk.score ??
-                    chunk.rrf_score;
+                  const isExpanded = expandedChunk === chunk.chunk_id;
+                  const citation = getCitationForChunk(chunk.chunk_id);
+                  const score = chunk.rerank_score ?? chunk.score ?? chunk.rrf_score;
 
                   return (
-                    <div
-                      className={`chunk-card ${
-                        isExpanded ? "expanded" : ""
-                      }`}
-                      key={chunk.chunk_id || index}
-                    >
-                      <button
-                        className="chunk-head"
-                        onClick={() =>
-                          toggleChunk(chunk.chunk_id)
-                        }
-                      >
-                        <div className="chunk-rank">
-                          {index + 1}
-                        </div>
-
-                        <div className="chunk-main">
-                          <strong>
-                            {chunk.chunk_id ||
-                              `chunk-${index + 1}`}
-                          </strong>
-
-                          <span>
-                            {chunk.source ||
-                              chunk.document_id ||
-                              "Unknown document"}{" "}
-                            • Page {chunk.page ?? "—"}
-                          </span>
-                        </div>
-
-                        <div className="chunk-score">
-                          {score !== undefined
-                            ? Number(score).toFixed(3)
-                            : "—"}
-
-                          <Icon
-                            name={
-                              isExpanded
-                                ? "chevron"
-                                : "arrow"
-                            }
-                            size={13}
-                          />
-                        </div>
+                    <div className={`chunk-card ${isExpanded ? "expanded" : ""}`} key={chunk.chunk_id || index}>
+                      <button className="chunk-row" type="button" onClick={() => toggleChunk(chunk.chunk_id)}>
+                        <span className="chunk-index">{String(index + 1).padStart(2, "0")}</span>
+                        <span className="chunk-copy">
+                          <strong>{chunk.chunk_id || `chunk-${index + 1}`}</strong>
+                          <small>{chunk.source || chunk.document_id || "Unknown document"} · Page {chunk.page ?? "—"}</small>
+                        </span>
+                        <span className="chunk-score">{score !== undefined ? Number(score).toFixed(3) : "—"} {isExpanded ? <ChevronDown size={15} /> : <ChevronRight size={15} />}</span>
                       </button>
-
                       {isExpanded && (
-                        <div className="chunk-text">
-                          {chunk.text ||
-                            "No retrieved text available."}
-
-                          {citation && (
-                            <div style={{ marginTop: 12 }}>
-                              Citation: Source{" "}
-                              {citation.source} • Page{" "}
-                              {citation.page}
-                            </div>
-                          )}
+                        <div className="chunk-detail">
+                          <p>{chunk.text || "No retrieved text available."}</p>
+                          {citation && <span>Citation · Source {citation.source} · Page {citation.page}</span>}
                         </div>
                       )}
                     </div>
                   );
                 })}
               </div>
-            </div>
+            </section>
           </section>
         )}
       </main>
 
-      {/* =====================================================
-          FOOTER
-      ===================================================== */}
-
       <footer className="footer">
-        <span>ENTERPRISE RAG • RETRIEVAL INTELLIGENCE</span>
-
-        <span>
-          <span className="status-dot" />
-          pgvector retrieval · Reranking · Grounded generation
-        </span>
+        <span>ENTERPRISE RAG / RETRIEVAL INTELLIGENCE</span>
+        <span><span className="status-dot" /> pgvector · reranking · grounded generation</span>
       </footer>
     </div>
   );
 }
 
-function MetricCard({ icon, label, value, sub }) {
+function PipelineStep({ number, icon, title, copy, last }) {
   return (
-    <div className="metric-card">
-      <div className="metric-icon">
-        <Icon name={icon} size={16} />
-      </div>
-
+    <div className={`pipeline-step ${last ? "last" : ""}`}>
+      <span className="step-number">{number}</span>
+      <span className="step-icon">{icon}</span>
       <div>
-        <div className="metric-label">{label}</div>
-        <div className="metric-value">{value}</div>
-        <div className="metric-sub">{sub}</div>
+        <strong>{title}</strong>
+        <p>{copy}</p>
       </div>
+    </div>
+  );
+}
+
+function PanelHeader({ eyebrow, title, count }) {
+  return (
+    <div className="panel-header">
+      <div>
+        <span className="eyebrow">{eyebrow}</span>
+        <h3>{title}</h3>
+      </div>
+      {count && <span className="panel-count">{count}</span>}
+    </div>
+  );
+}
+
+function MetricRow({ icon, label, value, sub }) {
+  return (
+    <div className="metric-row">
+      <span className="metric-icon">{icon}</span>
+      <span className="metric-copy"><strong>{label}</strong><small>{sub}</small></span>
+      <span className="metric-value">{value}</span>
     </div>
   );
 }
 
 function QualityBar({ label, value }) {
   const percent = percentage(value);
-
   return (
-    <div>
-      <div className="quality-top">
-        <span>{label}</span>
-        <strong>{percent}%</strong>
-      </div>
-
-      <div className="bar-track">
-        <div
-          className="bar-fill"
-          style={{ width: `${percent}%` }}
-        />
-      </div>
+    <div className="quality-bar">
+      <div><span>{label}</span><strong>{percent}%</strong></div>
+      <span className="bar-track"><span className="bar-fill" style={{ width: `${percent}%` }} /></span>
     </div>
   );
 }
