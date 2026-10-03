@@ -134,9 +134,12 @@ def test_readiness_rejects_unloaded_pipeline(monkeypatch):
     import app.api.main as main
 
     monkeypatch.setattr(main, "pipeline", None)
-    with TestClient(app) as client:
-        response = client.get("/ready")
-    assert response.status_code == 503
+    try:
+        main.readiness()
+    except Exception as exc:
+        assert getattr(exc, "status_code", None) == 503
+    else:
+        raise AssertionError("readiness() should reject an unloaded pipeline")
 
 
 def test_readiness_accepts_loaded_pipeline(monkeypatch):
