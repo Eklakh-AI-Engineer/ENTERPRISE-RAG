@@ -1,0 +1,11 @@
+{
+  "$schema": "https://railway.com/railway.schema.json",
+  "build": {
+    "builder": "DOCKERFILE",
+    "dockerfilePath": "Dockerfile"
+  },
+  "deploy": {
+    "startCommand": "sh -c \"exec python scripts/run_ingestion_worker.py --organization-id \\\"$ORGANIZATION_ID\\\" --loop --poll-seconds \\\"${WORKER_POLL_SECONDS:-10}\\\"\"",
+    "restartPolicyType": "ON_FAILURE"
+  }
+}
