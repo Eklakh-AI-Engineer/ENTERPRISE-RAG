@@ -339,7 +339,7 @@ Replace local-only persistence/index assumptions with production-managed storage
 - [x] Domain persistence records defined in `app/persistence/entities.py`.
 - [x] Repository contracts defined in `app/persistence/repositories.py`.
 - [x] In-memory adapters added for tests without requiring a live database.
-- [x] Implemented the first Postgres/Supabase repository adapter boundary (`app/persistence/supabase.py`) with injected-client semantics; live-project wiring remains pending.
+- [x] Implemented the Postgres/Supabase repository adapter boundary (`app/persistence/supabase.py`) with injected-client semantics and wired production document submission to the live atomic RPC.
 - [x] Wire initial document/ingestion lifecycle logic through repository interfaces rather than direct database calls.
 - [x] Wire the remaining query/conversation services through repository interfaces.
 - [x] Added Supabase conversation/answer/citation/retrieval telemetry adapters.
@@ -397,7 +397,7 @@ Do not assume that a global BM25 index plus post-filtering is safe for multi-ten
 
 # 7. Phase 4 — Authentication + Authorization + RLS
 
-**Status: [~] AUTHENTICATION CONTRACT PREPARED; LIVE PROJECT WIRING PENDING**
+**Status: [x] AUTHENTICATION CONTRACT + LIVE PROJECT WIRING VERIFIED**
 
 ## Objective
 
@@ -529,7 +529,7 @@ Use the mechanism selected during Phase 1.
 - [x] Failed jobs can be reclaimed after a valid retry transition.
 - [x] Document submission is idempotent for identical tenant-scoped content/pipeline identity.
 - [x] Job ownership/tenant context is carried by the service contract.
-- [x] Added the atomic `claim_ingestion_job` database contract using row locking + `SKIP LOCKED`; live migration/application remains pending.
+- [x] Added the atomic `claim_ingestion_job` database contract using row locking + `SKIP LOCKED` and verified the live migration history.
 - [x] Added the ingestion worker orchestration boundary.
 - [x] Worker execution starts only from an atomically claimed PROCESSING job.
 - [x] Added PDF → OCR → recursive chunk pipeline boundary.
