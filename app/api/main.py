@@ -2,7 +2,7 @@ from contextlib import asynccontextmanager
 import logging
 from uuid import uuid4
 
-from fastapi import Depends, FastAPI, File, Header, HTTPException, Request, UploadFile
+from fastapi import Depends, FastAPI, File, Header, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
@@ -162,7 +162,6 @@ def auth_me(principal=Depends(current_principal)):
 @app.post("/documents", response_model=DocumentUploadResponse, status_code=202)
 async def upload_document(
     file: UploadFile = File(...),
-    request: Request,
     auth=Depends(current_user_client),
 ):
     principal, client = auth
