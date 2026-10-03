@@ -89,9 +89,22 @@ Never expose provider API keys through VITE_* variables.
 4. Select the long-running inference host.
 5. Configure HTTPS between frontend and API.
 6. Configure JWT propagation and ensure Vercel and the API use the same Supabase project URL and publishable key.
-7. Add Supabase data plane in Phase 3.
-8. Add async worker in Phase 5.
-9. Add production smoke tests in Phase 7.
+7. Supabase data plane is provisioned and migration-synchronized.
+8. Deploy the API with `/ready` as the Railway readiness check.
+9. Deploy the ingestion worker with the target organization ID.
+10. Run `scripts/smoke_production_e2e.py` against the deployed API using a dedicated test account and PDF.
+11. Add production smoke tests to CI/deployment after the live environment is stable.
+
+## Production verification gate
+
+Before declaring the upload/retrieval path production-ready, the following must pass against the deployed environment:
+- `GET /ready` returns HTTP 200 after model initialization.
+- authenticated `POST /documents` returns HTTP 202.
+- `GET /documents/{document_id}` transitions to `READY`.
+- authenticated `POST /query` returns a non-empty answer with citations.
+- the same test is denied for an unrelated organization/user.
+
+The repository includes `scripts/smoke_production_e2e.py` for the positive-path test. It requires a dedicated test account and deployed API URL; it never uses a service-role key.
 
 ## Current limitation
 
