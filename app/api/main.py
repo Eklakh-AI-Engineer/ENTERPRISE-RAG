@@ -158,7 +158,11 @@ def health():
 def readiness():
     if pipeline is None:
         raise HTTPException(status_code=503, detail="RAG pipeline is not loaded.")
-    return {"status": "ready"}
+    return {
+        "status": "ready",
+        "service": "enterprise-rag",
+        "environment": settings.ENVIRONMENT,
+    }
 
 
 @app.get("/auth/me", response_model=AuthMeResponse)
