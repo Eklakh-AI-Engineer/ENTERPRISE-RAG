@@ -55,6 +55,9 @@ create table public.documents (
 create index documents_org_idx
   on public.documents (organization_id);
 
+alter table public.documents
+  add constraint documents_organization_id_id_key unique (organization_id, id);
+
 create index documents_owner_idx
   on public.documents (owner_user_id);
 
@@ -109,6 +112,12 @@ create table public.ingestion_jobs (
   updated_at timestamptz not null default now(),
   unique (document_id, content_hash, pipeline_version)
 );
+
+alter table public.ingestion_jobs
+  add constraint ingestion_jobs_document_org_fkey
+  foreign key (organization_id, document_id)
+  references public.documents (organization_id, id)
+  on delete cascade;
 
 create index ingestion_jobs_worker_idx
   on public.ingestion_jobs (status, lease_until, created_at);
@@ -530,6 +539,50 @@ using (
     from public.organization_members om
     where om.organization_id = split_part(name, '/', 2)::uuid
       and om.user_id = (select auth.uid())
+  )
+);
+
+create policy "ingestion jobs must match document tenant"
+on public.ingestion_jobs
+as restrictive
+for insert
+to authenticated
+with check (
+  exists (
+    select 1
+    from public.documents d
+    where d.id = ingestion_jobs.document_id
+      and d.organization_id = ingestion_jobs.organization_id
+  )
+);
+
+create policy "storage objects must match document row"
+on storage.objects
+as restrictive
+for all
+to authenticated
+using (
+  bucket_id = 'documents'
+  and split_part(name, '/', 1) = 'organizations'
+  and split_part(name, '/', 3) = 'documents'
+  and exists (
+    select 1
+    from public.documents d
+    where d.organization_id = split_part(objects.name, '/', 2)::uuid
+      and d.id = split_part(objects.name, '/', 4)::uuid
+      and d.storage_path = objects.name
+  )
+)
+with check (
+  bucket_id = 'documents'
+  and split_part(name, '/', 1) = 'organizations'
+  and split_part(name, '/', 3) = 'documents'
+  and exists (
+    select 1
+    from public.documents d
+    where d.organization_id = split_part(name, '/', 2)::uuid
+      and d.id = split_part(name, '/', 4)::uuid
+      and d.storage_path = name
   )
 );
 
