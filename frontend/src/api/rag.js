@@ -1,4 +1,17 @@
-const API_BASE_URL = "http://127.0.0.1:8000";
+import { getAccessToken } from "./auth";
+
+const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
+
+function authHeaders() {
+  const token = getAccessToken();
+  if (!token) {
+    throw new Error("Please sign in before using Enterprise RAG.");
+  }
+  return {
+    Authorization: `Bearer ${token}`,
+  };
+}
 
 export async function checkHealth() {
   const response = await fetch(`${API_BASE_URL}/health`);
@@ -15,19 +28,18 @@ export async function queryRAG(query) {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
+      ...authHeaders(),
     },
-    body: JSON.stringify({
-      query,
-    }),
+    body: JSON.stringify({ query }),
   });
 
-  if (!response.ok) {
-    const error = await response.json().catch(() => ({}));
+  const data = await response.json().catch(() => ({}));
 
+  if (!response.ok) {
     throw new Error(
-      error.detail || `Request failed with status ${response.status}`
+      data.detail || `Request failed with status ${response.status}`
     );
   }
 
-  return response.json();
+  return data;
 }
