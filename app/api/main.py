@@ -1,6 +1,8 @@
 from contextlib import asynccontextmanager
+import logging
+from uuid import uuid4
 
-from fastapi import Depends, FastAPI, File, Header, HTTPException, UploadFile
+from fastapi import Depends, FastAPI, File, Header, HTTPException, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
@@ -14,6 +16,7 @@ from app.query.production import ProductionQueryPipeline
 
 
 pipeline: ProductionQueryPipeline | None = None
+logger = logging.getLogger("enterprise_rag.api")
 
 
 class QueryRequest(BaseModel):
@@ -159,6 +162,7 @@ def auth_me(principal=Depends(current_principal)):
 @app.post("/documents", response_model=DocumentUploadResponse, status_code=202)
 async def upload_document(
     file: UploadFile = File(...),
+    request: Request,
     auth=Depends(current_user_client),
 ):
     principal, client = auth
@@ -189,12 +193,16 @@ async def upload_document(
     except DocumentValidationError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
     except Exception as exc:
-        # Keep the API failure actionable while avoiding credential/token leakage.
-        print("DOCUMENT SUBMISSION ERROR")
-        print(f"{type(exc).__name__}: {exc}")
+        request_id = uuid4().hex[:12]
+        logger.exception(
+            "document_submission_failed request_id=%s user_id=%s organization_id=%s",
+            request_id,
+            principal.user_id,
+            organization_id,
+        )
         raise HTTPException(
             status_code=500,
-            detail=f"Failed to create document ingestion job: {type(exc).__name__}: {exc}",
+            detail=f"Failed to create document ingestion job. Reference: {request_id}",
         ) from exc
 
     if not submission.deduplicated:
@@ -247,6 +255,14 @@ def query(request: QueryRequest, auth=Depends(current_user_client)):
     except HTTPException:
         raise
     except Exception as exc:
-        print("QUERY ERROR")
-        print(exc)
-        raise HTTPException(status_code=500, detail="Failed to process the query.") from exc
+        request_id = uuid4().hex[:12]
+        logger.exception(
+            "query_failed request_id=%s user_id=%s organization_id=%s",
+            request_id,
+            principal.user_id,
+            organization_id,
+        )
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to process the query. Reference: {request_id}",
+        ) from exc
