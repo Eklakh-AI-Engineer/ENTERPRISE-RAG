@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   getSession,
+  refreshSession,
   signIn,
   signOut,
 } from "./api/auth";
@@ -116,7 +117,35 @@ function App() {
   // ---------------------------------------------------------
 
   useEffect(() => {
-    setSession(getSession());
+    let active = true;
+
+    const restoreSession = async () => {
+      const current = getSession();
+
+      if (!current) {
+        if (active) setSession(null);
+        return;
+      }
+
+      if (!current.refresh_token) {
+        if (active) setSession(current);
+        return;
+      }
+
+      const refreshed = await refreshSession(current);
+
+      if (active) {
+        setSession(refreshed);
+      }
+    };
+
+    restoreSession().catch(() => {
+      if (active) setSession(null);
+    });
+
+    return () => {
+      active = false;
+    };
   }, []);
 
   const handleLogin = async (event) => {
