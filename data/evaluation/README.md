@@ -1,48 +1,76 @@
-# Phase 2 benchmark data
+# Evaluation Data
 
-This directory contains the versioned evaluation contract for the controlled retrieval experiment.
+This directory contains versioned evaluation contracts, query sets, relevance judgments, corpus manifests, and benchmark outputs.
 
-## Required benchmark
+## Benchmark contract
 
-The production-quality Phase 2 benchmark must contain **50–100 queries** distributed across the project's evaluation categories.
+The production-quality retrieval benchmark must contain **50–100 queries** derived from the fixed project corpus.
 
-Do not manufacture labels to fill the quota. Relevance judgments must come from the fixed corpus and the Dense ∪ BM25 candidate pool.
+Current benchmark draft:
 
-## Evidence labels
+- Corpus: CHA-POLICY-CORPUS-V1
+- Queries: 50
+- Categories: 10
+- Status: draft_pending_human_annotation
 
-Each judgment is durable across chunker changes:
+The draft is intentionally incomplete until human relevance judgments are frozen.
+
+## Evidence judgments
+
+Each candidate judgment uses durable provenance:
 
 - document_id
 - page
 - start_char
 - end_char
-- graded relevance from 0 to 3
+- graded relevance 0–3
 
-Suggested grading:
-
-| Relevance | Meaning |
+| Label | Meaning |
 |---:|---|
 | 0 | Not relevant |
-| 1 | Marginal/background relevance |
+| 1 | Marginal/background |
 | 2 | Relevant evidence |
-| 3 | Highly relevant / directly answers the query |
+| 3 | Highly relevant / directly answers |
 
 ## Pool construction
 
-For every query, retrieve the candidate union Dense(query) ∪ BM25(query) using the same corpus and query text.
+For every query:
 
-The annotator then judges the pooled candidates. This prevents the relevance set from being defined by one retrieval method.
+    Dense(query) ∪ BM25(query)
 
-## Versioning
+The annotator reviews the pooled candidates rather than allowing one retrieval method to define the relevance set.
 
-Increment benchmark_version whenever corpus documents, evidence spans, or relevance judgments materially change, or preprocessing changes the evidence mapping.
+## Versioning rules
 
-Record model/configuration versions separately so experiments remain reproducible.
+Increment the benchmark version when corpus documents, evidence spans, query definitions, relevance judgments, or preprocessing materially change.
 
-## Required reporting
+Record model and retrieval configuration versions separately.
 
-Report query-level and aggregate Recall@5, Recall@10, MRR, nDCG@5, nDCG@10, retrieval latency, candidate count, and reranking latency where applicable.
+## Available artifacts
 
-For Dense-vs-Hybrid, report paired treatment-minus-baseline deltas and bootstrap confidence intervals.
+| Artifact | Purpose |
+|---|---|
+| cha_corpus_manifest.json | Frozen corpus identity and hashes |
+| cha_queries_v1.json | Corpus-derived candidate query set |
+| golden_queries_v1.json | Benchmark-shaped 50-query draft |
+| golden_queries_v1.schema.json | Validation schema |
+| cha_silver_labels_v1.json | Model-generated silver checkpoint; not gold |
+| results/ | Controlled benchmark outputs when generated |
 
-A point estimate alone is not sufficient evidence for a retrieval improvement.
+## Validation
+
+    python scripts/validate_golden_set.py
+
+## Benchmark
+
+After human annotation is frozen:
+
+    python scripts/run_golden_retrieval_benchmark.py \
+      --benchmark data/evaluation/golden_queries_v1.json \
+      --chunks data/processed/cha_chunks.json \
+      --systems dense bm25 hybrid reranker \
+      --top-k 10 \
+      --candidate-k 20 \
+      --output data/evaluation/results/golden_v1.json
+
+Do not publish benchmark numbers until the benchmark status is frozen.
