@@ -1,0 +1,18 @@
+{
+  "format_version": "enterprise-rag-human-labels-v1",
+  "corpus_id": "CHA-POLICY-CORPUS-V1",
+  "query_count": 50,
+  "judgment_count": 780,
+  "score_encoding": "2-bit packed relevance scores; 4 scores per byte; query_id ascending then candidate_index ascending",
+  "candidate_order_sha256": "84606aba193afaf90e9057cd07ffa6a21557b405049f7215d50b710efa6fc282",
+  "source_workbook": "CHA_Human_Relevance_Review_v2.xlsx",
+  "provenance_verified_count": 780,
+  "score_distribution": {
+    "0": 323,
+    "1": 266,
+    "2": 82,
+    "3": 109
+  },
+  "scores_sha256": "e8477f0073fb126a2202b42d2e17a4844d557f432a63f2ee5fd331969453a621",
+  "scores_base64": "9VRWcFwwNf91AAUAGTDRAQpcQBQAPUfD13AADAPRABEQOmxXWqUAAkAAZEFEQDkAAQANtBFZmZURWSV0oJbA1EUBU+iSADXRQFBV"
+}
