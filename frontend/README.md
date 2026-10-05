@@ -1,16 +1,35 @@
-# React + Vite
+# Enterprise RAG Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+React + Vite inspection frontend for the Enterprise RAG pipeline.
 
-Currently, two official plugins are available:
+## Purpose
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+The frontend is a development and inspection surface for:
 
-## React Compiler
+- querying the local RAG pipeline;
+- inspecting retrieved evidence;
+- viewing citations;
+- viewing pipeline/evaluation telemetry.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+It is not currently presented as the production deployment surface.
 
-## Expanding the ESLint configuration
+## Development
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+    cd frontend
+    npm ci
+    npm run dev
+
+Default development server:
+
+    http://localhost:5173
+
+## Validation
+
+    npm run lint
+    npm run build
+
+## Configuration
+
+The frontend can point to another API host through Vite environment configuration. Do not put provider secrets or server-side API keys in VITE_* variables.
+
+See [../docs/DEVELOPMENT.md](../docs/DEVELOPMENT.md) for the complete local workflow.
