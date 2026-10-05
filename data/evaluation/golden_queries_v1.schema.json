@@ -1,0 +1,92 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Enterprise RAG Golden Evaluation Set",
+  "type": "object",
+  "required": [
+    "benchmark_version",
+    "status",
+    "corpus_id",
+    "queries"
+  ],
+  "properties": {
+    "benchmark_version": {
+      "type": "string"
+    },
+    "status": {
+      "enum": [
+        "draft_pending_human_annotation",
+        "frozen"
+      ]
+    },
+    "corpus_id": {
+      "type": "string"
+    },
+    "queries": {
+      "type": "array",
+      "minItems": 50,
+      "maxItems": 100,
+      "items": {
+        "type": "object",
+        "required": [
+          "query_id",
+          "category",
+          "query",
+          "answerable",
+          "relevance"
+        ],
+        "properties": {
+          "query_id": {
+            "type": "string"
+          },
+          "category": {
+            "type": "string"
+          },
+          "query": {
+            "type": "string"
+          },
+          "answerable": {
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "relevance": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "document_id",
+                "page",
+                "start_char",
+                "end_char",
+                "relevance"
+              ],
+              "properties": {
+                "document_id": {
+                  "type": "string"
+                },
+                "page": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "start_char": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "end_char": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "relevance": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 3
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -160,3 +160,68 @@ These queries are intentionally not yet a benchmark. The next required step is
 to build the Dense ∪ BM25 pool and have a human label the pooled candidates with
 relevance 0–3. Do not convert the query set into a benchmark until those
 judgments are frozen.
+
+
+## Golden benchmark v1
+
+```text
+data/evaluation/golden_queries_v1.json
+data/evaluation/golden_queries_v1.schema.json
+```
+
+The repository now contains 50 corpus-derived CHA queries, distributed across 10 categories. The file is intentionally marked `draft_pending_human_annotation`.
+
+**This is deliberate.** The existing `cha_silver_labels_v1.json` contains AI-generated silver labels, not human gold labels. It must not be promoted to gold merely to produce benchmark numbers.
+
+### Human annotation gate
+
+For each query:
+
+1. Run the Dense ∪ BM25 pool against the frozen CHA corpus.
+2. Review the pooled candidates.
+3. Label each candidate 0–3:
+   - 0 — not relevant
+   - 1 — marginal/background
+   - 2 — relevant evidence
+   - 3 — highly relevant/directly answers
+4. Record durable `document_id`, `page`, `start_char`, and `end_char`.
+5. Set `answerable` to true/false.
+6. Change `status` to `frozen` only after the full set has been reviewed.
+
+Validate the dataset:
+
+```bash
+python scripts/validate_golden_set.py
+```
+
+The validator permits the draft state so the repository can track progress, but the benchmark runner refuses to execute until the dataset is frozen and every query has relevance judgments.
+
+### Benchmark runner
+
+After human annotation is frozen:
+
+```bash
+python scripts/run_golden_retrieval_benchmark.py \
+  --benchmark data/evaluation/golden_queries_v1.json \
+  --chunks data/processed/cha_chunks.json \
+  --systems dense bm25 hybrid reranker \
+  --top-k 10 \
+  --candidate-k 20 \
+  --output data/evaluation/results/golden_v1.json
+```
+
+The runner reports query-level and aggregate:
+
+- Recall@5 / Recall@10
+- MRR
+- nDCG@5 / nDCG@10
+- Retrieval latency
+- Category-level slices
+- Paired Hybrid-vs-Dense deltas
+- Bootstrap confidence intervals
+
+No LLM generation call is required for the retrieval benchmark.
+
+### Why the human gate matters
+
+Retrieval metrics require labeled relevant evidence. A gold set should therefore be a fixed, curated evaluation artifact rather than an unverified model-generated label file. The benchmark is designed to keep retrieval evaluation separate from generation evaluation, so a retrieval regression cannot be hidden by a strong generator.
