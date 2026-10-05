@@ -12,8 +12,8 @@
   "page_count": 54,
   "chunk_count": 192,
   "extraction_counts": {
-    "native": 45,
-    "ocr:tesseract": 9
+    "native": 46,
+    "ocr:tesseract": 8
   },
   "chunks": [
     {
@@ -246,9 +246,9 @@
       "doc_type": "pdf",
       "chunk_index": 1,
       "start_char": 0,
-      "end_char": 64,
+      "end_char": 61,
       "chunker_version": "recursive-v2-span",
-      "text": "Uh\nCHA\nCHICAGO HOUSING\nAUTHORITY\nEMPLOYEE HANDBOOK\nJuly 29, 2025"
+      "text": "CHA\nCHICAGO HOUSING\nAUTHORITY\nEMPLOYEE HANDBOOK\nJuly 29, 2025"
     },
     {
       "chunk_id": "CHA Employee Handbook 2025-p002-c001",

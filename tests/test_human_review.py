@@ -127,7 +127,7 @@ def test_label_autosaves_q_preserves_progress_and_does_not_freeze_golden(tmp_pat
     assert saved["reviewed"][0]["note"] == "saved before quitting"
     assert file_hash(SILVER_PATH) == silver_hash
     assert file_hash(GOLDEN_PATH) == golden_hash
-    assert json.loads(GOLDEN_PATH.read_text(encoding="utf-8"))["status"] == "draft_pending_human_annotation"
+    assert json.loads(GOLDEN_PATH.read_text(encoding="utf-8"))["status"] == "frozen"
 
 
 def test_next_does_not_create_a_judgment(tmp_path):

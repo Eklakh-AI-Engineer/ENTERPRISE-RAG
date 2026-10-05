@@ -22,12 +22,15 @@ This repository is more than a PDF chatbot. Retrieval, generation, citations, ev
 | Citation mapping / validation | Implemented |
 | Faithfulness verification | Implemented |
 | Evaluation harness | Implemented |
+| Stable evidence metadata gate | COMPLETE |
+| OCR fallback validation | COMPLETE |
 | 50-query human-verified benchmark | Frozen |
 | Human-verified gold labels | Complete — 780 judgments |
-| Controlled retrieval results | Pending |
+| Query rewriting experiment | Evaluated — mixed; feature flag remains off |
+| Controlled retrieval results | Available in `data/evaluation/results/` |
 | Production multi-tenant release | Later milestone |
 
-> **Integrity rule:** development observations are not benchmark results. No controlled metric is published until the evaluation corpus, relevance judgments, configuration, and run are frozen.
+> **Integrity rule:** benchmark metrics are reported only with a frozen corpus, relevance judgments, configuration, and reproducible run. The query-rewrite comparison is separate from the original baseline.
 
 ## Architecture
 
@@ -90,7 +93,7 @@ See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the implemented design and 
           ≠
     Faithfulness
 
-The active CHA benchmark contains **50 corpus-derived queries across 10 categories**. It is currently a draft pending human relevance annotation. See [docs/EVALUATION.md](docs/EVALUATION.md).
+The CHA benchmark is frozen at **50 corpus-derived queries across 10 categories** with **780 human judgments**. Its separate query-rewriting experiment showed mixed query/category outcomes and a small overall nDCG@10 regression; rewriting remains feature-flagged and disabled by default. See [docs/EVALUATION.md](docs/EVALUATION.md).
 
 ## Repository structure
 
@@ -177,11 +180,15 @@ Failure analysis
 
 Validate:
 
-    python scripts/validate_golden_set.py
+    python -m scripts.validate_golden_set
 
-After human annotation is frozen:
+Reproduce the standard benchmark:
 
-    python scripts/run_golden_retrieval_benchmark.py       --benchmark data/evaluation/golden_queries_v1.json       --chunks data/processed/cha_chunks.json       --systems dense bm25 hybrid reranker       --top-k 10       --candidate-k 20       --output data/evaluation/results/golden_v1.json
+    python -m scripts.run_golden_retrieval_benchmark --benchmark data/evaluation/golden_queries_v1.json --chunks data/processed/cha_chunks.json --pool data/evaluation/cha_pool_v1.json --systems dense bm25 hybrid reranker --top-k 10 --candidate-k 20 --output data/evaluation/results/golden_v1.json
+
+Run the isolated, paired query-rewriting experiment:
+
+    python -m scripts.evaluate_query_rewriting --benchmark data/evaluation/golden_queries_v1.json --labels data/evaluation/human_labels_v1.json --pool data/evaluation/cha_pool_v1.json --chunks data/processed/cha_chunks.json --top-k 10 --candidate-k 20 --output data/evaluation/results/golden_v1_query_rewriting.json
 
 ## Local development
 
@@ -231,13 +238,9 @@ Screenshots are implementation evidence, **not controlled benchmark evidence**.
 
 ## Roadmap
 
-1. Complete human annotation of the 50-query CHA pool.
-2. Freeze the benchmark and configuration.
-3. Run Dense, BM25, Hybrid/RRF, and reranker comparisons.
-4. Perform query-level failure analysis.
-5. Validate the faithfulness judge against a human subset.
-6. Freeze the local evidence-grounded product.
-7. Re-enter the production deployment track only after the local gates pass.
+1. Validate the faithfulness judge against a human subset.
+2. Freeze the local evidence-grounded product.
+3. Re-enter the production deployment track only after the local gates pass.
 
 ## Author
 

@@ -1,5 +1,7 @@
 import re
 
+from app.chunking.recursive_chunker import validate_stable_evidence_metadata
+
 
 # Matches citations like:
 # [Source 1]
@@ -9,6 +11,28 @@ SOURCE_PATTERN = re.compile(
     r"\[Source\s+(\d+)\]",
     re.IGNORECASE,
 )
+
+
+def validate_evidence_references(citations: list[dict], chunks: list[dict]) -> None:
+    """Ensure mapped citations point to identified chunks in the evidence set."""
+
+    chunks_by_id = {
+        chunk.get("chunk_id"): chunk
+        for chunk in chunks
+        if isinstance(chunk.get("chunk_id"), str) and chunk["chunk_id"].strip()
+    }
+
+    for citation in citations:
+        chunk_id = citation.get("chunk_id")
+        chunk = chunks_by_id.get(chunk_id)
+        if chunk is None:
+            raise ValueError(f"citation source does not resolve to a chunk: {chunk_id!r}")
+        if citation.get("document_id") != chunk.get("document_id"):
+            raise ValueError(f"citation document_id does not match chunk {chunk_id}")
+        if citation.get("page") != chunk.get("page"):
+            raise ValueError(f"citation page does not match chunk {chunk_id}")
+
+    validate_stable_evidence_metadata(chunks)
 
 
 def extract_source_ids(answer: str) -> list[int]:
@@ -63,9 +87,8 @@ def map_citations(
         # Source numbering is 1-based.
         index = source_id - 1
 
-        # Ignore invalid source references.
         if index < 0 or index >= len(context_sources):
-            continue
+            raise ValueError(f"citation source index does not resolve to evidence: {source_id}")
 
         source = context_sources[index]
 
@@ -91,4 +114,5 @@ def map_citations(
             }
         )
 
+    validate_evidence_references(citations, context_sources)
     return citations

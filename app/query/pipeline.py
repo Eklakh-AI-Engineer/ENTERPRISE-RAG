@@ -8,6 +8,7 @@ from app.reranking.cross_encoder import CrossEncoderReranker
 from app.generation.rag_generator import RAGGenerator
 
 from app.query.context import build_context
+from app.query.rewrite import QueryRewriter
 
 from app.citations.mapper import map_citations
 
@@ -47,6 +48,8 @@ class QueryPipeline:
             if candidate_k is not None
             else settings.CANDIDATE_K
         )
+
+        self.query_rewriter = QueryRewriter(enabled=settings.QUERY_REWRITE_ENABLED)
 
         # =========================================================
         # Dense Retriever
@@ -140,6 +143,13 @@ class QueryPipeline:
 
     def run(self, query: str):
 
+        rewritten_query = self.query_rewriter.rewrite(query)
+        if rewritten_query != query:
+            print(f"[RAG DEBUG] Query rewritten: {rewritten_query}")
+
+        if not rewritten_query.strip():
+            raise RuntimeError("query cannot be empty after rewrite")
+
         metrics = PipelineMetrics()
 
         total_start = metrics.timer()
@@ -151,7 +161,7 @@ class QueryPipeline:
         retrieval_start = metrics.timer()
 
         retrieved = self.hybrid.search(
-            query=query,
+            query=rewritten_query,
             top_k=self.retrieval_top_k,
             candidate_k=self.candidate_k,
         )
@@ -179,7 +189,7 @@ class QueryPipeline:
         reranking_start = metrics.timer()
 
         reranked = self.reranker.rerank(
-            query=query,
+            query=rewritten_query,
             documents=retrieved,
             top_k=self.rerank_top_k,
         )
