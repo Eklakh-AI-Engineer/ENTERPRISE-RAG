@@ -1,16 +1,18 @@
 {
+  "schema_version": "human-review-v1",
   "reviewed": [
     {
-      "query_id": "DUMMY-001",
-      "query": "Dummy query?",
+      "review_id": "CHA-001::0",
+      "query_id": "CHA-001",
       "candidate_index": 0,
-      "chunk_id": "DUMMY_CHUNK",
-      "original_relevance": 2,
-      "original_confidence": 0.9,
-      "human_relevance": 2,
-      "human_status": "reviewed",
-      "reviewer_note": "test",
-      "metadata": {}
+      "chunk_id": "CHA Employee Handbook 2025-p006-c001",
+      "document_id": "CHA Employee Handbook 2025",
+      "page": 6,
+      "start_char": 0,
+      "end_char": 968,
+      "human_relevance": 3,
+      "verified": true,
+      "note": ""
     }
   ]
 }

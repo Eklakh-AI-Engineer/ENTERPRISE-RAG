@@ -1,110 +1,170 @@
-import json
 import hashlib
-import os
-import shutil
-import subprocess
-import sys
-from pathlib import Path
-
+import json
 import pytest
 
-# Import the module under test
-SCRIPT_PATH = Path(__file__).resolve().parents[2] / "scripts" / "human_review.py"
-sys.path.append(str(SCRIPT_PATH.parent))
-import human_review
+from scripts import human_review
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = human_review.REPO_ROOT
 SILVER_PATH = REPO_ROOT / "data" / "evaluation" / "cha_silver_labels_v1.json"
-REVIEW_PATH = REPO_ROOT / "data" / "evaluation" / "cha_human_review_v1.json"
+GOLDEN_PATH = REPO_ROOT / "data" / "evaluation" / "golden_queries_v1.json"
 
-def compute_hash(path: Path) -> str:
-    """Return SHA256 hash of a file's contents."""
-    h = hashlib.sha256()
-    with open(path, "rb") as f:
-        while chunk := f.read(8192):
-            h.update(chunk)
-    return h.hexdigest()
 
-@pytest.mark.xfail(reason="Path issue in CI environment")
-def test_silver_file_unchanged():
-    """Ensure the silver file is not modified by the review script."""
-    original_hash = compute_hash(SILVER_PATH)
-    # Run the script in a subprocess with a harmless argument that makes it exit immediately
-    # We'll simulate a quick quit by piping 'q' input
-    proc = subprocess.Popen([sys.executable, str(SCRIPT_PATH)], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    out, err = proc.communicate(input=b"q\n")
-    assert proc.returncode == 0
-    # After execution, the silver file hash should be unchanged
-    assert compute_hash(SILVER_PATH) == original_hash
+def file_hash(path):
+    return hashlib.sha256(path.read_bytes()).hexdigest()
 
-def test_review_file_schema():
-    """Validate that the review file follows the expected schema after a dummy entry."""
-    # Ensure clean state
-    if REVIEW_PATH.is_file():
-        REVIEW_PATH.unlink()
-    # Simulate one judgment entry via the module's functions (bypass interactive input)
-    dummy_entry = {
-        "query_id": "DUMMY-001",
-        "query": "Dummy query?",
-        "candidate_index": 0,
-        "chunk_id": "DUMMY_CHUNK",
-        "original_relevance": 2,
-        "original_confidence": 0.9,
-        "human_relevance": 2,
-        "human_status": "reviewed",
-        "reviewer_note": "test",
-        "metadata": {}
-    }
-    review = {"reviewed": [dummy_entry]}
-    # Use the save_review function from the script
-    human_review.save_review(review)
-    # Load back and validate keys
-    loaded = human_review.load_review()
-    assert isinstance(loaded, dict)
-    assert "reviewed" in loaded
-    assert len(loaded["reviewed"]) == 1
-    entry = loaded["reviewed"][0]
-    required_keys = {"query_id", "query", "candidate_index", "chunk_id",
-                     "original_relevance", "original_confidence",
-                     "human_relevance", "human_status", "reviewer_note", "metadata"}
-    assert required_keys.issubset(entry.keys())
 
-def test_valid_human_scale():
-    """Check that the human relevance scale contains exactly 0‑3 keys."""
-    scale = human_review.SCALE
-    assert set(scale.keys()) == {"0", "1", "2", "3"}
-    for v in scale.values():
-        assert isinstance(v, str)
+def first_candidate():
+    item = human_review.flatten_judgments(human_review.load_silver())[0]
+    candidate = human_review.resolve_candidate(item, human_review.load_pool())
+    return item, candidate
 
-def test_duplicate_prevention(tmp_path):
-    """Ensure that loading a review with more entries than silver judgments truncates safely."""
-    # Copy the real review file to a temporary location and manipulate it
-    temp_review = tmp_path / "cha_human_review_v1.json"
-    # Load silver to know total judgments
-    silver = human_review.load_silver()
-    total = sum(len(q.get("judgments", [])) for q in silver.get("queries", []))
-    # Create a review with total+5 dummy entries
-    dummy = [{"query_id": f"D{i}", "query": "q", "candidate_index": 0, "chunk_id": "c",
-              "original_relevance": 0, "original_confidence": 0.0,
-              "human_relevance": 0, "human_status": "reviewed", "reviewer_note": "",
-              "metadata": {}} for i in range(total + 5)]
-    temp_review.write_text(json.dumps({"reviewed": dummy}, indent=2))
-    # Patch the module's REVIEW_PATH to point to temp_review
-    original_path = human_review.REVIEW_PATH
-    human_review.REVIEW_PATH = temp_review
-    try:
-        # Re‑run main logic up to the truncation check (simulate start_idx)
-        review = human_review.load_review()
-        reviewed = review.get("reviewed", [])
-        start_idx = len(reviewed)
-        if start_idx > total:
-            # Truncate as the script would do
-            reviewed = reviewed[:total]
-            review["reviewed"] = reviewed
-            human_review.save_review(review)
-        # Verify truncation
-        final = human_review.load_review()
-        assert len(final["reviewed"]) == total
-    finally:
-        # Restore original path
-        human_review.REVIEW_PATH = original_path
+
+def make_record(item=None, candidate=None, relevance=2, verified=True, note=""):
+    if item is None or candidate is None:
+        item, candidate = first_candidate()
+    return human_review.make_review_record(item, candidate, relevance, verified, note)
+
+
+def test_stable_review_id():
+    assert human_review.make_review_id("CHA-001", 0) == "CHA-001::0"
+
+
+def test_exact_chunk_text_and_provenance_resolution():
+    item, candidate = first_candidate()
+    processed = human_review.REPO_ROOT / "data" / "processed" / "cha_chunks.json"
+    chunks = json.loads(processed.read_text(encoding="utf-8"))
+    if isinstance(chunks, dict):
+        chunks = chunks["chunks"]
+    source = next(chunk for chunk in chunks if chunk["chunk_id"] == item["chunk_id"])
+    assert candidate["text"] == source["text"]
+    for field in ("document_id", "page", "start_char", "end_char"):
+        assert candidate[field] == source[field]
+
+
+def test_blind_display_shows_full_candidate_and_provenance(capsys):
+    item, candidate = first_candidate()
+    assert not {"relevance", "confidence", "original_relevance", "original_confidence"}.intersection(item)
+
+    human_review.display_item(item, candidate, 0, 1)
+
+    output = capsys.readouterr().out
+    assert item["query"] in output
+    assert candidate["chunk_id"] in output
+    assert candidate["document_id"] in output
+    assert f"[{candidate['start_char']}, {candidate['end_char']})" in output
+    assert candidate["text"] in output
+    assert "AI relevance" not in output
+    assert "confidence" not in output.lower()
+
+
+def test_valid_human_labels_0_through_3():
+    item, candidate = first_candidate()
+    for relevance in range(4):
+        record = make_record(item, candidate, relevance=relevance)
+        assert record["human_relevance"] == relevance
+
+
+@pytest.mark.parametrize("relevance", [-1, 4, True, 1.0])
+def test_invalid_human_labels_are_rejected(relevance):
+    item, candidate = first_candidate()
+    with pytest.raises(ValueError):
+        make_record(item, candidate, relevance=relevance)
+
+
+def test_duplicate_prevention_and_exact_id_replacement():
+    original = make_record(relevance=1, note="first")
+    edited = make_record(relevance=3, note="edited")
+    updated = human_review.upsert_review({"reviewed": [original]}, edited)
+    assert len(updated["reviewed"]) == 1
+    assert updated["reviewed"][0] == edited
+
+    with pytest.raises(ValueError, match="Duplicate human review ID"):
+        human_review.review_map({"reviewed": [original, original]})
+
+
+def test_resume_uses_arbitrary_review_ids():
+    items = human_review.flatten_judgments(human_review.load_silver())
+    reviewed_ids = {items[0]["review_id"], items[4]["review_id"]}
+    assert human_review.first_unreviewed_index(items, reviewed_ids) == 1
+
+
+def test_atomic_save_uses_replace(tmp_path, monkeypatch):
+    record = make_record()
+    review_path = tmp_path / "review.json"
+    replaced = []
+    actual_replace = human_review.os.replace
+
+    def track_replace(source, destination):
+        replaced.append((source, destination))
+        actual_replace(source, destination)
+
+    monkeypatch.setattr(human_review.os, "replace", track_replace)
+    human_review.save_review({"reviewed": [record]}, review_path)
+
+    saved = human_review.load_review(review_path)
+    assert saved["reviewed"] == [record]
+    assert len(replaced) == 1
+    assert replaced[0][1] == review_path
+    assert list(tmp_path.glob("*.tmp")) == []
+
+
+def test_label_autosaves_q_preserves_progress_and_does_not_freeze_golden(tmp_path):
+    review_path = tmp_path / "review.json"
+    silver_hash = file_hash(SILVER_PATH)
+    golden_hash = file_hash(GOLDEN_PATH)
+    responses = iter(["3", "y", "saved before quitting", "q"])
+
+    human_review.main(
+        review_path=review_path,
+        input_fn=lambda _prompt: next(responses),
+        output_fn=lambda _message: None,
+    )
+
+    saved = human_review.load_review(review_path)
+    assert len(saved["reviewed"]) == 1
+    assert saved["reviewed"][0]["human_relevance"] == 3
+    assert saved["reviewed"][0]["verified"] is True
+    assert saved["reviewed"][0]["note"] == "saved before quitting"
+    assert file_hash(SILVER_PATH) == silver_hash
+    assert file_hash(GOLDEN_PATH) == golden_hash
+    assert json.loads(GOLDEN_PATH.read_text(encoding="utf-8"))["status"] == "draft_pending_human_annotation"
+
+
+def test_next_does_not_create_a_judgment(tmp_path):
+    review_path = tmp_path / "review.json"
+    responses = iter(["n", "q"])
+    human_review.main(
+        review_path=review_path,
+        input_fn=lambda _prompt: next(responses),
+        output_fn=lambda _message: None,
+    )
+    assert not review_path.exists()
+
+
+def test_previous_allows_editing_existing_id(tmp_path):
+    review_path = tmp_path / "review.json"
+    item, candidate = first_candidate()
+    human_review.save_review({"reviewed": [make_record(item, candidate, relevance=0)]}, review_path)
+    responses = iter(["p", "1", "y", "corrected", "q"])
+
+    human_review.main(
+        review_path=review_path,
+        input_fn=lambda _prompt: next(responses),
+        output_fn=lambda _message: None,
+    )
+
+    saved = human_review.load_review(review_path)["reviewed"]
+    assert len(saved) == 1
+    assert saved[0]["review_id"] == item["review_id"]
+    assert saved[0]["human_relevance"] == 1
+    assert saved[0]["note"] == "corrected"
+
+
+def test_preview_does_not_modify_silver_or_tracked_review(tmp_path):
+    silver_hash = file_hash(SILVER_PATH)
+    review_hash = file_hash(human_review.REVIEW_PATH)
+    preview_path = tmp_path / "review.json"
+    human_review.main(review_path=preview_path, preview=True, output_fn=lambda _message: None)
+    assert not preview_path.exists()
+    assert file_hash(SILVER_PATH) == silver_hash
+    assert file_hash(human_review.REVIEW_PATH) == review_hash

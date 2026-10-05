@@ -1,23 +1,23 @@
-import json
-import pytest
-from pathlib import Path
-import sys
+from scripts import human_review
 
-# Ensure the repository root is in sys.path for importing scripts
-REPO_ROOT = Path(__file__).resolve().parents[2]
-sys.path.append(str(REPO_ROOT / "scripts"))
 
-import human_review
+def test_pool_is_keyed_by_query_and_candidate_index():
+    item = human_review.flatten_judgments(human_review.load_silver())[0]
+    candidate = human_review.resolve_candidate(item, human_review.load_pool())
+    assert candidate["chunk_id"] == "CHA Employee Handbook 2025-p006-c001"
+    assert candidate["text"]
 
-def test_load_pool_contains_known_chunk():
-    pool_index = human_review.load_pool()
-    known_chunk_id = "CHA Employee Handbook 2025-p006-c001"
-    assert known_chunk_id in pool_index, f"Chunk ID {known_chunk_id} not found in pool"
-    chunk = pool_index[known_chunk_id]
-    assert "text" in chunk, "Chunk does not contain 'text' field"
-    assert isinstance(chunk["text"], str)
-    assert len(chunk["text"]) > 0
 
-def test_load_pool_missing_chunk():
-    pool_index = human_review.load_pool()
-    assert "NON_EXISTENT_CHUNK_ID" not in pool_index
+def test_missing_candidate_is_reported():
+    item = {
+        "review_id": "NOPE::0",
+        "query_id": "NOPE",
+        "candidate_index": 0,
+        "chunk_id": "MISSING",
+    }
+    try:
+        human_review.resolve_candidate(item, {})
+    except KeyError as error:
+        assert "NOPE::0" in str(error)
+    else:
+        raise AssertionError("Missing candidate should fail resolution")

@@ -362,7 +362,7 @@ def main() -> None:
             "Set it in your .env file or export it in your shell."
         )
 
-    model = DEFAULT_MODEL
+    model = DEFAULT_MODEL.strip()
     log.info("Judge model  : %s", model)
     log.info("Prompt ver   : %s", PROMPT_VERSION)
     log.info("Pool         : %s", POOL_PATH)
