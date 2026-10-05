@@ -1,0 +1,2627 @@
+{
+  "benchmark_version": "enterprise-rag-golden-v1-human-verified",
+  "corpus_id": "CHA-POLICY-CORPUS-V1",
+  "configuration": {
+    "systems": [
+      "dense",
+      "bm25",
+      "hybrid",
+      "reranker"
+    ],
+    "top_k": 10,
+    "candidate_k": 20,
+    "bootstrap_iterations": 10000,
+    "seed": 42
+  },
+  "queries": [
+    {
+      "query_id": "CHA-001",
+      "category": "Employee Relations & Conduct",
+      "query": "What does CHA say about employment at will?",
+      "systems": {
+        "dense": {
+          "recall_at_5": 0.2,
+          "recall_at_10": 0.36,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.6169826885784089,
+          "ndcg_at_10": 0.5596911774533866,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 10.74
+        },
+        "bm25": {
+          "recall_at_5": 0.2,
+          "recall_at_10": 0.32,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.45090012427168147,
+          "ndcg_at_10": 0.48741551387133425,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 0.51
+        },
+        "hybrid": {
+          "recall_at_5": 0.2,
+          "recall_at_10": 0.32,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.47162831488971624,
+          "ndcg_at_10": 0.4496512761317445,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 11.6
+        },
+        "reranker": {
+          "recall_at_5": 0.2,
+          "recall_at_10": 0.32,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.7294441835889875,
+          "ndcg_at_10": 0.639657648075902,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 1491.83
+        }
+      }
+    },
+    {
+      "query_id": "CHA-002",
+      "category": "Employee Relations & Conduct",
+      "query": "What workplace conduct can lead to disciplinary action?",
+      "systems": {
+        "dense": {
+          "recall_at_5": 0.25,
+          "recall_at_10": 0.35,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.7092912526226147,
+          "ndcg_at_10": 0.6023005471111191,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 10.0
+        },
+        "bm25": {
+          "recall_at_5": 0.25,
+          "recall_at_10": 0.45,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.38052008059004133,
+          "ndcg_at_10": 0.5343791318118986,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 0.52
+        },
+        "hybrid": {
+          "recall_at_5": 0.25,
+          "recall_at_10": 0.4,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.7092912526226147,
+          "ndcg_at_10": 0.6693308574240187,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 10.98
+        },
+        "reranker": {
+          "recall_at_5": 0.25,
+          "recall_at_10": 0.45,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.7092912526226147,
+          "ndcg_at_10": 0.7477291264026938,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 828.69
+        }
+      }
+    },
+    {
+      "query_id": "CHA-003",
+      "category": "Employee Relations & Conduct",
+      "query": "What are the rules for personal relationships between employees who work together?",
+      "systems": {
+        "dense": {
+          "recall_at_5": 0.4,
+          "recall_at_10": 0.5,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.7093047807172023,
+          "ndcg_at_10": 0.6336112836462847,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 11.54
+        },
+        "bm25": {
+          "recall_at_5": 0.3,
+          "recall_at_10": 0.5,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.6611762088198624,
+          "ndcg_at_10": 0.6171163729763562,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 0.95
+        },
+        "hybrid": {
+          "recall_at_5": 0.4,
+          "recall_at_10": 0.6,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.9567687797312098,
+          "ndcg_at_10": 0.8774216121368683,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 11.72
+        },
+        "reranker": {
+          "recall_at_5": 0.4,
+          "recall_at_10": 0.6,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.9518714281026602,
+          "ndcg_at_10": 0.8652023449951566,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 647.36
+        }
+      }
+    },
+    {
+      "query_id": "CHA-004",
+      "category": "Employee Relations & Conduct",
+      "query": "What does the handbook require employees to do when they become aware of waste, fraud, or abuse?",
+      "systems": {
+        "dense": {
+          "recall_at_5": 0.2222222222222222,
+          "recall_at_10": 0.3333333333333333,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.35124215912399903,
+          "ndcg_at_10": 0.4232377496236518,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 13.29
+        },
+        "bm25": {
+          "recall_at_5": 0.16666666666666666,
+          "recall_at_10": 0.2777777777777778,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.6860753156363693,
+          "ndcg_at_10": 0.6447847945253801,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 0.91
+        },
+        "hybrid": {
+          "recall_at_5": 0.2222222222222222,
+          "recall_at_10": 0.3333333333333333,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.7489015534827868,
+          "ndcg_at_10": 0.6733076165826637,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 14.41
+        },
+        "reranker": {
+          "recall_at_5": 0.1111111111111111,
+          "recall_at_10": 0.2777777777777778,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.6572885561341879,
+          "ndcg_at_10": 0.6105954948621091,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 904.04
+        }
+      }
+    },
+    {
+      "query_id": "CHA-005",
+      "category": "Employee Relations & Conduct",
+      "query": "What happens when an employee resigns or separates from CHA?",
+      "systems": {
+        "dense": {
+          "recall_at_5": 0.35714285714285715,
+          "recall_at_10": 0.42857142857142855,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.548456227119438,
+          "ndcg_at_10": 0.5146229179177262,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 16.16
+        },
+        "bm25": {
+          "recall_at_5": 0.21428571428571427,
+          "recall_at_10": 0.21428571428571427,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.15515683074272163,
+          "ndcg_at_10": 0.13901171566856715,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 0.85
+        },
+        "hybrid": {
+          "recall_at_5": 0.14285714285714285,
+          "recall_at_10": 0.42857142857142855,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.10921769979700928,
+          "ndcg_at_10": 0.22216250711407473,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 15.87
+        },
+        "reranker": {
+          "recall_at_5": 0.14285714285714285,
+          "recall_at_10": 0.42857142857142855,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.21062919270180983,
+          "ndcg_at_10": 0.4116126936563738,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 873.68
+        }
+      }
+    },
+    {
+      "query_id": "CHA-006",
+      "category": "Equal Employment & Accommodation",
+      "query": "What is CHA\u2019s policy on harassment and sexual harassment?",
+      "systems": {
+        "dense": {
+          "recall_at_5": 0.2857142857142857,
+          "recall_at_10": 0.5,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.7435934797653384,
+          "ndcg_at_10": 0.7162726913841144,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 16.01
+        },
+        "bm25": {
+          "recall_at_5": 0.35714285714285715,
+          "recall_at_10": 0.7142857142857143,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.8165832016561192,
+          "ndcg_at_10": 0.8660652376954463,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 1.29
+        },
+        "hybrid": {
+          "recall_at_5": 0.35714285714285715,
+          "recall_at_10": 0.5714285714285714,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.8165832016561192,
+          "ndcg_at_10": 0.778220146763302,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 17.52
+        },
+        "reranker": {
+          "recall_at_5": 0.35714285714285715,
+          "recall_at_10": 0.5,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.7294441835889875,
+          "ndcg_at_10": 0.6954278885772907,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 2168.67
+        }
+      }
+    },
+    {
+      "query_id": "CHA-007",
+      "category": "Equal Employment & Accommodation",
+      "query": "What reasonable accommodations does CHA provide for qualified employees with disabilities?",
+      "systems": {
+        "dense": {
+          "recall_at_5": 0.6,
+          "recall_at_10": 0.6,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.6076466218302259,
+          "ndcg_at_10": 0.6076466218302259,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 16.31
+        },
+        "bm25": {
+          "recall_at_5": 0.8,
+          "recall_at_10": 0.8,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.7983622935627412,
+          "ndcg_at_10": 0.7983622935627412,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 1.22
+        },
+        "hybrid": {
+          "recall_at_5": 0.6,
+          "recall_at_10": 0.8,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.6076466218302259,
+          "ndcg_at_10": 0.722680949410333,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 13.89
+        },
+        "reranker": {
+          "recall_at_5": 0.6,
+          "recall_at_10": 0.6,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.6505320002574321,
+          "ndcg_at_10": 0.6505320002574321,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 830.9
+        }
+      }
+    },
+    {
+      "query_id": "CHA-008",
+      "category": "Equal Employment & Accommodation",
+      "query": "What protections apply to pregnancy and childbirth accommodations?",
+      "systems": {
+        "dense": {
+          "recall_at_5": 0.4,
+          "recall_at_10": 0.4,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.9661791043627721,
+          "ndcg_at_10": 0.8586253550532441,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 13.73
+        },
+        "bm25": {
+          "recall_at_5": 0.4,
+          "recall_at_10": 0.5,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.9661791043627721,
+          "ndcg_at_10": 0.8818879781504141,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 0.66
+        },
+        "hybrid": {
+          "recall_at_5": 0.4,
+          "recall_at_10": 0.6,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.9661791043627721,
+          "ndcg_at_10": 0.9044925376580568,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 13.52
+        },
+        "reranker": {
+          "recall_at_5": 0.5,
+          "recall_at_10": 0.7,
+          "mrr": 1.0,
+          "ndcg_at_5": 1.0,
+          "ndcg_at_10": 0.9329522194823789,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 828.03
+        }
+      }
+    },
+    {
+      "query_id": "CHA-009",
+      "category": "Equal Employment & Accommodation",
+      "query": "How should an employee report discrimination or harassment?",
+      "systems": {
+        "dense": {
+          "recall_at_5": 0.21739130434782608,
+          "recall_at_10": 0.43478260869565216,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.6223772601563521,
+          "ndcg_at_10": 0.6422647739337616,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 14.67
+        },
+        "bm25": {
+          "recall_at_5": 0.21739130434782608,
+          "recall_at_10": 0.43478260869565216,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.7808192186449511,
+          "ndcg_at_10": 0.7740812785385268,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 1.35
+        },
+        "hybrid": {
+          "recall_at_5": 0.21739130434782608,
+          "recall_at_10": 0.43478260869565216,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.6683577236343724,
+          "ndcg_at_10": 0.6195412068515138,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 85.11
+        },
+        "reranker": {
+          "recall_at_5": 0.21739130434782608,
+          "recall_at_10": 0.391304347826087,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.6937326734044977,
+          "ndcg_at_10": 0.6962723879740786,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 2140.52
+        }
+      }
+    },
+    {
+      "query_id": "CHA-010",
+      "category": "Equal Employment & Accommodation",
+      "query": "What does CHA say about inclusion and belonging in the workplace?",
+      "systems": {
+        "dense": {
+          "recall_at_5": 0.2727272727272727,
+          "recall_at_10": 0.36363636363636365,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.665171950479666,
+          "ndcg_at_10": 0.5696548408896368,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 16.05
+        },
+        "bm25": {
+          "recall_at_5": 0.2727272727272727,
+          "recall_at_10": 0.2727272727272727,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.8683595134906049,
+          "ndcg_at_10": 0.6909032516569062,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 1.26
+        },
+        "hybrid": {
+          "recall_at_5": 0.18181818181818182,
+          "recall_at_10": 0.45454545454545453,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.5635781689741965,
+          "ndcg_at_10": 0.6625745736954779,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 16.33
+        },
+        "reranker": {
+          "recall_at_5": 0.09090909090909091,
+          "recall_at_10": 0.2727272727272727,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.48306700197788277,
+          "ndcg_at_10": 0.46333130151743446,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 2180.06
+        }
+      }
+    },
+    {
+      "query_id": "CHA-011",
+      "category": "Ethics, Investigations & Compliance",
+      "query": "What ethical standards are employees expected to follow?",
+      "systems": {
+        "dense": {
+          "recall_at_5": 0.26666666666666666,
+          "recall_at_10": 0.4666666666666667,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.6086067874378557,
+          "ndcg_at_10": 0.6830549866413935,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 13.68
+        },
+        "bm25": {
+          "recall_at_5": 0.3333333333333333,
+          "recall_at_10": 0.3333333333333333,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.6357901029964336,
+          "ndcg_at_10": 0.5058612737088046,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 0.98
+        },
+        "hybrid": {
+          "recall_at_5": 0.2,
+          "recall_at_10": 0.4666666666666667,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.5280956204415419,
+          "ndcg_at_10": 0.5788971981702756,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 14.94
+        },
+        "reranker": {
+          "recall_at_5": 0.26666666666666666,
+          "recall_at_10": 0.4666666666666667,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.6086067874378557,
+          "ndcg_at_10": 0.6897992122923683,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 2320.35
+        }
+      }
+    },
+    {
+      "query_id": "CHA-012",
+      "category": "Ethics, Investigations & Compliance",
+      "query": "What are employees required to do when cooperating with an Office of Inspector General investigation?",
+      "systems": {
+        "dense": {
+          "recall_at_5": 0.5,
+          "recall_at_10": 0.5,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.8490892410834268,
+          "ndcg_at_10": 0.8288605209618944,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 22.52
+        },
+        "bm25": {
+          "recall_at_5": 0.8333333333333334,
+          "recall_at_10": 0.8333333333333334,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.8039550181360283,
+          "ndcg_at_10": 0.784801576701034,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 1.15
+        },
+        "hybrid": {
+          "recall_at_5": 0.8333333333333334,
+          "recall_at_10": 0.8333333333333334,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.9051020864364281,
+          "ndcg_at_10": 0.8835389150970111,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 20.97
+        },
+        "reranker": {
+          "recall_at_5": 0.5,
+          "recall_at_10": 0.8333333333333334,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.7479421727830269,
+          "ndcg_at_10": 0.7762413649196784,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 2228.66
+        }
+      }
+    },
+    {
+      "query_id": "CHA-013",
+      "category": "Ethics, Investigations & Compliance",
+      "query": "What information may the OIG request from CHA employees?",
+      "systems": {
+        "dense": {
+          "recall_at_5": 0.17857142857142858,
+          "recall_at_10": 0.2857142857142857,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.7215411901507599,
+          "ndcg_at_10": 0.6065648344556341,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 14.9
+        },
+        "bm25": {
+          "recall_at_5": 0.17857142857142858,
+          "recall_at_10": 0.35714285714285715,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.7776883129849681,
+          "ndcg_at_10": 0.7389761098387103,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 0.75
+        },
+        "hybrid": {
+          "recall_at_5": 0.17857142857142858,
+          "recall_at_10": 0.32142857142857145,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.8403080070928569,
+          "ndcg_at_10": 0.7147242043261146,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 13.33
+        },
+        "reranker": {
+          "recall_at_5": 0.17857142857142858,
+          "recall_at_10": 0.35714285714285715,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.8848529619912747,
+          "ndcg_at_10": 0.7929015878348165,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 915.31
+        }
+      }
+    },
+    {
+      "query_id": "CHA-014",
+      "category": "Ethics, Investigations & Compliance",
+      "query": "What conduct involving CHA property or records can result in discipline?",
+      "systems": {
+        "dense": {
+          "recall_at_5": 0.16666666666666666,
+          "recall_at_10": 0.3333333333333333,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.5157051110116302,
+          "ndcg_at_10": 0.5577688525467637,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 15.0
+        },
+        "bm25": {
+          "recall_at_5": 0.20833333333333334,
+          "recall_at_10": 0.375,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.6568190367442152,
+          "ndcg_at_10": 0.737754457927494,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 1.16
+        },
+        "hybrid": {
+          "recall_at_5": 0.20833333333333334,
+          "recall_at_10": 0.3333333333333333,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.5594401368490775,
+          "ndcg_at_10": 0.6276522098129507,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 16.45
+        },
+        "reranker": {
+          "recall_at_5": 0.16666666666666666,
+          "recall_at_10": 0.3333333333333333,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.5168430421725534,
+          "ndcg_at_10": 0.5618269780382268,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 907.6
+        }
+      }
+    },
+    {
+      "query_id": "CHA-015",
+      "category": "Ethics, Investigations & Compliance",
+      "query": "What are the consequences of failing to comply with CHA policies?",
+      "systems": {
+        "dense": {
+          "recall_at_5": 0.21052631578947367,
+          "recall_at_10": 0.3684210526315789,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.45173722486469103,
+          "ndcg_at_10": 0.4558867204853276,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 14.56
+        },
+        "bm25": {
+          "recall_at_5": 0.2631578947368421,
+          "recall_at_10": 0.3157894736842105,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.4782643770313535,
+          "ndcg_at_10": 0.4242947298823692,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 0.87
+        },
+        "hybrid": {
+          "recall_at_5": 0.21052631578947367,
+          "recall_at_10": 0.3684210526315789,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.5390527227397919,
+          "ndcg_at_10": 0.4707990017990384,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 16.81
+        },
+        "reranker": {
+          "recall_at_5": 0.21052631578947367,
+          "recall_at_10": 0.3157894736842105,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.23945731250115798,
+          "ndcg_at_10": 0.24943386621130093,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 797.17
+        }
+      }
+    },
+    {
+      "query_id": "CHA-016",
+      "category": "Drug, Alcohol & Workplace Safety",
+      "query": "Where is smoking or use of electronic cigarettes prohibited at CHA?",
+      "systems": {
+        "dense": {
+          "recall_at_5": 0.35714285714285715,
+          "recall_at_10": 0.5,
+          "mrr": 1.0,
+          "ndcg_at_5": 1.0,
+          "ndcg_at_10": 0.9339595990793419,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 19.91
+        },
+        "bm25": {
+          "recall_at_5": 0.2857142857142857,
+          "recall_at_10": 0.5714285714285714,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.6723402705002275,
+          "ndcg_at_10": 0.6886416894916014,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 0.89
+        },
+        "hybrid": {
+          "recall_at_5": 0.35714285714285715,
+          "recall_at_10": 0.6428571428571429,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.7027197006669802,
+          "ndcg_at_10": 0.8617035615441606,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 19.97
+        },
+        "reranker": {
+          "recall_at_5": 0.35714285714285715,
+          "recall_at_10": 0.5714285714285714,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.7027197006669802,
+          "ndcg_at_10": 0.8342068192307367,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 2057.69
+        }
+      }
+    },
+    {
+      "query_id": "CHA-017",
+      "category": "Drug, Alcohol & Workplace Safety",
+      "query": "When can CHA require an employee to undergo drug or alcohol testing?",
+      "systems": {
+        "dense": {
+          "recall_at_5": 0.5,
+          "recall_at_10": 0.875,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.9244875304510924,
+          "ndcg_at_10": 0.9345161176004971,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 12.44
+        },
+        "bm25": {
+          "recall_at_5": 0.5,
+          "recall_at_10": 0.75,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.9244875304510924,
+          "ndcg_at_10": 0.8763886688218311,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 0.9
+        },
+        "hybrid": {
+          "recall_at_5": 0.625,
+          "recall_at_10": 0.875,
+          "mrr": 1.0,
+          "ndcg_at_5": 1.0,
+          "ndcg_at_10": 0.9485210598480436,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 16.26
+        },
+        "reranker": {
+          "recall_at_5": 0.625,
+          "recall_at_10": 0.75,
+          "mrr": 1.0,
+          "ndcg_at_5": 1.0,
+          "ndcg_at_10": 0.8941262667028972,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 2045.66
+        }
+      }
+    },
+    {
+      "query_id": "CHA-018",
+      "category": "Drug, Alcohol & Workplace Safety",
+      "query": "What is CHA\u2019s policy regarding a drug-free workplace?",
+      "systems": {
+        "dense": {
+          "recall_at_5": 0.35714285714285715,
+          "recall_at_10": 0.5714285714285714,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.8362275294293567,
+          "ndcg_at_10": 0.8169419016264634,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 15.31
+        },
+        "bm25": {
+          "recall_at_5": 0.2857142857142857,
+          "recall_at_10": 0.5,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.6740429882349457,
+          "ndcg_at_10": 0.7765218784807615,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 1.07
+        },
+        "hybrid": {
+          "recall_at_5": 0.2857142857142857,
+          "recall_at_10": 0.5,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.6740429882349457,
+          "ndcg_at_10": 0.7562913669996708,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 13.76
+        },
+        "reranker": {
+          "recall_at_5": 0.35714285714285715,
+          "recall_at_10": 0.5714285714285714,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.8362275294293567,
+          "ndcg_at_10": 0.8183870307373577,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 2379.48
+        }
+      }
+    },
+    {
+      "query_id": "CHA-019",
+      "category": "Drug, Alcohol & Workplace Safety",
+      "query": "What workplace behavior involving violence or weapons can result in discipline?",
+      "systems": {
+        "dense": {
+          "recall_at_5": 0.3333333333333333,
+          "recall_at_10": 0.6666666666666666,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.14600018520429386,
+          "ndcg_at_10": 0.35469111794785135,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 20.5
+        },
+        "bm25": {
+          "recall_at_5": 0.4444444444444444,
+          "recall_at_10": 0.6666666666666666,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.645612000735524,
+          "ndcg_at_10": 0.6331653115045688,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 1.96
+        },
+        "hybrid": {
+          "recall_at_5": 0.4444444444444444,
+          "recall_at_10": 0.5555555555555556,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.5033907591562251,
+          "ndcg_at_10": 0.484446611758685,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 23.12
+        },
+        "reranker": {
+          "recall_at_5": 0.3333333333333333,
+          "recall_at_10": 0.6666666666666666,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.6256036515865966,
+          "ndcg_at_10": 0.6346390914250266,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 2586.35
+        }
+      }
+    },
+    {
+      "query_id": "CHA-020",
+      "category": "Drug, Alcohol & Workplace Safety",
+      "query": "What should an employee do after a work-related automobile accident?",
+      "systems": {
+        "dense": {
+          "recall_at_5": 0.4444444444444444,
+          "recall_at_10": 0.4444444444444444,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.4984424431872503,
+          "ndcg_at_10": 0.4520763402059962,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 16.88
+        },
+        "bm25": {
+          "recall_at_5": 0.4444444444444444,
+          "recall_at_10": 0.4444444444444444,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.9661791043627721,
+          "ndcg_at_10": 0.8763032110404395,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 1.24
+        },
+        "hybrid": {
+          "recall_at_5": 0.3333333333333333,
+          "recall_at_10": 0.6666666666666666,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.8257189277680913,
+          "ndcg_at_10": 0.8134071367205057,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 18.83
+        },
+        "reranker": {
+          "recall_at_5": 0.5555555555555556,
+          "recall_at_10": 0.6666666666666666,
+          "mrr": 1.0,
+          "ndcg_at_5": 1.0,
+          "ndcg_at_10": 0.9307195869097207,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 843.97
+        }
+      }
+    },
+    {
+      "query_id": "CHA-021",
+      "category": "Compensation & Benefits",
+      "query": "What retirement benefits are available to eligible CHA employees?",
+      "systems": {
+        "dense": {
+          "recall_at_5": 0.38461538461538464,
+          "recall_at_10": 0.6923076923076923,
+          "mrr": 1.0,
+          "ndcg_at_5": 1.0000000000000002,
+          "ndcg_at_10": 0.9774263669301584,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 16.39
+        },
+        "bm25": {
+          "recall_at_5": 0.38461538461538464,
+          "recall_at_10": 0.6153846153846154,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.9107964694528203,
+          "ndcg_at_10": 0.9303329832729529,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 1.01
+        },
+        "hybrid": {
+          "recall_at_5": 0.38461538461538464,
+          "recall_at_10": 0.6153846153846154,
+          "mrr": 1.0,
+          "ndcg_at_5": 1.0000000000000002,
+          "ndcg_at_10": 0.9539183505737794,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 15.7
+        },
+        "reranker": {
+          "recall_at_5": 0.38461538461538464,
+          "recall_at_10": 0.46153846153846156,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.8559427324555539,
+          "ndcg_at_10": 0.7771395894066302,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 844.58
+        }
+      }
+    },
+    {
+      "query_id": "CHA-022",
+      "category": "Compensation & Benefits",
+      "query": "How does the employer match work for the deferred savings plan?",
+      "systems": {
+        "dense": {
+          "recall_at_5": 0.42857142857142855,
+          "recall_at_10": 0.42857142857142855,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.9086402078338698,
+          "ndcg_at_10": 0.8436325023710518,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 16.1
+        },
+        "bm25": {
+          "recall_at_5": 0.42857142857142855,
+          "recall_at_10": 0.7142857142857143,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.9086402078338698,
+          "ndcg_at_10": 0.9109491898994597,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 0.81
+        },
+        "hybrid": {
+          "recall_at_5": 0.42857142857142855,
+          "recall_at_10": 0.5714285714285714,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.8959958864750405,
+          "ndcg_at_10": 0.8688514278160101,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 18.59
+        },
+        "reranker": {
+          "recall_at_5": 0.5714285714285714,
+          "recall_at_10": 0.7142857142857143,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.9567687797312098,
+          "ndcg_at_10": 0.9252763885122297,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 2032.64
+        }
+      }
+    },
+    {
+      "query_id": "CHA-023",
+      "category": "Compensation & Benefits",
+      "query": "How does CHA vacation allowance change with years of service?",
+      "systems": {
+        "dense": {
+          "recall_at_5": 0.5,
+          "recall_at_10": 0.6666666666666666,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.6076466218302259,
+          "ndcg_at_10": 0.7143068767358635,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 13.89
+        },
+        "bm25": {
+          "recall_at_5": 0.6666666666666666,
+          "recall_at_10": 0.6666666666666666,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.97888138667067,
+          "ndcg_at_10": 0.9602094949645704,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 0.78
+        },
+        "hybrid": {
+          "recall_at_5": 0.8333333333333334,
+          "recall_at_10": 0.8333333333333334,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.9999999999999998,
+          "ndcg_at_10": 0.9809252765857508,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 15.86
+        },
+        "reranker": {
+          "recall_at_5": 0.6666666666666666,
+          "recall_at_10": 0.6666666666666666,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.97888138667067,
+          "ndcg_at_10": 0.9602094949645704,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 956.07
+        }
+      }
+    },
+    {
+      "query_id": "CHA-024",
+      "category": "Compensation & Benefits",
+      "query": "How much sick leave can an employee carry over?",
+      "systems": {
+        "dense": {
+          "recall_at_5": 0.5555555555555556,
+          "recall_at_10": 0.6666666666666666,
+          "mrr": 1.0,
+          "ndcg_at_5": 1.0,
+          "ndcg_at_10": 0.7713707099946514,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 12.82
+        },
+        "bm25": {
+          "recall_at_5": 0.4444444444444444,
+          "recall_at_10": 0.6666666666666666,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.8539316501572934,
+          "ndcg_at_10": 0.7462742600311302,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 1.32
+        },
+        "hybrid": {
+          "recall_at_5": 0.5555555555555556,
+          "recall_at_10": 0.6666666666666666,
+          "mrr": 1.0,
+          "ndcg_at_5": 1.0,
+          "ndcg_at_10": 0.7767471075223498,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 14.45
+        },
+        "reranker": {
+          "recall_at_5": 0.4444444444444444,
+          "recall_at_10": 0.6666666666666666,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.8687949224876581,
+          "ndcg_at_10": 0.7565748376244515,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 2009.13
+        }
+      }
+    },
+    {
+      "query_id": "CHA-025",
+      "category": "Compensation & Benefits",
+      "query": "Who is eligible for paid holidays?",
+      "systems": {
+        "dense": {
+          "recall_at_5": 0.22727272727272727,
+          "recall_at_10": 0.2727272727272727,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.8023389570436322,
+          "ndcg_at_10": 0.7084914936210623,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 15.19
+        },
+        "bm25": {
+          "recall_at_5": 0.22727272727272727,
+          "recall_at_10": 0.4090909090909091,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.8023389570436322,
+          "ndcg_at_10": 0.8106720492879409,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 0.57
+        },
+        "hybrid": {
+          "recall_at_5": 0.18181818181818182,
+          "recall_at_10": 0.36363636363636365,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.6467270319981572,
+          "ndcg_at_10": 0.7284344811992275,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 14.36
+        },
+        "reranker": {
+          "recall_at_5": 0.22727272727272727,
+          "recall_at_10": 0.45454545454545453,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.8023389570436322,
+          "ndcg_at_10": 0.8289808585991081,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 2172.59
+        }
+      }
+    },
+    {
+      "query_id": "CHA-026",
+      "category": "Leave & Time Off",
+      "query": "What are the eligibility requirements for FMLA leave at CHA?",
+      "systems": {
+        "dense": {
+          "recall_at_5": 0.2631578947368421,
+          "recall_at_10": 0.47368421052631576,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.6879148381536533,
+          "ndcg_at_10": 0.6672336464117895,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 16.38
+        },
+        "bm25": {
+          "recall_at_5": 0.21052631578947367,
+          "recall_at_10": 0.47368421052631576,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.5500198443489768,
+          "ndcg_at_10": 0.6961389437984465,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 1.13
+        },
+        "hybrid": {
+          "recall_at_5": 0.2631578947368421,
+          "recall_at_10": 0.5263157894736842,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.7324597930520711,
+          "ndcg_at_10": 0.7892782857234689,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 14.95
+        },
+        "reranker": {
+          "recall_at_5": 0.2631578947368421,
+          "recall_at_10": 0.42105263157894735,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.5151942811405652,
+          "ndcg_at_10": 0.670429363931965,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 888.61
+        }
+      }
+    },
+    {
+      "query_id": "CHA-027",
+      "category": "Leave & Time Off",
+      "query": "How much FMLA leave may an eligible employee take?",
+      "systems": {
+        "dense": {
+          "recall_at_5": 0.20833333333333334,
+          "recall_at_10": 0.4166666666666667,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.5133621291304895,
+          "ndcg_at_10": 0.6265547429261042,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 15.47
+        },
+        "bm25": {
+          "recall_at_5": 0.20833333333333334,
+          "recall_at_10": 0.4166666666666667,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.731219838408024,
+          "ndcg_at_10": 0.6698301363687474,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 1.38
+        },
+        "hybrid": {
+          "recall_at_5": 0.20833333333333334,
+          "recall_at_10": 0.4166666666666667,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.72272653993353,
+          "ndcg_at_10": 0.6887598213188714,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 16.4
+        },
+        "reranker": {
+          "recall_at_5": 0.20833333333333334,
+          "recall_at_10": 0.375,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.731219838408024,
+          "ndcg_at_10": 0.6603221835726708,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 824.83
+        }
+      }
+    },
+    {
+      "query_id": "CHA-028",
+      "category": "Leave & Time Off",
+      "query": "What are the rules for family bereavement leave?",
+      "systems": {
+        "dense": {
+          "recall_at_5": 0.5,
+          "recall_at_10": 0.8,
+          "mrr": 1.0,
+          "ndcg_at_5": 1.0,
+          "ndcg_at_10": 0.8521705090845475,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 15.29
+        },
+        "bm25": {
+          "recall_at_5": 0.4,
+          "recall_at_10": 0.8,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.8539316501572934,
+          "ndcg_at_10": 0.8318477135310892,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 0.91
+        },
+        "hybrid": {
+          "recall_at_5": 0.5,
+          "recall_at_10": 0.9,
+          "mrr": 1.0,
+          "ndcg_at_5": 1.0,
+          "ndcg_at_10": 0.9363792118010484,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 15.5
+        },
+        "reranker": {
+          "recall_at_5": 0.5,
+          "recall_at_10": 0.8,
+          "mrr": 1.0,
+          "ndcg_at_5": 1.0,
+          "ndcg_at_10": 0.8669479898642711,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 2055.97
+        }
+      }
+    },
+    {
+      "query_id": "CHA-029",
+      "category": "Leave & Time Off",
+      "query": "What notice is required for school visitation leave?",
+      "systems": {
+        "dense": {
+          "recall_at_5": 0.19230769230769232,
+          "recall_at_10": 0.38461538461538464,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.8040708765078748,
+          "ndcg_at_10": 0.7247558147330094,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 10.82
+        },
+        "bm25": {
+          "recall_at_5": 0.15384615384615385,
+          "recall_at_10": 0.34615384615384615,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.8687949224876581,
+          "ndcg_at_10": 0.846074506835919,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 0.99
+        },
+        "hybrid": {
+          "recall_at_5": 0.19230769230769232,
+          "recall_at_10": 0.38461538461538464,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.8415580415114009,
+          "ndcg_at_10": 0.8003074850374996,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 16.0
+        },
+        "reranker": {
+          "recall_at_5": 0.19230769230769232,
+          "recall_at_10": 0.34615384615384615,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.8415580415114009,
+          "ndcg_at_10": 0.7680089490450294,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 2079.26
+        }
+      }
+    },
+    {
+      "query_id": "CHA-030",
+      "category": "Leave & Time Off",
+      "query": "What leave is available under VESSA?",
+      "systems": {
+        "dense": {
+          "recall_at_5": 0.20833333333333334,
+          "recall_at_10": 0.375,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.7020976466720958,
+          "ndcg_at_10": 0.715684264212564,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 14.91
+        },
+        "bm25": {
+          "recall_at_5": 0.20833333333333334,
+          "recall_at_10": 0.375,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.9125299483251057,
+          "ndcg_at_10": 0.8917757551444746,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 0.76
+        },
+        "hybrid": {
+          "recall_at_5": 0.20833333333333334,
+          "recall_at_10": 0.4166666666666667,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.7020976466720958,
+          "ndcg_at_10": 0.8634162743946192,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 15.59
+        },
+        "reranker": {
+          "recall_at_5": 0.20833333333333334,
+          "recall_at_10": 0.4166666666666667,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.9125299483251057,
+          "ndcg_at_10": 0.9258936567941144,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 2106.25
+        }
+      }
+    },
+    {
+      "query_id": "CHA-031",
+      "category": "Work Environment & Equipment",
+      "query": "What are CHA\u2019s expectations for workplace attire?",
+      "systems": {
+        "dense": {
+          "recall_at_5": 0.5,
+          "recall_at_10": 0.5,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.8955428290491828,
+          "ndcg_at_10": 0.7708047890467716,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 15.2
+        },
+        "bm25": {
+          "recall_at_5": 0.375,
+          "recall_at_10": 0.5,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.5463148455053497,
+          "ndcg_at_10": 0.6013844807370722,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 0.97
+        },
+        "hybrid": {
+          "recall_at_5": 0.375,
+          "recall_at_10": 0.625,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.7073371794979774,
+          "ndcg_at_10": 0.6905974099902197,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 16.29
+        },
+        "reranker": {
+          "recall_at_5": 0.375,
+          "recall_at_10": 0.5,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.7073371794979774,
+          "ndcg_at_10": 0.6550118302129023,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 2132.4
+        }
+      }
+    },
+    {
+      "query_id": "CHA-032",
+      "category": "Work Environment & Equipment",
+      "query": "What are the rules for using CHA-issued equipment?",
+      "systems": {
+        "dense": {
+          "recall_at_5": 0.19230769230769232,
+          "recall_at_10": 0.34615384615384615,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.6937326734044977,
+          "ndcg_at_10": 0.720744602374753,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 14.22
+        },
+        "bm25": {
+          "recall_at_5": 0.19230769230769232,
+          "recall_at_10": 0.38461538461538464,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.4226015973418234,
+          "ndcg_at_10": 0.5600397497738985,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 0.99
+        },
+        "hybrid": {
+          "recall_at_5": 0.19230769230769232,
+          "recall_at_10": 0.38461538461538464,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.731219838408024,
+          "ndcg_at_10": 0.7878320334598178,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 16.23
+        },
+        "reranker": {
+          "recall_at_5": 0.19230769230769232,
+          "recall_at_10": 0.38461538461538464,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.9030970842075382,
+          "ndcg_at_10": 0.897655469787883,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 820.27
+        }
+      }
+    },
+    {
+      "query_id": "CHA-033",
+      "category": "Work Environment & Equipment",
+      "query": "Who is responsible for lost, damaged, or stolen CHA equipment?",
+      "systems": {
+        "dense": {
+          "recall_at_5": 0.2777777777777778,
+          "recall_at_10": 0.3888888888888889,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.6755698390821876,
+          "ndcg_at_10": 0.5711892723412878,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 15.32
+        },
+        "bm25": {
+          "recall_at_5": 0.2777777777777778,
+          "recall_at_10": 0.4444444444444444,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.6374351034578376,
+          "ndcg_at_10": 0.6736609556085706,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 1.14
+        },
+        "hybrid": {
+          "recall_at_5": 0.2222222222222222,
+          "recall_at_10": 0.4444444444444444,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.5381503236242533,
+          "ndcg_at_10": 0.6092589400903288,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 13.67
+        },
+        "reranker": {
+          "recall_at_5": 0.2222222222222222,
+          "recall_at_10": 0.5,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.7659213120899409,
+          "ndcg_at_10": 0.8061315820039214,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 845.89
+        }
+      }
+    },
+    {
+      "query_id": "CHA-034",
+      "category": "Work Environment & Equipment",
+      "query": "What does CHA require regarding a clear desk?",
+      "systems": {
+        "dense": {
+          "recall_at_5": 0.25,
+          "recall_at_10": 0.25,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.5167732491462516,
+          "ndcg_at_10": 0.4692056707890973,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 15.78
+        },
+        "bm25": {
+          "recall_at_5": 0.3333333333333333,
+          "recall_at_10": 0.3333333333333333,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.5441455338654687,
+          "ndcg_at_10": 0.4940584108137182,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 0.96
+        },
+        "hybrid": {
+          "recall_at_5": 0.16666666666666666,
+          "recall_at_10": 0.4166666666666667,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.4849950106908485,
+          "ndcg_at_10": 0.49834765126850916,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 15.38
+        },
+        "reranker": {
+          "recall_at_5": 0.16666666666666666,
+          "recall_at_10": 0.3333333333333333,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.47667357683104655,
+          "ndcg_at_10": 0.4702367928617854,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 855.97
+        }
+      }
+    },
+    {
+      "query_id": "CHA-035",
+      "category": "Work Environment & Equipment",
+      "query": "What is CHA\u2019s policy on personal use of CHA internet and email systems?",
+      "systems": {
+        "dense": {
+          "recall_at_5": 0.36363636363636365,
+          "recall_at_10": 0.5454545454545454,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.7847435677566986,
+          "ndcg_at_10": 0.7504367569390433,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 21.89
+        },
+        "bm25": {
+          "recall_at_5": 0.36363636363636365,
+          "recall_at_10": 0.5454545454545454,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.7083792421807712,
+          "ndcg_at_10": 0.6790911305073069,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 1.58
+        },
+        "hybrid": {
+          "recall_at_5": 0.36363636363636365,
+          "recall_at_10": 0.5454545454545454,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.7819582845483642,
+          "ndcg_at_10": 0.7472173861522673,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 21.17
+        },
+        "reranker": {
+          "recall_at_5": 0.36363636363636365,
+          "recall_at_10": 0.5454545454545454,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.7819582845483642,
+          "ndcg_at_10": 0.7497719568051364,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 909.02
+        }
+      }
+    },
+    {
+      "query_id": "CHA-036",
+      "category": "Information Security",
+      "query": "What is the purpose of the CHA Information Security Policy?",
+      "systems": {
+        "dense": {
+          "recall_at_5": 0.23809523809523808,
+          "recall_at_10": 0.42857142857142855,
+          "mrr": 1.0,
+          "ndcg_at_5": 1.0,
+          "ndcg_at_10": 0.866499373608536,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 14.94
+        },
+        "bm25": {
+          "recall_at_5": 0.19047619047619047,
+          "recall_at_10": 0.42857142857142855,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.5251604781247201,
+          "ndcg_at_10": 0.6740890300775227,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 1.11
+        },
+        "hybrid": {
+          "recall_at_5": 0.19047619047619047,
+          "recall_at_10": 0.38095238095238093,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.8539316501572934,
+          "ndcg_at_10": 0.8271865971710884,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 15.12
+        },
+        "reranker": {
+          "recall_at_5": 0.19047619047619047,
+          "recall_at_10": 0.38095238095238093,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.8539316501572934,
+          "ndcg_at_10": 0.8300668023777853,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 824.18
+        }
+      }
+    },
+    {
+      "query_id": "CHA-037",
+      "category": "Information Security",
+      "query": "What does the principle of least privilege require?",
+      "systems": {
+        "dense": {
+          "recall_at_5": 0.3076923076923077,
+          "recall_at_10": 0.46153846153846156,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.5413602506571343,
+          "ndcg_at_10": 0.6323641691019808,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 12.03
+        },
+        "bm25": {
+          "recall_at_5": 0.23076923076923078,
+          "recall_at_10": 0.3076923076923077,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.5167732491462516,
+          "ndcg_at_10": 0.4884410958884636,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 0.68
+        },
+        "hybrid": {
+          "recall_at_5": 0.3076923076923077,
+          "recall_at_10": 0.46153846153846156,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.5286328630611463,
+          "ndcg_at_10": 0.5179003491596689,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 11.33
+        },
+        "reranker": {
+          "recall_at_5": 0.15384615384615385,
+          "recall_at_10": 0.3076923076923077,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.47226762309486053,
+          "ndcg_at_10": 0.46540341201345,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 806.53
+        }
+      }
+    },
+    {
+      "query_id": "CHA-038",
+      "category": "Information Security",
+      "query": "Who is responsible for protecting CHA information assets?",
+      "systems": {
+        "dense": {
+          "recall_at_5": 0.25,
+          "recall_at_10": 0.4375,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.8687949224876581,
+          "ndcg_at_10": 0.692671576240693,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 13.8
+        },
+        "bm25": {
+          "recall_at_5": 0.3125,
+          "recall_at_10": 0.5625,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.8281227542004858,
+          "ndcg_at_10": 0.7213898078028356,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 0.8
+        },
+        "hybrid": {
+          "recall_at_5": 0.25,
+          "recall_at_10": 0.5625,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.7853272940061117,
+          "ndcg_at_10": 0.8535960526482813,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 13.69
+        },
+        "reranker": {
+          "recall_at_5": 0.25,
+          "recall_at_10": 0.5,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.7570287343648318,
+          "ndcg_at_10": 0.7463758663874197,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 768.74
+        }
+      }
+    },
+    {
+      "query_id": "CHA-039",
+      "category": "Information Security",
+      "query": "What are CHA users required to do if they suspect an information security breach?",
+      "systems": {
+        "dense": {
+          "recall_at_5": 0.26666666666666666,
+          "recall_at_10": 0.4,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.8990207509578788,
+          "ndcg_at_10": 0.8468544207142948,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 16.25
+        },
+        "bm25": {
+          "recall_at_5": 0.3333333333333333,
+          "recall_at_10": 0.3333333333333333,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.644649122319455,
+          "ndcg_at_10": 0.5775690317267402,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 1.02
+        },
+        "hybrid": {
+          "recall_at_5": 0.26666666666666666,
+          "recall_at_10": 0.4666666666666667,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.8990207509578788,
+          "ndcg_at_10": 0.8666532972213131,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 20.21
+        },
+        "reranker": {
+          "recall_at_5": 0.26666666666666666,
+          "recall_at_10": 0.4,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.8596324250006896,
+          "ndcg_at_10": 0.8151642131962561,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 885.2
+        }
+      }
+    },
+    {
+      "query_id": "CHA-040",
+      "category": "Information Security",
+      "query": "What security requirements apply to third-party managed cloud services?",
+      "systems": {
+        "dense": {
+          "recall_at_5": 0.22727272727272727,
+          "recall_at_10": 0.4090909090909091,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.647302800293475,
+          "ndcg_at_10": 0.7393553098849299,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 19.5
+        },
+        "bm25": {
+          "recall_at_5": 0.22727272727272727,
+          "recall_at_10": 0.4090909090909091,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.688623299253798,
+          "ndcg_at_10": 0.7001562384598105,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 0.77
+        },
+        "hybrid": {
+          "recall_at_5": 0.22727272727272727,
+          "recall_at_10": 0.4090909090909091,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.7033472869281177,
+          "ndcg_at_10": 0.8206712017236778,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 14.53
+        },
+        "reranker": {
+          "recall_at_5": 0.22727272727272727,
+          "recall_at_10": 0.45454545454545453,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.7033472869281177,
+          "ndcg_at_10": 0.8334789883516459,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 841.74
+        }
+      }
+    },
+    {
+      "query_id": "CHA-041",
+      "category": "Procurement",
+      "query": "What are CHA\u2019s stated goals for procurement?",
+      "systems": {
+        "dense": {
+          "recall_at_5": 0.3125,
+          "recall_at_10": 0.5625,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.7994765465672335,
+          "ndcg_at_10": 0.708800337366409,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 13.45
+        },
+        "bm25": {
+          "recall_at_5": 0.25,
+          "recall_at_10": 0.5,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.7408782483994215,
+          "ndcg_at_10": 0.7102042451877423,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 1.02
+        },
+        "hybrid": {
+          "recall_at_5": 0.3125,
+          "recall_at_10": 0.625,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.7994765465672335,
+          "ndcg_at_10": 0.8385734697953346,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 16.33
+        },
+        "reranker": {
+          "recall_at_5": 0.3125,
+          "recall_at_10": 0.625,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.9125299483251057,
+          "ndcg_at_10": 0.8667753125326365,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 803.26
+        }
+      }
+    },
+    {
+      "query_id": "CHA-042",
+      "category": "Procurement",
+      "query": "When can CHA make a non-competitive procurement?",
+      "systems": {
+        "dense": {
+          "recall_at_5": 0.3333333333333333,
+          "recall_at_10": 0.6666666666666666,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.4759908431563517,
+          "ndcg_at_10": 0.7400899594411117,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 13.95
+        },
+        "bm25": {
+          "recall_at_5": 0.3333333333333333,
+          "recall_at_10": 0.5333333333333333,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.8151510484299679,
+          "ndcg_at_10": 0.7790588813824012,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 0.71
+        },
+        "hybrid": {
+          "recall_at_5": 0.3333333333333333,
+          "recall_at_10": 0.6666666666666666,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.7698724385020872,
+          "ndcg_at_10": 0.8050314167312568,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 14.98
+        },
+        "reranker": {
+          "recall_at_5": 0.26666666666666666,
+          "recall_at_10": 0.6,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.7714160225925206,
+          "ndcg_at_10": 0.8701932108624081,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 998.38
+        }
+      }
+    },
+    {
+      "query_id": "CHA-043",
+      "category": "Procurement",
+      "query": "What is the micro-purchase threshold stated in the procurement policy?",
+      "systems": {
+        "dense": {
+          "recall_at_5": 0.4444444444444444,
+          "recall_at_10": 0.6666666666666666,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.8076572091794476,
+          "ndcg_at_10": 0.843045391249701,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 15.38
+        },
+        "bm25": {
+          "recall_at_5": 0.3333333333333333,
+          "recall_at_10": 0.5555555555555556,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.7479266229999318,
+          "ndcg_at_10": 0.7141940985130384,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 0.77
+        },
+        "hybrid": {
+          "recall_at_5": 0.4444444444444444,
+          "recall_at_10": 0.6666666666666666,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.7919648107385373,
+          "ndcg_at_10": 0.8156943606289796,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 14.93
+        },
+        "reranker": {
+          "recall_at_5": 0.3333333333333333,
+          "recall_at_10": 0.5555555555555556,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.7383121460922933,
+          "ndcg_at_10": 0.7729555368727669,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 1070.21
+        }
+      }
+    },
+    {
+      "query_id": "CHA-044",
+      "category": "Procurement",
+      "query": "What rules apply to procurement protests?",
+      "systems": {
+        "dense": {
+          "recall_at_5": 0.4,
+          "recall_at_10": 0.5,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.8687949224876582,
+          "ndcg_at_10": 0.6274092458891772,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 14.65
+        },
+        "bm25": {
+          "recall_at_5": 0.4,
+          "recall_at_10": 0.5,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.8687949224876582,
+          "ndcg_at_10": 0.6274092458891772,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 0.57
+        },
+        "hybrid": {
+          "recall_at_5": 0.4,
+          "recall_at_10": 0.6,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.8539316501572937,
+          "ndcg_at_10": 0.6840182226156365,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 14.88
+        },
+        "reranker": {
+          "recall_at_5": 0.3,
+          "recall_at_10": 0.4,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.7227265726449519,
+          "ndcg_at_10": 0.5384313152574521,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 985.54
+        }
+      }
+    },
+    {
+      "query_id": "CHA-045",
+      "category": "Procurement",
+      "query": "What restrictions apply to gifts and gratuities for CHA procurement staff?",
+      "systems": {
+        "dense": {
+          "recall_at_5": 0.36363636363636365,
+          "recall_at_10": 0.5454545454545454,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.5413602506571343,
+          "ndcg_at_10": 0.5289692335092605,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 19.01
+        },
+        "bm25": {
+          "recall_at_5": 0.36363636363636365,
+          "recall_at_10": 0.45454545454545453,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.5413602506571343,
+          "ndcg_at_10": 0.6131287440026145,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 0.82
+        },
+        "hybrid": {
+          "recall_at_5": 0.36363636363636365,
+          "recall_at_10": 0.5454545454545454,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.5413602506571343,
+          "ndcg_at_10": 0.646732871081197,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 19.05
+        },
+        "reranker": {
+          "recall_at_5": 0.36363636363636365,
+          "recall_at_10": 0.5454545454545454,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.5413602506571343,
+          "ndcg_at_10": 0.6336841340050314,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 829.99
+        }
+      }
+    },
+    {
+      "query_id": "CHA-046",
+      "category": "Business Expense & Travel",
+      "query": "What expenses are eligible for reimbursement under CHA\u2019s business expense policy?",
+      "systems": {
+        "dense": {
+          "recall_at_5": 0.2777777777777778,
+          "recall_at_10": 0.5555555555555556,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.8196294557259916,
+          "ndcg_at_10": 0.8428094924071499,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 18.32
+        },
+        "bm25": {
+          "recall_at_5": 0.2777777777777778,
+          "recall_at_10": 0.5555555555555556,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.9250256699929476,
+          "ndcg_at_10": 0.8920005416861835,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 0.9
+        },
+        "hybrid": {
+          "recall_at_5": 0.2777777777777778,
+          "recall_at_10": 0.5555555555555556,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.8281227542004858,
+          "ndcg_at_10": 0.8741279516183543,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 19.66
+        },
+        "reranker": {
+          "recall_at_5": 0.2777777777777778,
+          "recall_at_10": 0.5555555555555556,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.9165323715184533,
+          "ndcg_at_10": 0.8820335960515608,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 896.68
+        }
+      }
+    },
+    {
+      "query_id": "CHA-047",
+      "category": "Business Expense & Travel",
+      "query": "What documentation is required for a business expense reimbursement?",
+      "systems": {
+        "dense": {
+          "recall_at_5": 0.29411764705882354,
+          "recall_at_10": 0.5882352941176471,
+          "mrr": 1.0,
+          "ndcg_at_5": 1.0,
+          "ndcg_at_10": 1.0000000000000002,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 15.24
+        },
+        "bm25": {
+          "recall_at_5": 0.29411764705882354,
+          "recall_at_10": 0.5882352941176471,
+          "mrr": 1.0,
+          "ndcg_at_5": 1.0,
+          "ndcg_at_10": 0.9432106656105238,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 0.96
+        },
+        "hybrid": {
+          "recall_at_5": 0.29411764705882354,
+          "recall_at_10": 0.5882352941176471,
+          "mrr": 1.0,
+          "ndcg_at_5": 1.0,
+          "ndcg_at_10": 1.0000000000000002,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 15.2
+        },
+        "reranker": {
+          "recall_at_5": 0.29411764705882354,
+          "recall_at_10": 0.5882352941176471,
+          "mrr": 1.0,
+          "ndcg_at_5": 1.0,
+          "ndcg_at_10": 1.0000000000000002,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 2168.6
+        }
+      }
+    },
+    {
+      "query_id": "CHA-048",
+      "category": "Business Expense & Travel",
+      "query": "What travel expenses can CHA employees claim for business travel?",
+      "systems": {
+        "dense": {
+          "recall_at_5": 0.35714285714285715,
+          "recall_at_10": 0.5714285714285714,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.8546456263113074,
+          "ndcg_at_10": 0.7726229471650938,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 10.46
+        },
+        "bm25": {
+          "recall_at_5": 0.35714285714285715,
+          "recall_at_10": 0.6428571428571429,
+          "mrr": 1.0,
+          "ndcg_at_5": 1.0,
+          "ndcg_at_10": 0.8737794436737465,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 0.8
+        },
+        "hybrid": {
+          "recall_at_5": 0.35714285714285715,
+          "recall_at_10": 0.5714285714285714,
+          "mrr": 1.0,
+          "ndcg_at_5": 1.0,
+          "ndcg_at_10": 0.7997494735968351,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 11.63
+        },
+        "reranker": {
+          "recall_at_5": 0.2857142857142857,
+          "recall_at_10": 0.5714285714285714,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.8687949224876581,
+          "ndcg_at_10": 0.84860265890399,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 2168.5
+        }
+      }
+    },
+    {
+      "query_id": "CHA-049",
+      "category": "Business Expense & Travel",
+      "query": "What are the approval requirements for business travel?",
+      "systems": {
+        "dense": {
+          "recall_at_5": 0.29411764705882354,
+          "recall_at_10": 0.5882352941176471,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.5460273852451067,
+          "ndcg_at_10": 0.6875828787861902,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 17.18
+        },
+        "bm25": {
+          "recall_at_5": 0.29411764705882354,
+          "recall_at_10": 0.5294117647058824,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.7421841313007286,
+          "ndcg_at_10": 0.8348484269973583,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 1.13
+        },
+        "hybrid": {
+          "recall_at_5": 0.29411764705882354,
+          "recall_at_10": 0.5882352941176471,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.5789202639232207,
+          "ndcg_at_10": 0.786602900250938,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 19.23
+        },
+        "reranker": {
+          "recall_at_5": 0.29411764705882354,
+          "recall_at_10": 0.5882352941176471,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.5460273852451067,
+          "ndcg_at_10": 0.6766844761853137,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 893.49
+        }
+      }
+    },
+    {
+      "query_id": "CHA-050",
+      "category": "Business Expense & Travel",
+      "query": "What are the deadlines or procedures for submitting travel expense reports?",
+      "systems": {
+        "dense": {
+          "recall_at_5": 0.4,
+          "recall_at_10": 0.7,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.8539316501572937,
+          "ndcg_at_10": 0.762416491594312,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 21.18
+        },
+        "bm25": {
+          "recall_at_5": 0.4,
+          "recall_at_10": 0.7,
+          "mrr": 1.0,
+          "ndcg_at_5": 0.8687949224876582,
+          "ndcg_at_10": 0.7849818707050383,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 0.93
+        },
+        "hybrid": {
+          "recall_at_5": 0.5,
+          "recall_at_10": 0.7,
+          "mrr": 1.0,
+          "ndcg_at_5": 1.0,
+          "ndcg_at_10": 0.7967610662472993,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 20.39
+        },
+        "reranker": {
+          "recall_at_5": 0.5,
+          "recall_at_10": 0.8,
+          "mrr": 1.0,
+          "ndcg_at_5": 1.0,
+          "ndcg_at_10": 0.8521705090845474,
+          "candidate_count": 10,
+          "retrieval_latency_ms": 874.57
+        }
+      }
+    }
+  ],
+  "aggregate": {
+    "dense_recall_at_5": {
+      "mean": 0.32676717411079376,
+      "lower": 0.29748523873525556,
+      "upper": 0.35625675344252367,
+      "confidence": 0.95,
+      "iterations": 10000
+    },
+    "dense_recall_at_10": {
+      "mean": 0.4914169083515159,
+      "lower": 0.4547921578280755,
+      "upper": 0.5287882591734666,
+      "confidence": 0.95,
+      "iterations": 10000
+    },
+    "dense_mrr": {
+      "mean": 1.0,
+      "lower": 1.0,
+      "upper": 1.0,
+      "confidence": 0.95,
+      "iterations": 10000
+    },
+    "dense_ndcg_at_5": {
+      "mean": 0.724170176341414,
+      "lower": 0.6704782653768507,
+      "upper": 0.775655990573473,
+      "confidence": 0.95,
+      "iterations": 10000
+    },
+    "dense_ndcg_at_10": {
+      "mean": 0.6985549559172982,
+      "lower": 0.6577942492866308,
+      "upper": 0.738946394202815,
+      "confidence": 0.95,
+      "iterations": 10000
+    },
+    "dense_retrieval_latency_ms": {
+      "mean": 15.384199999999996,
+      "lower": 14.617795,
+      "upper": 16.163405000000004,
+      "confidence": 0.95,
+      "iterations": 10000
+    },
+    "bm25_recall_at_5": {
+      "mean": 0.32855471989833945,
+      "lower": 0.2920845046240347,
+      "upper": 0.3679688859352609,
+      "confidence": 0.95,
+      "iterations": 10000
+    },
+    "bm25_recall_at_10": {
+      "mean": 0.49846253700906407,
+      "lower": 0.4568106926500311,
+      "upper": 0.5398240643962161,
+      "confidence": 0.95,
+      "iterations": 10000
+    },
+    "bm25_mrr": {
+      "mean": 1.0,
+      "lower": 1.0,
+      "upper": 1.0,
+      "confidence": 0.95,
+      "iterations": 10000
+    },
+    "bm25_ndcg_at_5": {
+      "mean": 0.7296543310198436,
+      "lower": 0.6777627249696068,
+      "upper": 0.7783613897537363,
+      "confidence": 0.95,
+      "iterations": 10000
+    },
+    "bm25_ndcg_at_10": {
+      "mean": 0.7142703520806737,
+      "lower": 0.6689645629072348,
+      "upper": 0.7559390621043346,
+      "confidence": 0.95,
+      "iterations": 10000
+    },
+    "bm25_retrieval_latency_ms": {
+      "mean": 0.9756,
+      "lower": 0.903795,
+      "upper": 1.053,
+      "confidence": 0.95,
+      "iterations": 10000
+    },
+    "hybrid_recall_at_5": {
+      "mean": 0.3308573617009813,
+      "lower": 0.29065709381478666,
+      "upper": 0.3741783547215486,
+      "confidence": 0.95,
+      "iterations": 10000
+    },
+    "hybrid_recall_at_10": {
+      "mean": 0.54009619660712,
+      "lower": 0.5006734548537454,
+      "upper": 0.5809966073724886,
+      "confidence": 0.95,
+      "iterations": 10000
+    },
+    "hybrid_mrr": {
+      "mean": 1.0,
+      "lower": 1.0,
+      "upper": 1.0,
+      "confidence": 0.95,
+      "iterations": 10000
+    },
+    "hybrid_ndcg_at_5": {
+      "mean": 0.7483031501327053,
+      "lower": 0.6965421242484091,
+      "upper": 0.7980977382519535,
+      "confidence": 0.95,
+      "iterations": 10000
+    },
+    "hybrid_ndcg_at_10": {
+      "mean": 0.747458698465363,
+      "lower": 0.703512482546853,
+      "upper": 0.7884454941729168,
+      "confidence": 0.95,
+      "iterations": 10000
+    },
+    "hybrid_retrieval_latency_ms": {
+      "mean": 17.3338,
+      "lower": 15.375755000000002,
+      "upper": 20.606865,
+      "confidence": 0.95,
+      "iterations": 10000
+    },
+    "reranker_recall_at_5": {
+      "mean": 0.3144507127943324,
+      "lower": 0.27699550895002084,
+      "upper": 0.35286052039318117,
+      "confidence": 0.95,
+      "iterations": 10000
+    },
+    "reranker_recall_at_10": {
+      "mean": 0.510629425963576,
+      "lower": 0.4711538119623306,
+      "upper": 0.550517243012555,
+      "confidence": 0.95,
+      "iterations": 10000
+    },
+    "reranker_mrr": {
+      "mean": 1.0,
+      "lower": 1.0,
+      "upper": 1.0,
+      "confidence": 0.95,
+      "iterations": 10000
+    },
+    "reranker_ndcg_at_5": {
+      "mean": 0.7547935459001113,
+      "lower": 0.7015682180544488,
+      "upper": 0.8052089499212693,
+      "confidence": 0.95,
+      "iterations": 10000
+    },
+    "reranker_ndcg_at_10": {
+      "mean": 0.7449241177234383,
+      "lower": 0.7022407729073373,
+      "upper": 0.7862514905835118,
+      "confidence": 0.95,
+      "iterations": 10000
+    },
+    "reranker_retrieval_latency_ms": {
+      "mean": 1346.5022000000004,
+      "lower": 1172.46994,
+      "upper": 1524.4751199999998,
+      "confidence": 0.95,
+      "iterations": 10000
+    }
+  },
+  "paired_comparisons": {
+    "hybrid_minus_dense_recall_at_5": {
+      "mean_delta": 0.00409018759,
+      "lower": -0.01817420634920634,
+      "upper": 0.029087698412698412,
+      "confidence": 0.95,
+      "iterations": 10000
+    },
+    "hybrid_minus_dense_recall_at_10": {
+      "mean_delta": 0.048679288256,
+      "lower": 0.02646722920354501,
+      "upper": 0.0724128688197767,
+      "confidence": 0.95,
+      "iterations": 10000
+    },
+    "hybrid_minus_dense_mrr": {
+      "mean_delta": 0.0,
+      "lower": 0.0,
+      "upper": 0.0,
+      "confidence": 0.95,
+      "iterations": 10000
+    },
+    "hybrid_minus_dense_ndcg_at_5": {
+      "mean_delta": 0.024132973791,
+      "lower": -0.019358722942772286,
+      "upper": 0.06805640804356276,
+      "confidence": 0.95,
+      "iterations": 10000
+    },
+    "hybrid_minus_dense_ndcg_at_10": {
+      "mean_delta": 0.048903742548,
+      "lower": 0.020008278365825125,
+      "upper": 0.07818731589902794,
+      "confidence": 0.95,
+      "iterations": 10000
+    }
+  },
+  "category_summary": {
+    "Employee Relations & Conduct": {
+      "queries": 5,
+      "systems": {
+        "dense": {
+          "recall_at_5": 0.2858730158730159,
+          "mrr": 1.0,
+          "ndcg_at_10": 0.5466927351504337
+        },
+        "bm25": {
+          "recall_at_5": 0.2261904761904762,
+          "mrr": 1.0,
+          "ndcg_at_10": 0.4845415057707073
+        },
+        "hybrid": {
+          "recall_at_5": 0.24301587301587305,
+          "mrr": 1.0,
+          "ndcg_at_10": 0.578374773877874
+        },
+        "reranker": {
+          "recall_at_5": 0.22079365079365082,
+          "mrr": 1.0,
+          "ndcg_at_10": 0.6549594615984471
+        }
+      }
+    },
+    "Equal Employment & Accommodation": {
+      "queries": 5,
+      "systems": {
+        "dense": {
+          "recall_at_5": 0.35516657255787687,
+          "mrr": 1.0,
+          "ndcg_at_10": 0.6788928566181965
+        },
+        "bm25": {
+          "recall_at_5": 0.4094522868435912,
+          "mrr": 1.0,
+          "ndcg_at_10": 0.802260007920807
+        },
+        "hybrid": {
+          "recall_at_5": 0.351270468661773,
+          "mrr": 1.0,
+          "ndcg_at_10": 0.7375018828757367
+        },
+        "reranker": {
+          "recall_at_5": 0.3530886504799548,
+          "mrr": 1.0,
+          "ndcg_at_10": 0.687703159561723
+        }
+      }
+    },
+    "Ethics, Investigations & Compliance": {
+      "queries": 5,
+      "systems": {
+        "dense": {
+          "recall_at_5": 0.2644862155388471,
+          "mrr": 1.0,
+          "ndcg_at_10": 0.6264271830182027
+        },
+        "bm25": {
+          "recall_at_5": 0.36334586466165414,
+          "mrr": 1.0,
+          "ndcg_at_10": 0.6383376296116825
+        },
+        "hybrid": {
+          "recall_at_5": 0.3261528822055138,
+          "mrr": 1.0,
+          "ndcg_at_10": 0.655122305841078
+        },
+        "reranker": {
+          "recall_at_5": 0.2644862155388471,
+          "mrr": 1.0,
+          "ndcg_at_10": 0.6140406018592782
+        }
+      }
+    },
+    "Drug, Alcohol & Workplace Safety": {
+      "queries": 5,
+      "systems": {
+        "dense": {
+          "recall_at_5": 0.39841269841269844,
+          "mrr": 1.0,
+          "ndcg_at_10": 0.69843701529203
+        },
+        "bm25": {
+          "recall_at_5": 0.39206349206349206,
+          "mrr": 1.0,
+          "ndcg_at_10": 0.7702041518678404
+        },
+        "hybrid": {
+          "recall_at_5": 0.4091269841269841,
+          "mrr": 1.0,
+          "ndcg_at_10": 0.7728739473742131
+        },
+        "reranker": {
+          "recall_at_5": 0.44563492063492066,
+          "mrr": 1.0,
+          "ndcg_at_10": 0.8224157590011478
+        }
+      }
+    },
+    "Compensation & Benefits": {
+      "queries": 5,
+      "systems": {
+        "dense": {
+          "recall_at_5": 0.41920301920301917,
+          "mrr": 1.0,
+          "ndcg_at_10": 0.8030455899305575
+        },
+        "bm25": {
+          "recall_at_5": 0.43031413031413035,
+          "mrr": 1.0,
+          "ndcg_at_10": 0.8716875954912109
+        },
+        "hybrid": {
+          "recall_at_5": 0.4767787767787768,
+          "mrr": 1.0,
+          "ndcg_at_10": 0.8617753287394235
+        },
+        "reranker": {
+          "recall_at_5": 0.4588855588855589,
+          "mrr": 1.0,
+          "ndcg_at_10": 0.8496362338213981
+        }
+      }
+    },
+    "Leave & Time Off": {
+      "queries": 5,
+      "systems": {
+        "dense": {
+          "recall_at_5": 0.2744264507422402,
+          "mrr": 1.0,
+          "ndcg_at_10": 0.717279795473603
+        },
+        "bm25": {
+          "recall_at_5": 0.23620782726045886,
+          "mrr": 1.0,
+          "ndcg_at_10": 0.7871334111357353
+        },
+        "hybrid": {
+          "recall_at_5": 0.2744264507422402,
+          "mrr": 1.0,
+          "ndcg_at_10": 0.8156282156551015
+        },
+        "reranker": {
+          "recall_at_5": 0.2744264507422402,
+          "mrr": 1.0,
+          "ndcg_at_10": 0.7783204286416101
+        }
+      }
+    },
+    "Work Environment & Equipment": {
+      "queries": 5,
+      "systems": {
+        "dense": {
+          "recall_at_5": 0.31674436674436673,
+          "mrr": 1.0,
+          "ndcg_at_10": 0.6564762182981906
+        },
+        "bm25": {
+          "recall_at_5": 0.3084110334110334,
+          "mrr": 1.0,
+          "ndcg_at_10": 0.6016469454881133
+        },
+        "hybrid": {
+          "recall_at_5": 0.263966588966589,
+          "mrr": 1.0,
+          "ndcg_at_10": 0.6666506841922286
+        },
+        "reranker": {
+          "recall_at_5": 0.263966588966589,
+          "mrr": 1.0,
+          "ndcg_at_10": 0.7157615263343258
+        }
+      }
+    },
+    "Information Security": {
+      "queries": 5,
+      "systems": {
+        "dense": {
+          "recall_at_5": 0.25794538794538796,
+          "mrr": 1.0,
+          "ndcg_at_10": 0.7555489699100869
+        },
+        "bm25": {
+          "recall_at_5": 0.25887029637029635,
+          "mrr": 1.0,
+          "ndcg_at_10": 0.6323290407910745
+        },
+        "hybrid": {
+          "recall_at_5": 0.24842157842157842,
+          "mrr": 1.0,
+          "ndcg_at_10": 0.7772014995848059
+        },
+        "reranker": {
+          "recall_at_5": 0.21765234765234767,
+          "mrr": 1.0,
+          "ndcg_at_10": 0.7380978564653115
+        }
+      }
+    },
+    "Procurement": {
+      "queries": 5,
+      "systems": {
+        "dense": {
+          "recall_at_5": 0.37078282828282827,
+          "mrr": 1.0,
+          "ndcg_at_10": 0.6896628334911319
+        },
+        "bm25": {
+          "recall_at_5": 0.33606060606060606,
+          "mrr": 1.0,
+          "ndcg_at_10": 0.6887990429949947
+        },
+        "hybrid": {
+          "recall_at_5": 0.37078282828282827,
+          "mrr": 1.0,
+          "ndcg_at_10": 0.7580100681704809
+        },
+        "reranker": {
+          "recall_at_5": 0.31522727272727274,
+          "mrr": 1.0,
+          "ndcg_at_10": 0.736407901906059
+        }
+      }
+    },
+    "Business Expense & Travel": {
+      "queries": 5,
+      "systems": {
+        "dense": {
+          "recall_at_5": 0.3246311858076564,
+          "mrr": 1.0,
+          "ndcg_at_10": 0.8130863619905492
+        },
+        "bm25": {
+          "recall_at_5": 0.3246311858076564,
+          "mrr": 1.0,
+          "ndcg_at_10": 0.8657641897345701
+        },
+        "hybrid": {
+          "recall_at_5": 0.3446311858076564,
+          "mrr": 1.0,
+          "ndcg_at_10": 0.8514482783426853
+        },
+        "reranker": {
+          "recall_at_5": 0.3303454715219421,
+          "mrr": 1.0,
+          "ndcg_at_10": 0.8518982480450823
+        }
+      }
+    }
+  }
+}

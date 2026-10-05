@@ -1,0 +1,18 @@
+{
+  "schema_version": "human-review-v1",
+  "reviewed": [
+    {
+      "review_id": "CHA-001::0",
+      "query_id": "CHA-001",
+      "candidate_index": 0,
+      "chunk_id": "CHA Employee Handbook 2025-p006-c001",
+      "document_id": "CHA Employee Handbook 2025",
+      "page": 6,
+      "start_char": 0,
+      "end_char": 968,
+      "human_relevance": 3,
+      "verified": true,
+      "note": ""
+    }
+  ]
+}
