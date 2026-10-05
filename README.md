@@ -22,8 +22,8 @@ This repository is more than a PDF chatbot. Retrieval, generation, citations, ev
 | Citation mapping / validation | Implemented |
 | Faithfulness verification | Implemented |
 | Evaluation harness | Implemented |
-| 50-query corpus-derived benchmark draft | Ready for annotation |
-| Human-verified gold labels | Pending |
+| 50-query human-verified benchmark | Frozen |
+| Human-verified gold labels | Complete — 780 judgments |
 | Controlled retrieval results | Pending |
 | Production multi-tenant release | Later milestone |
 
@@ -164,7 +164,7 @@ Frozen corpus
     ↓
 Dense ∪ BM25 candidate pool
     ↓
-Human relevance labels (0–3)
+780 human relevance labels (0–3)
     ↓
 Frozen benchmark
     ↓

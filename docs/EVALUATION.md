@@ -52,13 +52,14 @@ Current status:
 
     50 queries
     10 categories
-    draft_pending_human_annotation
+    frozen
+    780 human relevance judgments
 
-This is a benchmark **draft**, not human gold.
+This is the **frozen human-verified benchmark**. The 780 judgments are stored in `data/evaluation/human_labels_v1.json` as an immutable compact score vector.
 
 The existing cha_silver_labels_v1.json contains model-generated silver judgments. It must not be represented as human ground truth.
 
-### Human annotation gate
+### Human annotation gate (completed)
 
 For each query:
 
@@ -71,13 +72,13 @@ For each query:
    - **3** — highly relevant/directly answers.
 4. Record durable document_id, page, start_char, and end_char.
 5. Set answerable.
-6. Change the benchmark status to frozen only after the full set has been reviewed.
+6. The full set has now been reviewed: 780/780 candidates received human relevance grades and 780/780 provenance checks are marked verified.
 
 Validate:
 
     python scripts/validate_golden_set.py
 
-The validator permits the draft state for progress tracking. The benchmark runner refuses to execute until the set is frozen and every query has relevance judgments.
+The benchmark runner expands the compact human-label artifact against the frozen candidate pool and refuses to execute if its checksum or judgment count does not match.
 
 ## 3. Controlled retrieval comparison
 
