@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="650" viewBox="0 0 1200 650">
+  <rect width="1200" height="650" fill="#0b0b0d"/>
+  <rect x="48" y="44" width="1104" height="562" rx="18" fill="#101114" stroke="#2a2c31"/>
+  <text x="82" y="94" fill="#f5f5f5" font-family="Inter, Arial, sans-serif" font-size="30" font-weight="700">Major retrieval result</text>
+  <text x="82" y="132" fill="#c9cbd0" font-family="Inter, Arial, sans-serif" font-size="20">Hybrid vs Dense on the frozen CHA benchmark</text>
+
+  <text x="82" y="188" fill="#9fa3aa" font-family="Inter, Arial, sans-serif" font-size="17" font-weight="600">Metric</text>
+  <text x="500" y="188" fill="#9fa3aa" font-family="Inter, Arial, sans-serif" font-size="17" font-weight="600" text-anchor="end">Dense</text>
+  <text x="730" y="188" fill="#9fa3aa" font-family="Inter, Arial, sans-serif" font-size="17" font-weight="600" text-anchor="end">Hybrid</text>
+  <text x="1090" y="188" fill="#9fa3aa" font-family="Inter, Arial, sans-serif" font-size="17" font-weight="600" text-anchor="end">Result</text>
+  <line x1="82" y1="205" x2="1090" y2="205" stroke="#34363b"/>
+
+  <text x="82" y="252" fill="#e9eaed" font-family="Inter, Arial, sans-serif" font-size="19">Recall@5</text>
+  <text x="500" y="252" fill="#d5d7db" font-family="Inter, Arial, sans-serif" font-size="19" text-anchor="end">0.326767</text>
+  <text x="730" y="252" fill="#ffffff" font-family="Inter, Arial, sans-serif" font-size="19" font-weight="700" text-anchor="end">0.330857</text>
+  <text x="1090" y="252" fill="#d5d7db" font-family="Inter, Arial, sans-serif" font-size="19" text-anchor="end">Hybrid +</text>
+
+  <line x1="82" y1="275" x2="1090" y2="275" stroke="#24262a"/>
+  <text x="82" y="318" fill="#e9eaed" font-family="Inter, Arial, sans-serif" font-size="19">Recall@10</text>
+  <text x="500" y="318" fill="#d5d7db" font-family="Inter, Arial, sans-serif" font-size="19" text-anchor="end">0.491417</text>
+  <text x="730" y="318" fill="#ffffff" font-family="Inter, Arial, sans-serif" font-size="19" font-weight="700" text-anchor="end">0.540096</text>
+  <text x="1090" y="318" fill="#ffffff" font-family="Inter, Arial, sans-serif" font-size="19" font-weight="700" text-anchor="end">Hybrid +9.9%</text>
+
+  <line x1="82" y1="341" x2="1090" y2="341" stroke="#24262a"/>
+  <text x="82" y="384" fill="#e9eaed" font-family="Inter, Arial, sans-serif" font-size="19">MRR</text>
+  <text x="500" y="384" fill="#d5d7db" font-family="Inter, Arial, sans-serif" font-size="19" text-anchor="end">1.000000</text>
+  <text x="730" y="384" fill="#d5d7db" font-family="Inter, Arial, sans-serif" font-size="19" text-anchor="end">1.000000</text>
+  <text x="1090" y="384" fill="#d5d7db" font-family="Inter, Arial, sans-serif" font-size="19" text-anchor="end">Saturated</text>
+
+  <line x1="82" y1="407" x2="1090" y2="407" stroke="#24262a"/>
+  <text x="82" y="450" fill="#e9eaed" font-family="Inter, Arial, sans-serif" font-size="19">nDCG@5</text>
+  <text x="500" y="450" fill="#d5d7db" font-family="Inter, Arial, sans-serif" font-size="19" text-anchor="end">0.724170</text>
+  <text x="730" y="450" fill="#ffffff" font-family="Inter, Arial, sans-serif" font-size="19" font-weight="700" text-anchor="end">0.748303</text>
+  <text x="1090" y="450" fill="#d5d7db" font-family="Inter, Arial, sans-serif" font-size="19" text-anchor="end">Hybrid +</text>
+
+  <line x1="82" y1="473" x2="1090" y2="473" stroke="#24262a"/>
+  <text x="82" y="516" fill="#e9eaed" font-family="Inter, Arial, sans-serif" font-size="19">nDCG@10</text>
+  <text x="500" y="516" fill="#d5d7db" font-family="Inter, Arial, sans-serif" font-size="19" text-anchor="end">0.698555</text>
+  <text x="730" y="516" fill="#ffffff" font-family="Inter, Arial, sans-serif" font-size="19" font-weight="700" text-anchor="end">0.747459</text>
+  <text x="1090" y="516" fill="#ffffff" font-family="Inter, Arial, sans-serif" font-size="19" font-weight="700" text-anchor="end">Hybrid +7.0%</text>
+
+  <text x="82" y="565" fill="#b9bcc2" font-family="Inter, Arial, sans-serif" font-size="16">Paired bootstrap analysis: statistically supported gains at Recall@10 and nDCG@10.</text>
+</svg>
