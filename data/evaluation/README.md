@@ -11,9 +11,9 @@ Current benchmark draft:
 - Corpus: CHA-POLICY-CORPUS-V1
 - Queries: 50
 - Categories: 10
-- Status: draft_pending_human_annotation
+- Status: frozen
 
-The draft is intentionally incomplete until human relevance judgments are frozen.
+The benchmark is now frozen after manual review of all 780 pooled candidates.
 
 ## Evidence judgments
 
@@ -52,9 +52,10 @@ Record model and retrieval configuration versions separately.
 |---|---|
 | cha_corpus_manifest.json | Frozen corpus identity and hashes |
 | cha_queries_v1.json | Corpus-derived candidate query set |
-| golden_queries_v1.json | Benchmark-shaped 50-query draft |
+| golden_queries_v1.json | Frozen 50-query benchmark contract |
 | golden_queries_v1.schema.json | Validation schema |
 | cha_silver_labels_v1.json | Model-generated silver checkpoint; not gold |
+| human_labels_v1.json | Immutable packed human relevance labels (780 judgments) |
 | results/ | Controlled benchmark outputs when generated |
 
 ## Validation
@@ -63,7 +64,7 @@ Record model and retrieval configuration versions separately.
 
 ## Benchmark
 
-After human annotation is frozen:
+The human annotation is frozen. The benchmark runner expands `human_labels_v1.json` against the frozen Dense ∪ BM25 pool before scoring.
 
     python scripts/run_golden_retrieval_benchmark.py \
       --benchmark data/evaluation/golden_queries_v1.json \
