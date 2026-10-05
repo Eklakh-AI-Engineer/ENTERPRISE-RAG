@@ -1,3 +1,5 @@
+import pytest
+
 from app.chunking.recursive_chunker import RecursiveChunker
 
 

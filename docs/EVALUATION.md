@@ -3,7 +3,7 @@
 **Status:** Active evaluation contract  
 **Last reviewed:** 2026-10-05
 
-This document defines how retrieval, generation, citations, and faithfulness are evaluated. It intentionally does not publish benchmark numbers until the evaluation set and relevance judgments are frozen.
+This document defines how retrieval, generation, citations, and faithfulness are evaluated. Benchmark numbers below are from the frozen evaluation set and identify their configuration and separate experimental artifact.
 
 ## 1. Evaluation layers
 
@@ -76,7 +76,7 @@ For each query:
 
 Validate:
 
-    python scripts/validate_golden_set.py
+    python -m scripts.validate_golden_set
 
 The benchmark runner expands the compact human-label artifact against the frozen candidate pool and refuses to execute if its checksum or judgment count does not match.
 
@@ -91,7 +91,44 @@ Run the same corpus, queries, relevance judgments, chunking, and evaluation proc
 
 Runner:
 
-    python scripts/run_golden_retrieval_benchmark.py       --benchmark data/evaluation/golden_queries_v1.json       --chunks data/processed/cha_chunks.json       --systems dense bm25 hybrid reranker       --top-k 10       --candidate-k 20       --output data/evaluation/results/golden_v1.json
+    python -m scripts.run_golden_retrieval_benchmark --benchmark data/evaluation/golden_queries_v1.json --chunks data/processed/cha_chunks.json --pool data/evaluation/cha_pool_v1.json --systems dense bm25 hybrid reranker --top-k 10 --candidate-k 20 --output data/evaluation/results/golden_v1.json
+
+## Ingestion validation gates
+
+**Stable evidence metadata: COMPLETE.** The chunk/ingestion gate requires a non-empty document and chunk identity, positive page and chunk index, canonical document-page-index identity, unique chunk IDs, valid integer spans within the source page, and exact agreement between each span and its page-text slice. Available section metadata is preserved. Citation mapping runs the structural gate and rejects unresolved source markers rather than silently omitting them. Deterministic repeated-input and deliberately corrupted-metadata cases are covered by `tests/test_evidence_metadata.py`.
+
+**OCR fallback validation: COMPLETE.** Pages with sufficient native text do not invoke OCR. Insufficient pages attempt OCR; only sufficiently long, text-like, materially better OCR is accepted. Empty/poor results retain native text. OCR exceptions retain native text and record `extraction_status="ocr_failed"` plus `extraction_error`. Parser tests assert page/document identity and downstream chunk spans.
+
+## Paired query-rewriting experiment
+
+Artifact: `data/evaluation/results/golden_v1_query_rewriting.json`. Baseline and treatment both use Hybrid/RRF candidate retrieval plus the same cross-encoder, `top_k=10`, `candidate_k=20`, and the same materialized frozen human judgments. Rewrite strategy `strip-interrogative-prefix-v1` removes only a recognized leading question frame and preserves the remaining query body verbatim. The runtime flag defaults off.
+
+| Metric | Baseline | Rewritten | Absolute delta | Relative delta |
+|---|---:|---:|---:|---:|
+| Recall@5 | 0.314451 | 0.317589 | +0.003138 | +0.998% |
+| Recall@10 | 0.510629 | 0.509977 | -0.000653 | -0.128% |
+| MRR | 1.000000 | 1.000000 | 0.000000 | 0.000% |
+| nDCG@5 | 0.754794 | 0.750950 | -0.003844 | -0.509% |
+| nDCG@10 | 0.744924 | 0.741851 | -0.003074 | -0.413% |
+
+The per-query retrieval results and all baseline/treatment metrics are in the artifact. On nDCG@10, 13 queries improved (CHA-003, CHA-004, CHA-009, CHA-012, CHA-018, CHA-022, CHA-028, CHA-034, CHA-035, CHA-037, CHA-039, CHA-041, CHA-043), 28 were unchanged (CHA-002, CHA-007, CHA-008, CHA-011, CHA-013, CHA-014, CHA-016, CHA-017, CHA-019, CHA-020, CHA-021, CHA-024, CHA-025, CHA-027, CHA-029, CHA-030, CHA-031, CHA-032, CHA-033, CHA-036, CHA-038, CHA-040, CHA-042, CHA-044, CHA-045, CHA-046, CHA-047, CHA-048), and 9 degraded (CHA-001, CHA-005, CHA-006, CHA-010, CHA-015, CHA-023, CHA-026, CHA-049, CHA-050). The artifact includes original and rewritten text for all 50.
+
+Category comparison deltas (rewritten minus baseline):
+
+| Category | Recall@5 | Recall@10 | MRR | nDCG@10 | Result |
+|---|---:|---:|---:|---:|---|
+| Business Expense & Travel | -0.020000 | 0.000000 | 0.000000 | -0.004787 | Degraded |
+| Compensation & Benefits | -0.004762 | 0.000000 | 0.000000 | -0.004947 | Degraded |
+| Drug, Alcohol & Workplace Safety | 0.000000 | -0.014286 | 0.000000 | +0.001274 | Improved |
+| Employee Relations & Conduct | +0.011111 | -0.023746 | 0.000000 | -0.046975 | Degraded |
+| Equal Employment & Accommodation | 0.000000 | +0.008696 | 0.000000 | +0.008836 | Improved |
+| Ethics, Investigations & Compliance | +0.022807 | 0.000000 | 0.000000 | -0.002228 | Degraded |
+| Information Security | 0.000000 | +0.013333 | 0.000000 | +0.020835 | Improved |
+| Leave & Time Off | 0.000000 | +0.009474 | 0.000000 | -0.006529 | Degraded |
+| Procurement | +0.022222 | 0.000000 | 0.000000 | +0.002142 | Improved |
+| Work Environment & Equipment | 0.000000 | 0.000000 | 0.000000 | +0.001644 | Improved |
+
+Conclusion: results are mixed, with an aggregate nDCG regression and meaningful query/category regressions. Keep rewriting disabled and experimental; do not promote it based on the Recall@5 increase alone. Latency is recorded in the artifact but is runtime-sensitive and is not treated as evidence of retrieval-quality change.
 
 ## 4. Reproducibility contract
 

@@ -5,7 +5,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Callable
 
-from app.chunking.recursive_chunker import RecursiveChunker
+from app.chunking.recursive_chunker import RecursiveChunker, validate_stable_evidence_metadata
 from app.parsing.pdf_parser import parse_pdf
 
 
@@ -53,6 +53,14 @@ class PdfIngestionPipeline:
             normalized_pages.append(normalized)
 
         chunks = self.chunker.chunk_pages(normalized_pages)
+        page_text_map: dict[str, dict[int, str]] = {}
+        page_section_map: dict[str, dict[int, str | None]] = {}
+        for page in normalized_pages:
+            document_id = page["document_id"]
+            page_number = int(page["page"])
+            page_text_map.setdefault(document_id, {})[page_number] = page["text"]
+            page_section_map.setdefault(document_id, {})[page_number] = page.get("section")
+        validate_stable_evidence_metadata(chunks, page_text_map, page_section_map)
         parser_version = pages[0].get("parser_version", "unknown") if pages else "unknown"
         return IngestionArtifact(
             pages=normalized_pages,

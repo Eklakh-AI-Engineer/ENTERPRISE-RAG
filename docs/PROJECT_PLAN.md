@@ -44,11 +44,13 @@ Production-specific Supabase/Railway implementation remains in Git history and t
 
 ### Phase B — Ingestion quality
 - [ ] Freeze PDF parser behavior.
-- [ ] Validate page/section/chunk metadata and stable IDs.
-- [ ] Validate character offsets.
+- [x] Validate page/section/chunk metadata and stable IDs.
+- [x] Validate character offsets and source-page text correspondence.
 - [ ] Test malformed/empty PDFs.
 - [ ] Evaluate chunk size/overlap.
-- [ ] Decide and evaluate OCR fallback.
+- [x] Decide and evaluate OCR fallback; failures are explicit and observable.
+
+**Evidence metadata gate: COMPLETE. OCR fallback validation: COMPLETE.** Automated coverage verifies required identity fields, positive pages, preserved sections, canonical IDs, duplicate detection, page bounds, text/span equality, citation resolution, and deterministic chunk identity. OCR tests cover native-only, fallback attempt, accepted OCR, rejected OCR, and OCR failure states.
 
 ### Phase C — Retrieval benchmark
 - [x] Frozen CHA corpus/query pool exists.
@@ -67,10 +69,12 @@ Production-specific Supabase/Railway implementation remains in Git history and t
 - [ ] Re-run the benchmark after every material change.
 
 ### Phase E — Query rewriting
-- [ ] Implement rewriting as an explicit experimental toggle.
-- [ ] Compare original vs rewritten queries on the same gold set.
-- [ ] Report gains and regressions by query category.
-- [ ] Do not mix rewriting results with the baseline experiment.
+- [x] Implement rewriting as an explicit experimental toggle (disabled by default).
+- [x] Compare original vs rewritten queries on the same frozen gold set.
+- [x] Report gains and regressions by query category.
+- [x] Keep rewriting results in a separate artifact from the baseline experiment.
+
+**Experimental conclusion:** mixed, with aggregate nDCG@10 down 0.003074 (-0.413%), 13 queries improved, 9 degraded, and 28 unchanged. Five categories improved and five degraded. Keep rewriting experimental and disabled by default. See [the paired result artifact](../data/evaluation/results/golden_v1_query_rewriting.json) and [evaluation analysis](EVALUATION.md).
 
 ### Phase F — Answer/evidence evaluation
 - [ ] Human-validate the faithfulness judge.

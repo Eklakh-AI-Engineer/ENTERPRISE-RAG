@@ -1,3 +1,4 @@
+from difflib import SequenceMatcher
 from pathlib import Path
 
 import io
@@ -10,6 +11,36 @@ from PIL import Image
 PARSER_VERSION = "pdf-parser-v2-ocr"
 DEFAULT_OCR_MIN_TEXT_CHARS = 100
 DEFAULT_OCR_DPI = 180
+
+
+def should_use_ocr(native_text: str, ocr_text: str, *, min_text_chars: int) -> bool:
+    """Allow OCR fallback only when it meaningfully improves extraction quality."""
+
+    cleaned_native = clean_text(native_text)
+    cleaned_ocr = clean_text(ocr_text)
+
+    if not cleaned_ocr.strip():
+        return False
+
+    if len(cleaned_ocr) < min_text_chars:
+        return False
+
+    alphanumeric_ratio = sum(character.isalnum() for character in cleaned_ocr) / len(cleaned_ocr)
+    words = cleaned_ocr.split()
+    if alphanumeric_ratio < 0.5 or len(set(words)) < 3:
+        return False
+
+    if len(cleaned_ocr) <= len(cleaned_native):
+        return False
+
+    if cleaned_native and SequenceMatcher(None, cleaned_native, cleaned_ocr).ratio() >= 0.95:
+        return False
+
+    gain_ratio = (len(cleaned_ocr) - len(cleaned_native)) / max(1, len(cleaned_native))
+    if len(cleaned_native) >= min_text_chars and gain_ratio < 0.25:
+        return False
+
+    return True
 
 
 def clean_text(text: str) -> str:
@@ -60,28 +91,42 @@ def parse_pdf(
     doc = pymupdf.open(path)
     pages = []
 
-    for page_number, page in enumerate(doc, start=1):
-        native_text = clean_text(page.get_text("text"))
-        text = native_text
-        extraction_method = "native"
+    try:
+        for page_number, page in enumerate(doc, start=1):
+            native_text = clean_text(page.get_text("text"))
+            text = native_text
+            extraction_method = "native"
+            extraction_status = "native_sufficient" if len(native_text) >= ocr_min_text_chars else "native_insufficient"
+            extraction_error = None
 
-        if ocr_enabled and len(native_text) < ocr_min_text_chars:
-            ocr_text = clean_text(_ocr_page(page, ocr_dpi))
-            if len(ocr_text) > len(native_text):
-                text = ocr_text
-                extraction_method = "ocr:tesseract"
+            if ocr_enabled and len(native_text) < ocr_min_text_chars:
+                try:
+                    ocr_text = clean_text(_ocr_page(page, ocr_dpi))
+                except Exception as error:
+                    extraction_status = "ocr_failed"
+                    extraction_error = f"{type(error).__name__}: {error}"
+                else:
+                    if should_use_ocr(native_text, ocr_text, min_text_chars=ocr_min_text_chars):
+                        text = ocr_text
+                        extraction_method = "ocr:tesseract"
+                        extraction_status = "ocr_used"
+                    else:
+                        extraction_status = "ocr_rejected"
 
-        pages.append(
-            {
+            page_result = {
                 "document_id": document_id,
                 "source": path.name,
                 "page": page_number,
                 "doc_type": "pdf",
                 "text": text,
                 "extraction_method": extraction_method,
+                "extraction_status": extraction_status,
                 "parser_version": PARSER_VERSION,
             }
-        )
+            if extraction_error is not None:
+                page_result["extraction_error"] = extraction_error
+            pages.append(page_result)
+    finally:
+        doc.close()
 
-    doc.close()
     return pages

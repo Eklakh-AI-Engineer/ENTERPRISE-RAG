@@ -56,6 +56,13 @@ class Settings:
 
     APP_VERSION = os.getenv("APP_VERSION", "1.0.0")
 
+    QUERY_REWRITE_ENABLED = os.getenv("QUERY_REWRITE_ENABLED", "false").strip().lower() in {
+        "1",
+        "true",
+        "yes",
+        "on",
+    }
+
     SUPABASE_URL = os.getenv("SUPABASE_URL", "")
     SUPABASE_PUBLISHABLE_KEY = os.getenv("SUPABASE_PUBLISHABLE_KEY", "")
     SUPABASE_SERVICE_ROLE_KEY = os.getenv("SUPABASE_SERVICE_ROLE_KEY", "")
