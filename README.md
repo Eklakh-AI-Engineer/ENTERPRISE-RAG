@@ -1,684 +1,246 @@
 # Enterprise RAG / AI Search
 
-> **Evidence-grounded Retrieval-Augmented Generation system focused on retrieval quality, reranking, citation traceability, faithfulness evaluation, and pipeline observability.**
+> **Retrieval engineering for evidence-grounded LLM systems.** Dense + BM25 retrieval, RRF fusion, cross-encoder reranking, citation traceability, faithfulness verification, and reproducible evaluation.
 
-Enterprise RAG is an AI Search project built to go beyond the typical **"upload a PDF → ask a question"** chatbot.
+Enterprise RAG is built around a simple principle:
 
-The system treats retrieval as an engineering problem: documents are represented as searchable chunks, multiple retrieval signals are combined, candidates are reranked, answers are generated from retrieved evidence, citations are mapped back to source metadata, and generated claims are evaluated for faithfulness.
+> **Retrieve the evidence. Rank it. Cite it. Verify it. Measure it.**
 
-> **Current direction (October 2026): local-first.** The active milestone is to finish and measure the retrieval-engineering system locally. Supabase/Railway/Vercel production work is intentionally deferred until the local benchmark and product gates are complete. See [docs/PROJECT_PLAN.md](docs/PROJECT_PLAN.md).
+This repository is more than a PDF chatbot. Retrieval, generation, citations, evaluation, persistence, and observability are separated so each layer can be tested and improved independently.
 
----
+## Project status
 
-## Why this project?
+**Current milestone: local-first retrieval engineering + benchmark completion.**
 
-A basic RAG system can retrieve a few vectors and pass them directly to an LLM. That approach can be insufficient for enterprise-style search, where queries may depend on:
+| Area | Status |
+|---|---|
+| Dense retrieval | Implemented |
+| BM25 retrieval | Implemented locally |
+| Hybrid / RRF | Implemented locally |
+| Cross-encoder reranking | Implemented |
+| Evidence-constrained generation | Implemented |
+| Citation mapping / validation | Implemented |
+| Faithfulness verification | Implemented |
+| Evaluation harness | Implemented |
+| 50-query corpus-derived benchmark draft | Ready for annotation |
+| Human-verified gold labels | Pending |
+| Controlled retrieval results | Pending |
+| Production multi-tenant release | Later milestone |
 
-- Exact terminology
-- Keywords and identifiers
-- Acronyms
-- Semantic similarity
-- Document/page metadata
-- Evidence traceability
-- Answer grounding
+> **Integrity rule:** development observations are not benchmark results. No controlled metric is published until the evaluation corpus, relevance judgments, configuration, and run are frozen.
 
-This project therefore separates and measures the major stages of the retrieval pipeline instead of hiding everything behind a single framework.
-
-The central engineering question is:
-
-> **Can better retrieval and ranking produce answers that are more relevant, traceable, and grounded in evidence?**
-
----
-
-## Documentation
-
-- [Architecture](docs/architecture.md) — implemented pipeline and design boundaries
-- [Evaluation Methodology](docs/evaluation.md) — benchmark contract, metrics, baselines, and error analysis
-- [Project Plan](docs/PROJECT_PLAN.md) — implementation roadmap
-
----
-
-## System Architecture
+## Architecture
 
 ```text
-                         ┌──────────────────────┐
-                         │      User Query      │
-                         └──────────┬───────────┘
-                                    │
-                                    ▼
-                    ┌─────────────────────────────┐
-                    │       Hybrid Retrieval      │
-                    │                             │
-                    │  ┌──────────┐ ┌──────────┐ │
-                    │  │  Dense   │ │  BM25    │ │
-                    │  │ Retrieval│ │ Retrieval│ │
-                    │  └────┬─────┘ └────┬─────┘ │
-                    │       └──────┬──────┘       │
-                    │              ▼              │
-                    │        Hybrid Fusion        │
-                    └──────────────┬──────────────┘
-                                   │
-                                   ▼
-                    ┌─────────────────────────────┐
-                    │    Cross-Encoder Reranker    │
-                    │   Candidate re-ordering      │
-                    └──────────────┬──────────────┘
-                                   │
-                                   ▼
-                    ┌─────────────────────────────┐
-                    │      Context Assembly        │
-                    │ document / page / chunk      │
-                    │ metadata + source content    │
-                    └──────────────┬──────────────┘
-                                   │
-                                   ▼
-                    ┌─────────────────────────────┐
-                    │       LLM Generation         │
-                    │   Evidence-constrained RAG   │
-                    └──────────────┬──────────────┘
-                                   │
-                    ┌──────────────┴──────────────┐
-                    ▼                             ▼
-          ┌──────────────────┐          ┌────────────────────┐
-          │ Citation Mapping │          │ Faithfulness       │
-          │ [Source N] →     │          │ Verification       │
-          │ document/page/   │          │ claim → evidence   │
-          │ chunk metadata   │          └─────────┬──────────┘
-          └─────────┬────────┘                    │
-                    └──────────────┬─────────────┘
-                                   ▼
-                         ┌─────────────────────┐
-                         │ Evaluation & Metrics│
-                         │ relevance / citation│
-                         │ faithfulness / time │
-                         └─────────────────────┘
+                         User Query
+                             │
+              ┌──────────────┴──────────────┐
+              ▼                             ▼
+       Dense Retrieval                  BM25 Retrieval
+              │                             │
+              └──────────────┬──────────────┘
+                             ▼
+                       RRF / Hybrid Fusion
+                             │
+                             ▼
+                  Cross-Encoder Reranking
+                             │
+                             ▼
+                     Context Assembly
+                  document / page / chunk
+                             │
+                             ▼
+                Evidence-Constrained LLM
+                             │
+                ┌────────────┴────────────┐
+                ▼                         ▼
+         Citation Mapping          Faithfulness Check
+                │                         │
+                └────────────┬────────────┘
+                             ▼
+                    Evaluation + Metrics
 ```
 
----
+See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the implemented design and later production boundary.
 
-## Current Implementation
+## What is engineered here?
 
 ### Retrieval
-
-- Dense semantic retrieval
-- BM25 lexical retrieval
-- Hybrid retrieval
+- Dense semantic retrieval with SentenceTransformers
+- BM25 lexical retrieval for exact terms, identifiers, acronyms, and terminology
+- Hybrid candidate fusion using RRF
 - Configurable candidate and top-k selection
-
-### Ranking
-
 - Cross-encoder reranking
-- Larger retrieved candidate set → smaller final context set
-- Reranking latency measured independently
 
-### Generation
+### Evidence and generation
+- Context assembly preserves document/page/chunk provenance
+- Evidence-constrained generation through an OpenRouter-backed provider interface
+- Explicit insufficient-evidence behavior
+- Strict [Source N] citation mapping
+- Citation validity and citation accuracy treated as separate concepts
+- Claim-level faithfulness verification
 
-- Provider-independent generation interface
-- OpenRouter-backed LLM client
-- Evidence-constrained system prompt
-- Strict `[Source N]` citation format
-- Explicit insufficient-information behavior
+### Evaluation
 
-### Citation System
+    Retrieval quality
+          ≠
+    Generation quality
+          ≠
+    Citation quality
+          ≠
+    Faithfulness
 
-Generated citations are not treated as decorative text.
+The active CHA benchmark contains **50 corpus-derived queries across 10 categories**. It is currently a draft pending human relevance annotation. See [docs/EVALUATION.md](docs/EVALUATION.md).
 
-The system:
-
-1. Extracts `[Source N]` references from the answer.
-2. Maps source numbers to the reranked context.
-3. Resolves document/page/chunk metadata.
-4. Detects invalid citation IDs.
-5. Separates citation validity from answer quality.
-
-Example:
+## Repository structure
 
 ```text
-Answer:
-A high-quality application typically takes 20–60 minutes. [Source 1]
-
-Mapped citation:
-Source 1
-└── document: sample.pdf
-    page: 1
-    chunk: sample-p001-c002
-```
-
-### Faithfulness Verification
-
-The project includes a semantic evidence verifier.
-
-```text
-Generated Claim
-      │
-      ▼
-Extract [Source N]
-      │
-      ▼
-Resolve cited evidence
-      │
-      ▼
-Evidence verification
-      │
-      ├── Supported
-      └── Unsupported
-```
-
-The verifier is explicitly instructed to use only the supplied evidence and not outside knowledge.
-
-### Observability
-
-The pipeline records:
-
-- Retrieval latency
-- Reranking latency
-- Generation latency
-- Citation verification latency
-- Faithfulness verification latency
-- End-to-end latency
-- Retrieved document count
-- Reranked document count
-- Citation validity
-- Citation accuracy
-- Relevance score
-- Faithfulness score
-- Supported / unsupported claim counts
-- Overall evaluation score
-
----
-
-## Example Development Run
-
-A representative pipeline execution:
-
-```text
-Query
-  ↓
-10 retrieved candidates
-  ↓
-5 reranked candidates
-  ↓
-Context assembly
-  ↓
-LLM generation
-  ↓
-Citation mapping
-  ↓
-Faithfulness verification
-  ↓
-Evaluation
-```
-
-Example development output:
-
-```text
-Retrieved documents: 10
-Reranked documents: 5
-
-Citations mapped: 3
-
-Faithfulness:
-3 / 3 claims supported
-
-Citation validity: 1.00
-Citation accuracy: 1.00
-Faithfulness: 1.00
-Overall score: 0.91
-```
-
-> These values are from a development run and are **not benchmark claims**. Final retrieval-quality results will be reported only after a fixed evaluation dataset and controlled experiment are established.
-
----
-
-## Evaluation Philosophy
-
-The project intentionally separates different dimensions of quality.
-
-| Metric | What it measures |
-|---|---|
-| Citation validity | Whether `[Source N]` maps to a retrieved source |
-| Citation accuracy | Whether the cited evidence supports the claim |
-| Faithfulness | Whether generated claims are supported by evidence |
-| Relevance | Whether the answer addresses the user's information need |
-| Recall@5 | Whether relevant evidence appears in the top five |
-| MRR | Rank of the first relevant result |
-| nDCG | Ranking quality using graded relevance |
-| Latency | Cost of individual stages and the complete pipeline |
-
-The retrieval metrics will be used with a fixed labeled evaluation dataset.
-
----
-
-## Planned Core Experiment
-
-### Dense Retrieval vs Hybrid Retrieval
-
-Both systems will use the same:
-
-- Corpus
-- Evaluation queries
-- Relevance judgments
-- Evaluation procedure
-
-| Dimension | Dense Baseline | Hybrid System |
-|---|---:|---:|
-| Semantic retrieval | ✓ | ✓ |
-| BM25 retrieval | — | ✓ |
-| Hybrid fusion | — | ✓ |
-| Reranking | Controlled | Controlled |
-| Recall@5 | Measure | Measure |
-| MRR | Measure | Measure |
-| nDCG | Measure | Measure |
-| Latency | Measure | Measure |
-
-The objective is not to assume that hybrid retrieval is better.
-
-Instead, the experiment will measure **where and why** hybrid retrieval helps or fails.
-
----
-
-## Query Pipeline
-
-```text
-QueryPipeline
+ENTERPRISE-RAG/
 │
-├── DenseRetriever
-├── BM25Retriever
-├── HybridRetriever
-├── CrossEncoderReranker
-├── Context Builder
-├── RAGGenerator
-├── Citation Mapper
-├── AnswerEvaluator
-├── FaithfulnessVerifier
-└── PipelineMetrics
-```
-
-The modular design makes it possible to change one retrieval component without rewriting the entire application.
-
----
-
-## Repository Structure
-
-```text
-enterprise-rag/
-├── app/
-│   ├── api/
-│   ├── parsing/
-│   ├── chunking/
-│   ├── indexing/
-│   ├── retrieval/
-│   │   ├── dense/
-│   │   ├── bm25/
-│   │   └── hybrid/
-│   ├── reranking/
-│   ├── generation/
-│   ├── citations/
-│   ├── evaluation/
-│   ├── faithfulness/
-│   ├── ingestion/
-│   ├── query/
-│   └── observability/
+├── app/                         # Backend application and domain logic
+│   ├── api/                     # FastAPI routes and request boundaries
+│   ├── parsing/                 # PDF extraction and OCR fallback
+│   ├── chunking/                # Chunking + durable evidence spans
+│   ├── ingestion/               # Document ingestion orchestration
+│   ├── indexing/                # Index construction / persistence
+│   ├── retrieval/               # Dense, BM25, hybrid retrieval
+│   ├── reranking/               # Cross-encoder ranking
+│   ├── generation/              # LLM provider + grounded generation
+│   ├── citations/               # Citation extraction and mapping
+│   ├── faithfulness/            # Claim/evidence verification
+│   ├── evaluation/              # Evaluation primitives
+│   ├── query/                   # Query pipeline orchestration
+│   └── observability/           # Pipeline telemetry
+│
 ├── data/
-│   ├── evaluation/
-│   └── processed/
-├── frontend/
-├── scripts/
-├── tests/
+│   └── evaluation/              # Versioned benchmark contracts and labels
+│
 ├── docs/
-├── Enterprise RAG.docx
-├── requirements.txt
-├── Dockerfile
-└── README.md
+│   ├── README.md                # Documentation map
+│   ├── ARCHITECTURE.md          # Current architecture
+│   ├── EVALUATION.md            # Evaluation methodology + benchmark
+│   ├── PROJECT_PLAN.md          # Active delivery roadmap
+│   ├── DEVELOPMENT.md           # Local development workflow
+│   ├── DEPLOYMENT.md             # Later production deployment
+│   ├── DATABASE.md               # Production data model
+│   ├── SECURITY.md               # Security baseline
+│   ├── IMPLEMENTATION_PLAN.md    # Detailed implementation plan
+│   └── history/                  # Superseded audits and historical snapshots
+│
+├── frontend/                    # React + Vite inspection UI
+├── scripts/                     # Reproducible build/evaluation utilities
+├── tests/                       # Canonical automated test suite
+├── screenshots/                 # Working application evidence
+├── supabase/                    # Database schema/migration artifacts
+│
+├── .env.example                 # Environment configuration template
+├── Dockerfile                   # Backend container
+├── requirements.txt             # Python dependencies
+├── pytest.ini                   # Test configuration
+└── README.md                    # Project entry point
 ```
 
-The repository no longer keeps one-off debug scripts or duplicate `scripts/test_*.py` files. `tests/` is the canonical automated test suite.
+## Documentation map
 
----
-
-## Technology Stack
-
-| Layer | Technology |
+| Document | Purpose |
 |---|---|
-| Backend API | FastAPI |
-| Language | Python |
-| Dense Retrieval | Sentence-transformers based retrieval |
-| Sparse Retrieval | BM25 |
-| Hybrid Search | Dense + BM25 fusion |
-| Reranking | `cross-encoder/ms-marco-MiniLM-L-6-v2` |
-| LLM Gateway | OpenRouter |
-| Generation | Evidence-constrained RAG |
-| Evaluation | Custom evaluation modules |
-| Frontend | React |
-| Frontend Icons | Lucide |
-| Version Control | Git / GitHub |
+| [Documentation index](docs/README.md) | Find the right document quickly |
+| [Architecture](docs/ARCHITECTURE.md) | Implemented pipeline and production boundary |
+| [Evaluation](docs/EVALUATION.md) | Metrics, benchmark contract, annotation gate |
+| [Project plan](docs/PROJECT_PLAN.md) | Current roadmap and definition of done |
+| [Development](docs/DEVELOPMENT.md) | Setup, tests, local execution |
+| [Deployment](docs/DEPLOYMENT.md) | Production prerequisites and sequence |
+| [Database](docs/DATABASE.md) | Persistence model and pgvector parity gate |
+| [Security](docs/SECURITY.md) | Secrets, tenant isolation, request-path controls |
+| [Evaluation data](data/evaluation/README.md) | Benchmark data contract |
+| [History](docs/history/README.md) | Previous audits and resume snapshots |
 
----
-
-## Running Locally
-
-### 1. Clone
-
-```bash
-git clone https://github.com/Eklakh-AI-Engineer/ENTERPRISE-RAG.git
-cd ENTERPRISE-RAG
-```
-
-### 2. Create virtual environment
-
-Windows:
-
-```bash
-python -m venv .venv
-.venv\Scripts\activate
-```
-
-Linux / macOS:
-
-```bash
-python3 -m venv .venv
-source .venv/bin/activate
-```
-
-### 3. Install dependencies
-
-```bash
-pip install -r requirements.txt
-```
-
-### 4. Configure environment variables
-
-Create the local environment configuration expected by the project's settings module.
-
-Example:
-
-```env
-OPENROUTER_API_KEY=your_key_here
-```
-
-**Never commit API keys or secrets to GitHub.**
-
-### 5. Start the backend
-
-```bash
-uvicorn app.api.main:app --reload
-```
-
-Expected API:
+## Evaluation workflow
 
 ```text
-http://127.0.0.1:8000
+Frozen corpus
+    ↓
+50 corpus-derived queries
+    ↓
+Dense ∪ BM25 candidate pool
+    ↓
+Human relevance labels (0–3)
+    ↓
+Frozen benchmark
+    ↓
+Dense / BM25 / Hybrid / Reranker
+    ↓
+Recall / MRR / nDCG / latency
+    ↓
+Failure analysis
 ```
 
-### 6. Start the frontend
+Validate:
 
-From the frontend directory:
+    python scripts/validate_golden_set.py
 
-```bash
-npm install
-npm run dev
-```
+After human annotation is frozen:
 
-The frontend communicates with the FastAPI `/query` endpoint.
+    python scripts/run_golden_retrieval_benchmark.py       --benchmark data/evaluation/golden_queries_v1.json       --chunks data/processed/cha_chunks.json       --systems dense bm25 hybrid reranker       --top-k 10       --candidate-k 20       --output data/evaluation/results/golden_v1.json
 
----
+## Local development
 
-## API
+### Backend
 
-### Health Check
+    python -m venv .venv
+    # Windows
+    .venv\Scripts\activate
+    # Linux/macOS
+    # source .venv/bin/activate
+    pip install -r requirements.txt
+    uvicorn app.api.main:app --reload
 
-```http
-GET /health
-```
+### Frontend
 
-Used by the frontend to determine whether the RAG pipeline is available.
+    cd frontend
+    npm ci
+    npm run dev
 
-### Query
+### Tests
 
-```http
-POST /query
-Content-Type: application/json
-```
+    pytest -q
+    python -m compileall app tests
 
-Request:
+Frontend validation:
 
-```json
-{
-  "query": "Why do candidates spend so much time applying for jobs?"
-}
-```
+    cd frontend
+    npm ci
+    npm run lint
+    npm run build
 
-The response contains:
+## Screenshots
 
-- Generated answer
-- Mapped citations
-- Retrieved evidence
-- Evaluation information
-- Pipeline metrics
+The repository includes working-run evidence of the application interface, backend/frontend startup, grounded query response, citation/evaluation output, and retrieval observability.
 
----
+Screenshots are implementation evidence, **not controlled benchmark evidence**.
 
-## Engineering Principles
+## Engineering principles
 
-### 1. Retrieval is measurable
+1. **Measure retrieval independently.**
+2. **Preserve durable evidence provenance.**
+3. **Keep retrieval and generation separable.**
+4. **Treat citations as evidence links, not decoration.**
+5. **Validate faithfulness separately from retrieval relevance.**
+6. **Optimize only after measurement.**
+7. **Never convert model-generated labels into human ground truth.**
 
-Retrieval components should be independently evaluated rather than judged only by the final LLM response.
+## Roadmap
 
-### 2. Citations are evidence links
-
-A citation must resolve to actual retrieved evidence.
-
-### 3. Faithfulness is an evaluation metric
-
-A fluent answer is not automatically a grounded answer.
-
-### 4. Retrieval and generation are separated
-
-```text
-Retrieval quality
-        ≠
-Generation quality
-        ≠
-Citation quality
-        ≠
-Faithfulness
-```
-
-### 5. Avoid unnecessary orchestration
-
-The core retrieval mechanics remain visible and modular.
-
-### 6. Optimize after measurement
-
-Latency and quality trade-offs should be measured before changing retrieval parameters or models.
-
----
-
-## Development Direction
-
-The repository is intentionally being completed in a local-first sequence:
-
-1. **Local baseline** — clean startup, tests, and end-to-end PDF/query/evidence flow.
-2. **Ingestion** — stable page/section/chunk metadata, offsets, edge cases, and OCR decision.
-3. **Retrieval benchmark** — human-verified 50–100 query gold set and reproducible Recall/MRR/nDCG.
-4. **Controlled experiments** — Dense vs BM25 vs Hybrid/RRF, reranking, chunking, and query rewriting.
-5. **Answer evaluation** — citation validity/accuracy, faithfulness human validation, latency, token/cost accounting.
-6. **Local product freeze** — polished evidence inspection workflow and final results documentation.
-7. **Production release** — Supabase/Railway/Vercel only after the local system is frozen and measured.
-
-The detailed checklist is in [docs/PROJECT_PLAN.md](docs/PROJECT_PLAN.md).
-
-## Development Status
-
-### Implemented
-
-- [x] Dense retrieval
-- [x] BM25 retrieval
-- [x] Hybrid retrieval
-- [x] Cross-encoder reranking
-- [x] Context construction
-- [x] Evidence-constrained RAG generation
-- [x] Citation extraction
-- [x] Citation-to-source mapping
-- [x] Citation validity evaluation
-- [x] Faithfulness verification
-- [x] Relevance evaluation
-- [x] Pipeline latency metrics
-- [x] FastAPI query interface
-- [x] React inspection frontend
-
-### Next
-
-- [ ] Verify clean local backend/frontend startup.
-- [ ] Freeze ingestion and chunk metadata behavior.
-- [ ] Human-verify the 50–100 query relevance pool.
-- [ ] Run Dense, BM25, and Hybrid/RRF retrieval benchmarks.
-- [ ] Compare Hybrid vs Hybrid + CrossEncoder.
-- [ ] Perform systematic retrieval failure analysis.
-- [ ] Evaluate query rewriting separately.
-- [ ] Human-validate the faithfulness judge.
-- [ ] Add systematic token/cost accounting.
-- [ ] Freeze the local product and publish controlled results.
-
----
-
-## What Makes This Different From a Basic RAG Demo?
-
-A basic RAG demo often looks like:
-
-```text
-PDF → Embeddings → Vector Search → LLM → Answer
-```
-
-This project is designed around:
-
-```text
-Documents
-   ↓
-Structured chunks + metadata
-   ↓
-Dense retrieval ──────┐
-                      ├── Hybrid retrieval
-BM25 retrieval ───────┘
-   ↓
-Cross-encoder reranking
-   ↓
-Evidence-aware context
-   ↓
-Grounded LLM generation
-   ↓
-Citation mapping
-   ↓
-Citation validation
-   ↓
-Claim-level faithfulness verification
-   ↓
-Evaluation + observability
-```
-
-The emphasis is on **retrieval engineering and measurable evidence grounding**, not simply integrating an LLM API.
-
----
-
-## Interview Topics
-
-This project supports discussion around:
-
-- Why combine BM25 with dense retrieval?
-- When does lexical retrieval outperform semantic retrieval?
-- Why fuse rankings instead of directly combining raw scores?
-- Why retrieve more candidates before reranking?
-- What is the computational cost of cross-encoder reranking?
-- How are citation IDs validated?
-- How can citation validity differ from citation accuracy?
-- How is faithfulness measured?
-- What causes retrieval failures?
-- How do chunk size and chunk boundaries affect retrieval?
-- How would retrieval scale to a larger corpus?
-- How would you reduce LLM latency and token cost?
-- How should Dense vs Hybrid retrieval be evaluated fairly?
-
----
-
-## Future Direction
-
-Potential extensions include:
-
-- Multi-hop query planning
-- Table-aware retrieval
-- Cross-document evidence aggregation
-- Adaptive retrieval weighting
-- Online relevance feedback
-- Larger-scale evaluation
-- Caching and asynchronous execution
-- Access-control-aware retrieval
-- More systematic quality/cost optimization
-
----
-
-## Project Positioning
-
-**Enterprise RAG / AI Search** is best presented as a **Retrieval Engineering + LLM Systems project**, rather than a generic chatbot.
-
-It combines:
-
-```text
-Information Retrieval
-        +
-NLP / LLM Engineering
-        +
-Backend Engineering
-        +
-Evaluation
-        +
-Observability
-```
-
-The central idea:
-
-> **Don't just generate an answer. Retrieve the evidence, rank it, cite it, verify it, and measure the result.**
-
----
+1. Complete human annotation of the 50-query CHA pool.
+2. Freeze the benchmark and configuration.
+3. Run Dense, BM25, Hybrid/RRF, and reranker comparisons.
+4. Perform query-level failure analysis.
+5. Validate the faithfulness judge against a human subset.
+6. Freeze the local evidence-grounded product.
+7. Re-enter the production deployment track only after the local gates pass.
 
 ## Author
 
-**Eklakh Dewan**  
-B.Tech — Artificial Intelligence & Data Science
+**Eklakh Dewan** — B.Tech, Artificial Intelligence & Data Science
 
-GitHub: https://github.com/Eklakh-AI-Engineer/ENTERPRISE-RAG
-
----
-
-## License
-
-This project is currently intended as an educational and engineering portfolio project. Add a formal open-source license if the repository is later released for external reuse.
-
-## Screenshots / Working Proof
-
-The following screenshots document the working application, backend/frontend startup, grounded response generation, citation evaluation, and retrieval observability.
-
-### Application Interface
-
-![Enterprise RAG homepage](screenshots/04_enterprise_rag_homepage.png)
-
-### Backend API Startup
-
-![Backend API startup](screenshots/02_backend_api_startup.png)
-
-### Frontend Vite Server
-
-![Frontend Vite server](screenshots/03_frontend_vite_server.png)
-
-### Grounded Query Response
-
-![Grounded query response](screenshots/05_grounded_query_response.png)
-
-### Citation Evaluation and Pipeline Performance
-
-![Citation evaluation and pipeline performance](screenshots/01_pipeline_evaluation_88_percent.png)
-
-### Retrieval Observability and Evidence Ranking
-
-![Pipeline observability and retrieved evidence](screenshots/06_pipeline_observability_retrieved_evidence.png)
-
-> **Note:** These screenshots are development-run evidence of the implemented pipeline. Performance numbers are runtime observations, not controlled benchmark claims.
+[GitHub repository](https://github.com/Eklakh-AI-Engineer/ENTERPRISE-RAG)

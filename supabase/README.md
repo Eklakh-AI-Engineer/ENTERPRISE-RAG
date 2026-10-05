@@ -1,56 +1,49 @@
-# Supabase Phase 3
+# Enterprise RAG — Supabase Artifacts
 
-This directory contains **reference database artifacts only**.
+This directory contains database schema and migration artifacts for the Enterprise RAG persistence layer.
 
-## Current status
+## Role in the repository
 
-The connected Supabase account currently exposes a project named **Tackboard**. That project is unrelated to Enterprise RAG and has **not** been modified.
+Supabase is a **later-stage production boundary**, while the current milestone remains local-first retrieval engineering.
 
-Therefore this repository does **not** contain an applied Enterprise RAG migration yet.
+The artifacts cover:
 
-## Files
+- organizations and memberships;
+- documents and document chunks;
+- ingestion jobs;
+- conversations, messages, answers, and citations;
+- retrieval telemetry;
+- pgvector;
+- RLS policies;
+- private document Storage;
+- trusted-worker ingestion claim semantics.
 
-- `schema.sql` — reviewed Phase 3 reference DDL for the intended production schema, including an atomic trusted-worker ingestion claim RPC.
-- `../docs/DATABASE.md` — architectural data-model and parity decisions.
+## Source of truth
 
-## Migration rule
+- schema.sql — reviewed reference DDL.
+- migrations/ — versioned migration history where applicable.
+- ../docs/DATABASE.md — data-model and parity contract.
 
-When the dedicated Enterprise RAG Supabase project is identified:
+Do not treat narrative documentation as a replacement for versioned migrations.
 
-1. Verify the project ID.
-2. Check its Postgres and pgvector versions.
-3. Generate the migration filename with the installed Supabase CLI:
-   `supabase migration new phase3_initial_schema`
-4. Move the reviewed SQL into that generated migration.
-5. Apply it only to the intended project.
-6. Run Supabase security/performance advisors.
-7. Verify the schema and RLS with test queries before wiring the application.
+## Security boundary
 
-Do **not** apply `schema.sql` directly to an unrelated Supabase project.
+Normal user operations must use user authorization context so RLS can enforce tenant ownership.
 
-## Current vector parity assumptions
+Service-role credentials are restricted to trusted worker/admin operations. A service-role query is not evidence that RLS works.
 
-The reference schema uses the current repository baseline:
+The tenant-aware vector-search boundary is explicit; an unscoped vector-search fallback is not acceptable.
 
-- `sentence-transformers/all-MiniLM-L6-v2`
-- 384 dimensions
-- normalized embeddings
-- cosine distance (`<=>`)
-- HNSW index with `vector_cosine_ops`
+## Production gate
 
-These are **provisional production choices** until the FAISS-vs-pgvector parity benchmark is executed.
+Before production release:
 
+1. freeze the local retrieval benchmark;
+2. verify FAISS-vs-pgvector ranking parity;
+3. verify authenticated API request propagation;
+4. run cross-tenant negative tests through the real application path;
+5. verify Storage isolation;
+6. verify ingestion idempotency and chunk replacement;
+7. deploy only after the local product gates pass.
 
-## Application adapter boundary
-
-The repository now contains `app/persistence/supabase.py` with adapters for:
-
-- tenant-scoped document reads/writes;
-- tenant-scoped ingestion-job reads/writes;
-- atomic worker job claiming through `claim_ingestion_job`.
-
-The adapter receives an injected Supabase client. It does not create credentials itself, so the application can use user-JWT clients for RLS-protected request paths and a trusted worker client for the privileged claim operation.
-
-The atomic claim RPC is deliberately not granted to `authenticated`. It uses row locking with `FOR UPDATE SKIP LOCKED`, claims the oldest eligible tenant job, increments `attempt_count`, and assigns a lease.
-
-This remains an **unapplied reference design** until the dedicated Enterprise RAG Supabase project is selected.
+See [../docs/DATABASE.md](../docs/DATABASE.md), [../docs/SECURITY.md](../docs/SECURITY.md), and [../docs/DEPLOYMENT.md](../docs/DEPLOYMENT.md).

@@ -1,132 +1,151 @@
 # Enterprise RAG — Architecture
 
-**Current architecture direction:** local-first retrieval engineering  
-**Date:** 2026-10-03
+**Status:** Active architecture contract  
+**Last reviewed:** 2026-10-05
 
-## 1. Current local architecture
+This document describes the architecture currently implemented or explicitly bounded by the repository. Planned production components are marked as targets rather than completed capabilities.
 
-Query
-  ↓
-Dense retrieval + BM25
-  ↓
-RRF hybrid fusion
-  ↓
-Cross-encoder reranking
-  ↓
-Context assembly
-  ↓
-OpenRouter generation
-  ↓
-Citation mapping / verification
-  ↓
-Faithfulness verification
-  ↓
-Observability / evaluation
+## 1. Request pipeline
 
-The implementation keeps retrieval, ranking, generation, citation verification, and evaluation as separate modules.
+    User Query
+        │
+        ├───────────────┐
+        ▼               ▼
+    Dense Retrieval   BM25 Retrieval
+        │               │
+        └───────┬───────┘
+                ▼
+          RRF / Hybrid Fusion
+                │
+                ▼
+       Cross-Encoder Reranking
+                │
+                ▼
+          Context Assembly
+       document/page/chunk metadata
+                │
+                ▼
+     Evidence-Constrained Generation
+                │
+          ┌─────┴─────┐
+          ▼           ▼
+    Citation Mapping  Faithfulness Verification
+          │           │
+          └─────┬─────┘
+                ▼
+        Evaluation + Observability
 
-## 2. Later production topology
+## 2. Retrieval layer
 
-Production is intentionally deferred until the local retrieval benchmark and product are frozen.
+The retrieval layer exposes independent signals:
+
+- **Dense retrieval** for semantic similarity.
+- **BM25** for lexical overlap, terminology, identifiers, acronyms, and exact phrases.
+- **Hybrid/RRF** for rank-based fusion without requiring raw-score calibration.
+- **Cross-encoder reranking** for query-document interaction over a bounded candidate set.
+
+Each stage remains independently replaceable and measurable.
+
+## 3. Evidence model
+
+Retrieved chunks retain provenance required for inspection and evaluation:
+
+- document identity;
+- page;
+- section where available;
+- stable chunk ID;
+- character span;
+- source content.
+
+The golden benchmark also records durable document/page/character-span references so relevance judgments can survive chunk-ID changes when possible.
+
+## 4. Generation boundary
+
+The generation layer uses a provider-independent interface with an OpenRouter-backed implementation.
+
+The contract is:
+
+1. generate from supplied evidence;
+2. use the repository citation format;
+3. avoid unsupported claims;
+4. return an insufficient-evidence response when the corpus cannot support the answer.
+
+Retrieved document content is treated as **data**, not instructions.
+
+## 5. Citation boundary
+
+    [Source N]
+        ↓
+    Retrieved context entry
+        ↓
+    Document / page / chunk metadata
+        ↓
+    Citation validity + accuracy checks
+
+- **Validity:** the citation resolves to a retrieved source.
+- **Accuracy:** the resolved evidence supports the associated claim.
+
+## 6. Faithfulness boundary
+
+Faithfulness verification runs after answer generation and citation mapping.
+
+    Generated claim
+          ↓
+    Referenced evidence
+          ↓
+    Evidence verification
+       ┌──┴────────┐
+    Supported   Unsupported
+
+The verifier is intended to judge supplied evidence rather than introduce outside knowledge.
+
+## 7. Observability
+
+The pipeline records stage-level and end-to-end measurements for retrieval, reranking, generation, citation verification, faithfulness verification, counts, and evaluation signals.
+
+Development measurements are diagnostic. They become benchmark evidence only when produced by the frozen evaluation workflow.
+
+## 8. Production boundary
+
+Production persistence and tenant-aware infrastructure are a later release track. The current milestone remains local-first retrieval engineering.
 
 Target topology:
 
-Browser
-  ↓
-Vercel — React/Vite frontend
-  ↓ HTTPS + authenticated user context
-Long-running API / inference service
-  ├── retrieval orchestration
-  ├── embedding inference
-  ├── reranking
-  └── generation orchestration
-  ├── Supabase Auth
-  ├── Supabase Postgres / pgvector
-  └── Supabase Storage
-  ↓
-Long-running ingestion worker
+    React/Vite
+        ↓ HTTPS + user auth context
+    Long-running FastAPI / inference service
+        ├── retrieval orchestration
+        ├── embeddings
+        ├── reranking
+        └── generation
+        │
+        ├── Supabase Auth
+        ├── Postgres / pgvector
+        └── private Storage
+        ↑
+    Long-running ingestion worker
 
-The production host is not fixed yet. The deployment choice will be made after a target-runtime feasibility measurement.
+Production release is gated by:
 
-## 3. Production feasibility gate
+- frozen retrieval benchmark;
+- FAISS-vs-pgvector parity evidence;
+- authenticated request-path isolation tests;
+- reliable ingestion and chunk replacement;
+- production BM25 lifecycle;
+- target-runtime resource measurements.
 
-Before production deployment, measure the actual target runtime for:
+## 9. Security constraints
 
-- Python/package footprint;
-- model initialization;
-- embedding inference;
-- reranking;
-- concurrent-request behavior;
-- memory and startup characteristics.
+1. Tenant scope must be established before retrieval.
+2. Ordinary user operations should carry user authorization context so RLS can enforce ownership.
+3. Service-role credentials are restricted to trusted worker/admin operations.
+4. Retrieved documents are untrusted input and remain separated from system instructions.
+5. Secrets never enter frontend VITE_* variables.
 
-Local measurements are evidence for development, not guarantees about a target hosting platform.
+## 10. Design principles
 
-## 4. Async ingestion target
-
-The intended production mechanism is a Supabase Postgres-backed job table plus a long-running worker with row leasing.
-
-Upload
-  ↓
-Supabase Storage
-  ↓
-documents + ingestion_jobs
-  ↓
-Worker claims job with lease
-  ↓
-parse → OCR → chunk → embed → index
-  ↓
-READY / FAILED
-
-The worker must support multi-tenant job claiming, lease recovery, idempotency,
-and tenant-safe index updates before production release.
-
-## 5. Tenant-safe lexical retrieval target
-
-The intended production lexical strategy is per-tenant BM25 indexes.
-
-The index must contain only chunks belonging to the tenant. Query execution
-receives an explicit tenant ID and never falls back to a global corpus.
-
-## 6. Supabase request-path security target
-
-User JWTs are passed through to Supabase-backed operations wherever RLS should
-enforce ownership.
-
-The Supabase service-role key is not part of the ordinary user query path. It is
-reserved for explicitly trusted operations such as migrations/admin provisioning
-or isolated worker operations.
-
-RLS tests must be performed independently through an actual user-authorized
-request path.
-
-## 7. Configuration boundary
-
-Runtime configuration is centralized in app/config/settings.py.
-
-Environment-controlled values include:
-
-- local index paths;
-- embedding model;
-- reranker model;
-- retrieval top-k values;
-- API host/port;
-- CORS origins;
-- environment;
-- application version.
-
-No local Windows/WSL absolute paths are required.
-
-## 8. Architectural constraints
-
-The system should preserve:
-
-1. tenant isolation before retrieval;
-2. explicit retrieval stages;
-3. versioned embedding/index configuration;
-4. asynchronous ingestion;
-5. citation traceability;
-6. provider-independent generation;
-7. stage-level observability.
-
-The architecture should not be rewritten around a framework unless benchmark or
-operational evidence justifies it.
+- Retrieval is measurable.
+- Evidence is first-class.
+- Components remain replaceable.
+- Production claims require production evidence.
+- Optimization follows measurement.
