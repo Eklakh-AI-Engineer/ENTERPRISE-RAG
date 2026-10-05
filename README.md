@@ -30,6 +30,14 @@ The central engineering question is:
 
 ---
 
+## Documentation
+
+- [Architecture](docs/architecture.md) — implemented pipeline and design boundaries
+- [Evaluation Methodology](docs/evaluation.md) — benchmark contract, metrics, baselines, and error analysis
+- [Project Plan](docs/PROJECT_PLAN.md) — implementation roadmap
+
+---
+
 ## System Architecture
 
 ```text
