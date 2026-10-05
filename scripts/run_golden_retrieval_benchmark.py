@@ -35,6 +35,53 @@ def unwrap_chunks(payload):
     return payload
 
 
+def materialize_compact_human_labels(benchmark, labels_path: str, pool_path: str):
+    """Expand the compact, immutable human-review score vector into normal judgments."""
+    labels = load_json(labels_path)
+    pool = load_json(pool_path)
+    pool_queries = pool.get("queries", pool if isinstance(pool, list) else [])
+    by_id = {q["query_id"]: q for q in pool_queries}
+
+    raw = __import__("base64").b64decode(labels["scores_base64"])
+    scores = []
+    for byte in raw:
+        scores.extend([(byte >> 6) & 3, (byte >> 4) & 3, (byte >> 2) & 3, byte & 3])
+
+    expected = sum(int(q.get("candidate_count", len(q.get("candidates", [])))) for q in pool_queries)
+    if expected != labels["judgment_count"]:
+        raise SystemExit(f"Pool candidate count {expected} != human judgment count {labels['judgment_count']}.")
+    if len(scores) < expected:
+        raise SystemExit("Packed human score vector is shorter than the pool candidate count.")
+    scores = scores[:expected]
+
+    cursor = 0
+    mapping_lines = []
+    for item in benchmark["queries"]:
+        pq = by_id.get(item["query_id"])
+        if pq is None:
+            raise SystemExit(f"Human-label pool is missing {item['query_id']}.")
+        candidates = pq.get("candidates", [])
+        item["relevance"] = []
+        for idx, candidate in enumerate(candidates):
+            score = int(scores[cursor])
+            cursor += 1
+            mapping_lines.append(f"{item['query_id']}|{idx}|{candidate['chunk_id']}")
+            item["relevance"].append({
+                "document_id": candidate["document_id"],
+                "page": int(candidate["page"]),
+                "start_char": int(candidate["start_char"]),
+                "end_char": int(candidate["end_char"]),
+                "relevance": score,
+                "chunk_id": candidate["chunk_id"],
+            })
+
+    import hashlib
+    mapping_hash = hashlib.sha256("\n".join(mapping_lines).encode("utf-8")).hexdigest()
+    if mapping_hash != labels["candidate_order_sha256"]:
+        raise SystemExit("Human-label candidate-order checksum mismatch.")
+    return benchmark
+
+
 def matches(chunk: dict, judgment: dict) -> bool:
     if (judgment.get("document_id") or "") != (
         chunk.get("document_id") or chunk.get("document") or chunk.get("source")
@@ -116,8 +163,17 @@ def validate_benchmark(benchmark):
 
 def run(args):
     benchmark = load_json(args.benchmark)
-    validate_benchmark(benchmark)
     chunks = unwrap_chunks(load_json(args.chunks))
+
+    human_review = benchmark.get("human_review", {})
+    if human_review.get("labels_artifact"):
+        benchmark = materialize_compact_human_labels(
+            benchmark,
+            human_review["labels_artifact"],
+            args.pool,
+        )
+
+    validate_benchmark(benchmark)
 
     dense = DenseRetriever()
     dense.build_index(chunks)
@@ -253,6 +309,11 @@ def main():
     parser.add_argument(
         "--chunks",
         default="data/processed/cha_chunks.json",
+    )
+    parser.add_argument(
+        "--pool",
+        default="data/evaluation/cha_pool_v1.json",
+        help="Frozen Dense ∪ BM25 candidate pool used for the human annotation order.",
     )
     parser.add_argument(
         "--systems",
