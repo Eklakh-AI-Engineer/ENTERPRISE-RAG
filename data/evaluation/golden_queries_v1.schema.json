@@ -87,6 +87,37 @@
           }
         }
       }
+    },
+    "human_review": {
+      "type": "object",
+      "required": [
+        "status",
+        "judgment_count",
+        "score_distribution",
+        "provenance_verified_count",
+        "candidate_order_sha256",
+        "labels_artifact"
+      ],
+      "properties": {
+        "status": {
+          "const": "complete"
+        },
+        "judgment_count": {
+          "const": 780
+        },
+        "score_distribution": {
+          "type": "object"
+        },
+        "provenance_verified_count": {
+          "const": 780
+        },
+        "candidate_order_sha256": {
+          "type": "string"
+        },
+        "labels_artifact": {
+          "type": "string"
+        }
+      }
     }
   }
 }
