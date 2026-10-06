@@ -34,40 +34,6 @@ This repository is more than a PDF chatbot. Retrieval, generation, citations, ev
 
 ## Architecture
 
-```text
-                         User Query
-                             │
-              ┌──────────────┴──────────────┐
-              ▼                             ▼
-       Dense Retrieval                  BM25 Retrieval
-              │                             │
-              └──────────────┬──────────────┘
-                             ▼
-                       RRF / Hybrid Fusion
-                             │
-                             ▼
-                  Cross-Encoder Reranking
-                             │
-                             ▼
-                     Context Assembly
-                  document / page / chunk
-                             │
-                             ▼
-                Evidence-Constrained LLM
-                             │
-                ┌────────────┴────────────┐
-                ▼                         ▼
-         Citation Mapping          Faithfulness Check
-                │                         │
-                └────────────┬────────────┘
-                             ▼
-                    Evaluation + Metrics
-```
-
-See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the implemented design and later production boundary.
-
-## Architecture
-
 The system is intentionally separated into ingestion, retrieval, ranking, evidence-grounded generation, citation verification, and evaluation so that each layer can be measured independently.
 
 [![Explore the repository architecture](https://gitdiagram.com/diagram-badge.svg)](https://gitdiagram.com/eklakh-ai-engineer/enterprise-rag?utm_source=readme&utm_medium=badge)
