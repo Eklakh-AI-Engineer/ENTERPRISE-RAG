@@ -66,6 +66,33 @@ This repository is more than a PDF chatbot. Retrieval, generation, citations, ev
 
 See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the implemented design and later production boundary.
 
+## Architecture
+
+The system is intentionally separated into ingestion, retrieval, ranking, evidence-grounded generation, citation verification, and evaluation so that each layer can be measured independently.
+
+[![Explore the repository architecture](https://gitdiagram.com/diagram-badge.svg)](https://gitdiagram.com/eklakh-ai-engineer/enterprise-rag?utm_source=readme&utm_medium=badge)
+
+```mermaid
+flowchart TB
+    U[User Query] --> D[Dense Retrieval]
+    U --> B[BM25 Retrieval]
+    D --> H[RRF / Hybrid Fusion]
+    B --> H
+    H --> R[Cross-Encoder Reranking]
+    R --> C[Context Assembly<br/>document / page / chunk]
+    C --> G[Evidence-Constrained LLM]
+    G --> CM[Citation Mapping]
+    G --> F[Faithfulness Verification]
+    CM --> E[Evaluation + Metrics]
+    F --> E
+```
+
+**Retrieval path:** dense semantic retrieval and BM25 lexical retrieval are fused with RRF, then reranked before context assembly. The generation boundary receives retrieved evidence rather than unrestricted corpus access.
+
+**Evidence path:** document/page/chunk provenance is preserved through generation, citations are mapped back to retrieved evidence, and faithfulness is evaluated separately from retrieval relevance.
+
+**Implementation map:** [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) describes the implemented request pipeline, evidence model, generation/citation boundaries, observability, production boundary, and security constraints.
+
 ## What is engineered here?
 
 ### Retrieval
