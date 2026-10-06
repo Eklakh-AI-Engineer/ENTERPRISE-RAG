@@ -35,6 +35,79 @@ This document describes the architecture currently implemented or explicitly bou
                 ▼
         Evaluation + Observability
 
+## 2. Repository architecture map
+
+[![Explore the repository architecture](https://gitdiagram.com/diagram-badge.svg)](https://gitdiagram.com/eklakh-ai-engineer/enterprise-rag?utm_source=readme&utm_medium=badge)
+
+The repository-level architecture connects the application boundary, ingestion pipeline, persistence/integrations, retrieval pipeline, generation provider, and evidence/evaluation layer:
+
+```mermaid
+flowchart LR
+    U[User] --> W[Workspace UI]
+    W --> A[Auth Client]
+    W --> Q[RAG Client]
+    Q --> API[FastAPI Routes]
+    API --> AUTH[Token Authentication]
+
+    subgraph ING[Document Ingestion]
+      IW[Ingestion Worker]
+      IP[Ingestion Pipeline]
+      PP[PDF Parsing]
+      CH[Evidence Chunking]
+      DI[Document Indexing]
+      EM[Embedding Provider]
+      IW --> IP --> PP --> CH
+      IW --> DI --> EM
+    end
+
+    API --> IW
+    API --> QP[Query Orchestration]
+
+    subgraph RET[Retrieval and Answers]
+      DR[Dense Retrieval]
+      BM[BM25 Retrieval]
+      HF[Hybrid Fusion]
+      RR[Cross-Encoder Reranking]
+      CA[Context Assembly]
+      GG[Grounded Generation]
+      QP --> DR
+      QP --> BM
+      DR --> HF
+      BM --> HF
+      HF --> RR --> CA --> GG
+    end
+
+    subgraph EVAL[Evidence and Evaluation]
+      CM[Citation Mapping]
+      CV[Citation Validation]
+      FM[Faithfulness Check]
+      PM[Pipeline Metrics]
+      AE[Answer Evaluation]
+    end
+
+    GG --> CM
+    GG --> FM
+    CM --> CV
+    RR --> PM
+    GG --> AE
+
+    subgraph DATA[Persistence and Integrations]
+      DB[(Supabase Persistence)]
+      FS[(Supabase File Storage)]
+      SA[Supabase Auth]
+      OR[OpenRouter Service]
+    end
+
+    API --> DB
+    API --> FS
+    AUTH --> SA
+    GG --> OR
+    CH --> DB
+    EM --> DB
+```
+
+This visualization is the repository map; the sections below define the behavior and boundaries of each layer.
+
 ## 2. Retrieval layer
 
 The retrieval layer exposes independent signals:
