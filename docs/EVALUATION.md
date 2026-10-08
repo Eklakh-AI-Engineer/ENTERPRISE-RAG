@@ -80,6 +80,10 @@ Validate:
 
 The benchmark runner expands the compact human-label artifact against the frozen candidate pool and refuses to execute if its checksum or judgment count does not match.
 
+### MRR saturation finding
+
+MRR is exactly 1.0 for Dense, BM25, Hybrid, and Reranker because the first retrieved result is relevant for every query/system pair. This is a property of the frozen benchmark, not evidence that the systems are equivalent. MRR is therefore reported for completeness but excluded from comparative claims. The next evaluation layer is the separate held-out challenge set.
+
 ## 3. Controlled retrieval comparison
 
 Run the same corpus, queries, relevance judgments, chunking, and evaluation procedure for:
@@ -145,9 +149,16 @@ A benchmark result is defined by:
 
 Record benchmark/configuration versions whenever any material input changes.
 
-## 5. Negative / unanswerable queries
+## 5. Held-out challenge and unanswerable evaluation
 
-The evaluation set should include corpus-unanswerable queries.
+`data/evaluation/challenge_queries_v1.json` contains 20 independently authored queries kept separate from the frozen 50-query gold benchmark:
+
+- 10 hard in-domain, corpus-blind queries with `answerable=null` pending human adjudication;
+- 10 deliberately external/unanswerable controls with `answerable=false`.
+
+Do not add these queries to the frozen gold result until they have been independently adjudicated and labeled. This prevents benchmark contamination and avoids guessed relevance labels.
+
+For generated responses, `scripts/evaluate_answerability.py` reports the **insufficient-evidence rate** on the unanswerable controls and the false-abstention rate on adjudicated answerable queries.
 
 Expected behavior:
 
@@ -155,9 +166,38 @@ Expected behavior:
 - avoid unsupported factual claims;
 - avoid citing unrelated evidence as authoritative.
 
-Negative cases should be analyzed separately from ordinary retrieval accuracy.
+Negative cases are analyzed separately from ordinary retrieval accuracy.
 
-## 6. Error analysis
+## 6. Faithfulness judge validation
+
+The faithfulness judge is implemented, but its automated output is **not human-validated yet**. `data/evaluation/faithfulness_human_subset.schema.json` defines the independent review contract. The validation subset must contain at least 30 claims, with a human binary support label and the frozen judge output for each claim.
+
+Run:
+
+    python -m scripts.evaluate_faithfulness_judge --labels data/evaluation/faithfulness_human_subset.json
+
+The validator reports accuracy, precision, recall, F1, and **Cohen's kappa**. Human labels remain the ground truth. Do not report a validated judge-agreement figure until this file contains real independently reviewed items.
+
+## 7. Reproducibility configuration
+
+| Layer | Configuration |
+|---|---|
+| Python | 3.12 |
+| Corpus | `CHA-POLICY-CORPUS-V1` |
+| Query set | `enterprise-rag-golden-v1-human-verified`, 50 queries |
+| Chunker | `recursive-v2-span` |
+| Embeddings | `sentence-transformers/all-MiniLM-L6-v2` |
+| Dense index | FAISS `IndexFlatIP`, normalized vectors |
+| BM25 | `rank-bm25==0.2.2` |
+| Fusion | RRF |
+| Candidate / top-k | 20 / 10 |
+| Reranker | `cross-encoder/ms-marco-MiniLM-L-6-v2` |
+| Bootstrap | 10,000 iterations, seed 42 |
+| Generation | OpenRouter, model frozen per answer-evaluation artifact via `OPENROUTER_MODEL` |
+| Faithfulness judge | same configured OpenRouter model, prompt `faithfulness-v1`, temperature 0 |
+| Dependencies | `requirements.txt`, `requirements-dev.txt`, `requirements.lock` |
+
+## 8. Error analysis
 
 Classify retrieval failures where practical:
 
@@ -172,17 +212,19 @@ Classify retrieval failures where practical:
 
 A failure record should retain the query, expected evidence, retrieved evidence, configuration, and diagnosis.
 
-## 7. Statistical reporting
+## 9. Statistical reporting
 
 For paired Dense-vs-Hybrid comparisons, report query-level deltas and bootstrap confidence intervals.
 
 Point estimates without query-level comparison are insufficient evidence for a retrieval improvement.
 
-## 8. Result discipline
+## 10. Result discipline
 
 Do not publish:
 
 - development-run metrics as benchmark numbers;
+- MRR=1.0 as evidence that one retrieval system is superior;
+- automated faithfulness scores as human-validated without Cohen's kappa;
 - AI-generated silver labels as human gold;
 - a benchmark result without a frozen corpus/query/label configuration.
 
