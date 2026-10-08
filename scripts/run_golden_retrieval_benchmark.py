@@ -278,6 +278,13 @@ def run(args):
         "corpus_id": benchmark["corpus_id"],
         "configuration": {
             "systems": args.systems,
+            "python_version": "3.12",
+            "chunker_version": "recursive-v2-span",
+            "embedding_model": "sentence-transformers/all-MiniLM-L6-v2",
+            "embedding_normalization": "L2-normalized; FAISS IndexFlatIP",
+            "sparse_retriever": "rank-bm25==0.2.2 (Okapi BM25)",
+            "fusion": "Reciprocal Rank Fusion (RRF)",
+            "reranker_model": "cross-encoder/ms-marco-MiniLM-L-6-v2",
             "top_k": args.top_k,
             "candidate_k": args.candidate_k,
             "bootstrap_iterations": args.bootstrap_iterations,
