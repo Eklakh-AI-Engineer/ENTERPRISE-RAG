@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Enterprise RAG Held-out Challenge Set",
+  "type": "object",
+  "required": ["challenge_version", "status", "corpus_blind_authoring", "queries"],
+  "properties": {
+    "challenge_version": {"type": "string"},
+    "status": {"enum": ["draft_pending_human_annotation", "frozen"]},
+    "corpus_blind_authoring": {"type": "boolean"},
+    "queries": {
+      "type": "array",
+      "minItems": 20,
+      "items": {
+        "type": "object",
+        "required": ["query_id", "category", "query", "answerable", "challenge_type"],
+        "properties": {
+          "query_id": {"type": "string"},
+          "category": {"type": "string"},
+          "query": {"type": "string"},
+          "answerable": {"type": ["boolean", "null"]},
+          "challenge_type": {"enum": ["hard_in_domain", "unanswerable"]}
+        }
+      }
+    }
+  }
+}
