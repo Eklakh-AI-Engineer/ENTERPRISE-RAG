@@ -1,0 +1,28 @@
+{
+  "challenge_version": "v1.0",
+  "status": "draft_pending_human_annotation",
+  "corpus_blind_authoring": true,
+  "note": "Queries were authored independently of corpus text. In-domain answerability remains null until human adjudication; external queries are intentionally outside the CHA policy corpus and are labeled unanswerable.",
+  "queries": [
+    {"query_id":"CH-001","category":"Employee Relations & Conduct","query":"If two employees are in a reporting relationship and begin a romantic relationship, what disclosure or reassignment steps should be taken?","answerable":null,"challenge_type":"hard_in_domain"},
+    {"query_id":"CH-002","category":"Equal Employment & Accommodation","query":"An employee requests a workplace adjustment after a temporary medical restriction. What process should the employee follow, and who must be involved?","answerable":null,"challenge_type":"hard_in_domain"},
+    {"query_id":"CH-003","category":"Ethics, Investigations & Compliance","query":"A supervisor learns that an employee may have altered an official record after the fact. What reporting and investigation obligations apply?","answerable":null,"challenge_type":"hard_in_domain"},
+    {"query_id":"CH-004","category":"Drug, Alcohol & Workplace Safety","query":"An employee witnesses threatening behavior involving a coworker but no physical injury occurs. What immediate reporting path should be followed?","answerable":null,"challenge_type":"hard_in_domain"},
+    {"query_id":"CH-005","category":"Compensation & Benefits","query":"An employee changes from part-time to full-time status during the year. Which benefit eligibility rules should be checked and when do they take effect?","answerable":null,"challenge_type":"hard_in_domain"},
+    {"query_id":"CH-006","category":"Leave & Time Off","query":"An employee needs intermittent protected leave for a recurring family-care situation. What eligibility, notice, and documentation requirements should be considered?","answerable":null,"challenge_type":"hard_in_domain"},
+    {"query_id":"CH-007","category":"Work Environment & Equipment","query":"An employee discovers that a shared workstation contains sensitive information left visible by the previous user. What should the employee do?","answerable":null,"challenge_type":"hard_in_domain"},
+    {"query_id":"CH-008","category":"Information Security","query":"A staff member receives an unexpected request for credentials from a contractor claiming to support an internal system. What security response is required?","answerable":null,"challenge_type":"hard_in_domain"},
+    {"query_id":"CH-009","category":"Cross-reference / policy interaction","query":"If two handbook sections appear to impose different requirements for the same employee situation, which source should control and how should the conflict be resolved?","answerable":null,"challenge_type":"hard_in_domain"},
+    {"query_id":"CH-010","category":"Multi-intent policy lookup","query":"For a new employee, what obligations, reporting channels, and leave-related rules should be reviewed before the first month of employment ends?","answerable":null,"challenge_type":"hard_in_domain"},
+    {"query_id":"CH-011","category":"External / unanswerable","query":"What is the next scheduled Chicago Transit Authority Blue Line departure from O'Hare tonight?","answerable":false,"challenge_type":"unanswerable"},
+    {"query_id":"CH-012","category":"External / unanswerable","query":"What will the Federal Reserve's target interest rate be at its next meeting?","answerable":false,"challenge_type":"unanswerable"},
+    {"query_id":"CH-013","category":"External / unanswerable","query":"What is the current weather forecast for downtown Chicago tomorrow afternoon?","answerable":false,"challenge_type":"unanswerable"},
+    {"query_id":"CH-014","category":"External / unanswerable","query":"Which team will win the next Chicago Cubs game?","answerable":false,"challenge_type":"unanswerable"},
+    {"query_id":"CH-015","category":"External / unanswerable","query":"What is the current market price of Microsoft stock?","answerable":false,"challenge_type":"unanswerable"},
+    {"query_id":"CH-016","category":"External / unanswerable","query":"What is the latest Illinois driver's license renewal fee for 2026?","answerable":false,"challenge_type":"unanswerable"},
+    {"query_id":"CH-017","category":"External / unanswerable","query":"What is the current exchange rate between USD and INR?","answerable":false,"challenge_type":"unanswerable"},
+    {"query_id":"CH-018","category":"External / unanswerable","query":"Who is the current mayor of Chicago, and when is the next municipal election?","answerable":false,"challenge_type":"unanswerable"},
+    {"query_id":"CH-019","category":"External / unanswerable","query":"What is the current price of a one-bedroom apartment in downtown Chicago?","answerable":false,"challenge_type":"unanswerable"},
+    {"query_id":"CH-020","category":"External / unanswerable","query":"What are today's Chicago-area restaurant health inspection scores?","answerable":false,"challenge_type":"unanswerable"}
+  ]
+}
