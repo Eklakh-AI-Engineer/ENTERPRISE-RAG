@@ -54,12 +54,14 @@ Production-specific Supabase/Railway implementation remains in Git history and t
 
 ### Phase C — Retrieval benchmark
 - [x] Frozen CHA corpus/query pool exists.
-- [ ] Human-verify the relevance pool.
-- [ ] Freeze 50–100 gold queries.
-- [ ] Record benchmark/configuration hashes.
-- [ ] Run Dense, BM25, and Hybrid/RRF.
-- [ ] Run Recall@5/@10, MRR, nDCG@5/@10.
-- [ ] Add paired bootstrap confidence intervals to the published results.
+- [x] Human-verify the 50-query CHA relevance pool — 780 judgments.
+- [x] Freeze the 50-query gold benchmark.
+- [x] Record benchmark/configuration hashes and bootstrap configuration.
+- [x] Run Dense, BM25, Hybrid/RRF, and Reranker.
+- [x] Run Recall@5/@10, MRR, nDCG@5/@10.
+- [x] Add paired bootstrap confidence intervals to the published results.
+- [ ] Add and adjudicate the separate 20-query held-out challenge set.
+- [ ] Replace saturated MRR comparisons with challenge-set evidence before broader generalization claims.
 
 ### Phase D — Reranking and failure analysis
 - [ ] Compare Hybrid vs Hybrid + CrossEncoder.
@@ -77,7 +79,9 @@ Production-specific Supabase/Railway implementation remains in Git history and t
 **Experimental conclusion:** mixed, with aggregate nDCG@10 down 0.003074 (-0.413%), 13 queries improved, 9 degraded, and 28 unchanged. Five categories improved and five degraded. Keep rewriting experimental and disabled by default. See [the paired result artifact](../data/evaluation/results/golden_v1_query_rewriting.json) and [evaluation analysis](EVALUATION.md).
 
 ### Phase F — Answer/evidence evaluation
-- [ ] Human-validate the faithfulness judge.
+- [ ] Human-validate the faithfulness judge on ≥30 claims and report Cohen's kappa.
+- [ ] Run the 20-query held-out challenge set.
+- [ ] Report insufficient-evidence rate on the 10 unanswerable controls.
 - [ ] Create held-out answer evaluation set.
 - [ ] Measure citation validity and citation accuracy.
 - [ ] Measure faithfulness separately from retrieval relevance.
